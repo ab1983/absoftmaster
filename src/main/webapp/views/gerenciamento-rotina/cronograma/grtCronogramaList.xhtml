@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:form prependId="false">
+        <h:panelGroup layout="block">
+            <p:remoteCommand name="atualizarCronograma"  actionListener="#{grtCronogramaBean.atualizar()}" process="@form" update="schedule" immediate="true"/>
+            <p:selectCheckboxMenu onHide="atualizarCronograma();" id="cronProjFiltro" value="#{grtCronogramaBean.projetoIdFiltroList}" label="Filtro por Projeto" filter="true" filterMatchMode="startsWith" >  
+                <p:ajax event="toggleSelect" process="@this"/>
+                <p:ajax event="change" process="@this"/>
+                <f:selectItems value="#{grtCronogramaBean.projetoList}" var="item" itemValue="#{item.projetoId}" itemLabel="#{item.nome}"/>
+            </p:selectCheckboxMenu>   
+            <p:selectCheckboxMenu onHide="atualizarCronograma();" value="#{grtCronogramaBean.tipoEventoFiltroList}" label="Filtro por Tipo Evento" filter="true" filterMatchMode="startsWith">  
+                <p:ajax event="toggleSelect" process="@this"/>
+                <p:ajax event="change" process="@this"/>
+                <f:selectItems value="#{grtCronogramaBean.tipoEventoList}" var="item" itemValue="#{item[0]}" itemLabel="#{item[1]}"/> 
+            </p:selectCheckboxMenu>
+            <div style="width: 45%;display: inline-block;float: right;">
+            <table style="border: solid 1px;float: left;"><caption>Legenda</caption><tr><td>Pendente:</td><td style="width: 20px;background-color: lightgoldenrodyellow;border: solid 1px;"></td><td>Atrasado:</td><td style="width: 20px;background-color:lightsalmon;border: solid 1px;"></td><td>Concluído:</td><td style="width: 20px;background-color:lightgreen;border: solid 1px;"></td></tr></table>
+            <p:commandButton value="Atualizar" action="#{grtCronogramaBean.indexBean()}" update="@form" immediate="true" style="float: right;"/>
+            </div>
+            <p:schedule  value="#{grtCronogramaBean.eventModel}" id="schedule" aspectRatio="5" leftHeaderTemplate="prev,next,today" rightHeaderTemplate="month, basicWeek, basicDay" 
+                         centerHeaderTemplate="title" widgetVar="myschedule" style="height:2000px;width: 100%;" locale="br">  
+                <!--p:ajax event="dateSelect" listener="#{grtCronogramaBean.onDateSelect}" update="eventDetails" oncomplete="eventDialog.show()" /-->  
+                <p:ajax event="eventSelect" listener="#{grtCronogramaBean.onEventSelect}" update="eventDetails" oncomplete="eventDialog.show()" />  
+                <!--p:ajax event="eventMove" listener="#{grtCronogramaBean.onEventMove}" update="messages" /-->  
+                <!--p:ajax event="eventResize" listener="#{grtCronogramaBean.onEventResize}" update="messages" /-->  
+            </p:schedule>  
+            <!--p:scrollPanel style="height:450px">
+            </p:scrollPanel-->
+
+            <p:dialog widgetVar="eventDialog" header="Evento" showEffect="clip" hideEffect="clip" resizable="false">   
+                <h:panelGrid id="eventDetails" columns="2">  
+                    <h:outputLabel for="title" value="#{msg.description}:" />  
+                    <h:outputText id="title" value="#{grtCronogramaBean.event.title}"/>  
+                    <h:outputLabel for="to" value="Data Término:" />  
+                    <p:calendar locale="br" value="#{grtCronogramaBean.bean.dataHoraTerminoRealizado}" pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Emissão #{msg.required}." />
+                    <h:outputLabel value="Concluído:" />  
+                    <p:selectBooleanCheckbox value="#{grtCronogramaBean.cronogramaConcluido}"/> 
+                    <p:commandButton id="addButton" value="Gravar" actionListener="#{grtCronogramaBean.doBeanSave()}" oncomplete="myschedule.update();eventDialog.hide();"/>  
+                </h:panelGrid>  
+            </p:dialog>             
+        </h:panelGroup>
+    </h:form>
+</html>

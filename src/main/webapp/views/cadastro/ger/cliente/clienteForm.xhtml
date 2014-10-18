@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:commandButton value="Listar" action="#{gerClienteBean.doBeanList()}" icon="ui-icon-search" immediate="true"   update="@form"/>   
+    <p:panel header="Cadastro Cliente" style="width: 600px;" id="cadastroPanel" widgetVar="cadastroPanel">
+        <h:panelGrid columns="4">
+            <h:outputText value="#{msg.companyRegistrationType}"/>
+            <p:selectOneMenu value="#{gerClienteBean.bean.tipoPessoa}" editable="false" required="true" requiredMessage="Tipo pessoa #{msg.required}." style="width:100%;">
+                <f:selectItem  itemLabel="#{msg['corporateRegistration']}" itemValue="corporateRegistration"/>
+                <f:selectItem  itemLabel="#{msg['individualRegistration']}" itemValue="individualRegistration"/>
+                <p:ajax update="@form"/>
+            </p:selectOneMenu>               
+            <h:outputText value="Nome:"/>
+            <p:inputText value="#{gerClienteBean.bean.nome}" required="true" requiredMessage="Nome #{msg.required}."/> 
+            <h:outputText value="#{msg.dualRegistrationNumber}:"/>
+            <p:inputMask mask="#{gerClienteBean.bean.tipoPessoa=='individualRegistration'?msg.individualRegistrationMask:msg.corporateRegistrationMask}" value="#{gerClienteBean.bean.cpfCnpj}" required="true" requiredMessage="#{msg.dualRegistrationNumber} #{msg.required}."/>                                    
+            <h:outputText value="Endereço:"/>
+            <p:inputText value="#{gerClienteBean.bean.endereco}" required="true" requiredMessage="Endereço #{msg.required}."/> 
+            <h:outputText value="CEP:"/>
+            <p:inputMask mask="#{msg.postalCodeMask}" value="#{gerClienteBean.bean.cep}" required="true" requiredMessage="CEP #{msg.required}."/> 
+            <h:outputText value="Cidade:"/>
+            <p:inputText value="#{gerClienteBean.bean.cidade}" required="true" requiredMessage="Cidade #{msg.required}."/>                     
+            <h:outputText value="UF:"/>
+            <p:inputText value="#{gerClienteBean.bean.uf}" required="true" requiredMessage="UF #{msg.required}."/>                     
+            <h:outputText value="E-mail:"/>
+            <p:inputText value="#{gerClienteBean.bean.email}" required="true" requiredMessage="E-mail #{msg.required}."/> 
+            <h:outputText value="Telefone1:"/>
+            <p:inputMask mask="#{msg.phoneMask}" value="#{gerClienteBean.bean.telefone1}" required="true" requiredMessage="Telefone1 #{msg.required}."/> 
+            <h:outputText value="Telefone2:"/>
+            <p:inputMask mask="#{msg.phoneMask}" value="#{gerClienteBean.bean.telefone2}"/> 
+            <h:outputText value="Telefone3:"/>
+            <p:inputMask mask="#{msg.phoneMask}" value="#{gerClienteBean.bean.telefone3}"/>                     
+        </h:panelGrid>
+        <p:commandButton value="Gravar"  action="#{gerClienteBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+
+</html>

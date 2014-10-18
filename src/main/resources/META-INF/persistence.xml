@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="ERPPU" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <jta-data-source>erp</jta-data-source>
+    <class>com.algoboss.erp.entity.AdmBusinessUnit</class>
+    <class>com.algoboss.erp.entity.AdmCompany</class>
+    <class>com.algoboss.erp.entity.AdmContract</class>
+    <class>com.algoboss.erp.entity.AdmInstantiatesSite</class>
+    <class>com.algoboss.erp.entity.AdmRepresentative</class>
+    <class>com.algoboss.erp.entity.AdmService</class>
+    <class>com.algoboss.erp.entity.AdmServiceContract</class>
+    <class>com.algoboss.erp.entity.AdmServiceModuleContract</class>
+    <class>com.algoboss.erp.entity.AdmSubsidiary</class>
+    <class>com.algoboss.erp.entity.CbcPlanejamentoOrcamentario</class>
+    <class>com.algoboss.erp.entity.CpgDocumento</class>
+    <class>com.algoboss.erp.entity.CpgItemDocumento</class>
+    <class>com.algoboss.erp.entity.CpgTipoDespesa</class>
+    <class>com.algoboss.erp.entity.CrcDocumento</class>
+    <class>com.algoboss.erp.entity.CrcItemDocumento</class>
+    <class>com.algoboss.erp.entity.CrcTipoReceita</class>
+    <class>com.algoboss.erp.entity.DevComponentContainer</class>
+    <class>com.algoboss.erp.entity.DevEntityClass</class>
+    <class>com.algoboss.erp.entity.DevEntityClassConfig</class>
+    <class>com.algoboss.erp.entity.DevEntityObject</class>
+    <class>com.algoboss.erp.entity.DevEntityPropertyDescriptor</class>
+    <class>com.algoboss.erp.entity.DevEntityPropertyDescriptorConfig</class>
+    <class>com.algoboss.erp.entity.DevEntityPropertyValue</class>
+    <class>com.algoboss.erp.entity.DevPrototypeComponentBehaviors</class>
+    <class>com.algoboss.erp.entity.DevPrototypeComponentChildren</class>
+    <class>com.algoboss.erp.entity.DevPrototypeComponentFacets</class>
+    <class>com.algoboss.erp.entity.DevPrototypeComponentProperty</class>
+    <class>com.algoboss.erp.entity.DevReportFieldContainer</class>
+    <class>com.algoboss.erp.entity.DevReportFieldOptions</class>
+    <class>com.algoboss.erp.entity.DevReportFieldOptionsMap</class>
+    <class>com.algoboss.erp.entity.DevReportRequirement</class>
+    <class>com.algoboss.erp.entity.DevRequirement</class>
+    <class>com.algoboss.erp.entity.DevRequirementItem</class>
+    <class>com.algoboss.erp.entity.Funcionario</class>
+    <class>com.algoboss.erp.entity.GerBank</class>
+    <class>com.algoboss.erp.entity.GerBankAccount</class>
+    <class>com.algoboss.erp.entity.GerCentroCusto</class>
+    <class>com.algoboss.erp.entity.GerCliente</class>
+    <class>com.algoboss.erp.entity.GerFornecedor</class>
+    <class>com.algoboss.erp.entity.GerLocation</class>
+    <class>com.algoboss.erp.entity.GerTipoDocumento</class>
+    <class>com.algoboss.erp.entity.GobAquisicaoImovel</class>
+    <class>com.algoboss.erp.entity.GobChecklistDocumentacaoAquisicao</class>
+    <class>com.algoboss.erp.entity.GobComplementacaoAquisicaoClientePf</class>
+    <class>com.algoboss.erp.entity.GobConjugueAquisicao</class>
+    <class>com.algoboss.erp.entity.GobItemPadraoChecklistDocumentacaoAquisicao</class>
+    <class>com.algoboss.erp.entity.GobObra</class>
+    <class>com.algoboss.erp.entity.GobStatusAquisicao</class>
+    <class>com.algoboss.erp.entity.GobUnidadeObra</class>
+    <class>com.algoboss.erp.entity.GrtCronograma</class>
+    <class>com.algoboss.erp.entity.GrtProjeto</class>
+    <class>com.algoboss.erp.entity.PurOrder</class>
+    <class>com.algoboss.erp.entity.PurOrderItem</class>
+    <class>com.algoboss.erp.entity.PurParameter</class>
+    <class>com.algoboss.erp.entity.PurQuotation</class>
+    <class>com.algoboss.erp.entity.PurQuotationBySupplier</class>
+    <class>com.algoboss.erp.entity.PurQuotationBySupplierItem</class>
+    <class>com.algoboss.erp.entity.PurSolicitation</class>
+    <class>com.algoboss.erp.entity.PurSolicitationItem</class>
+    <class>com.algoboss.erp.entity.SalOrder</class>
+    <class>com.algoboss.erp.entity.SalOrderItem</class>
+    <class>com.algoboss.erp.entity.SecAuthorization</class>
+    <class>com.algoboss.erp.entity.SecAuthorizationItem</class>
+    <class>com.algoboss.erp.entity.SecGroup</class>
+    <class>com.algoboss.erp.entity.SecGroupAuthorization</class>
+    <class>com.algoboss.erp.entity.SecUser</class>
+    <class>com.algoboss.erp.entity.SecUserAuthorization</class>
+    <class>com.algoboss.erp.entity.StkBrand</class>
+    <class>com.algoboss.erp.entity.StkInputDocument</class>
+    <class>com.algoboss.erp.entity.StkInputDocumentItem</class>
+    <class>com.algoboss.erp.entity.StkMovement</class>
+    <class>com.algoboss.erp.entity.StkMovementHistory</class>
+    <class>com.algoboss.erp.entity.StkMovementItem</class>
+    <class>com.algoboss.erp.entity.StkOutputDocument</class>
+    <class>com.algoboss.erp.entity.StkOutputDocumentItem</class>
+    <class>com.algoboss.erp.entity.StkSupplyCategory</class>
+    <class>com.algoboss.erp.entity.StkSupplyItem</class>
+    <class>com.algoboss.erp.entity.StkUnitOfMeasure</class>
+    <class>com.algoboss.integration.small.entity.Estoque</class>
+    <class>com.algoboss.integration.small.entity.Itens001</class>
+    <class>com.algoboss.integration.small.entity.Itens003</class>
+    <class>com.algoboss.integration.small.entity.OrdemServico</class>
+    <class>com.algoboss.integration.small.entity.Vendedor</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+	    <property name="eclipselink.target-server" value="JBoss"/>
+	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
+		<property name="eclipselink.weaving" value="static"/> 
+    </properties>
+    <!--properties>
+      <property name="eclipselink.ddl-generation" value="create-tables"/>
+    </properties-->
+  </persistence-unit>
+  <!--persistence-unit name="SMALLPU" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <properties>
+      <property name="eclipselink.ddl-generation" value="create-tables"/>
+    </properties>
+  </persistence-unit-->
+</persistence>

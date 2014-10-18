@@ -1,0 +1,386 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+		<f:view contentType="text/html" >
+		<script type="text/javascript"> /* <![CDATA[ */
+			        var currentEl = null;
+			        var currentChild = null;
+			        var fieldShowAllBool = true;
+			        function createEventOrderListRep() {
+			
+			            var func = 'mouseup.eventOrderListRep';
+			            $('.customListRep').off(func).on(func, function(event) {
+			                //event.preventDefault();
+			                window.setTimeout(function() {
+			                    processConfigReport();
+			                }, 1000);
+			            });
+			        }
+			        function prepareUpdateMenu() {
+			            window.setTimeout(function() {
+			                updateMenu();
+			            }, 5000);
+			        }
+			        /* ]]> */
+		</script>		
+	<p:dialog  widgetVar="listFormWizWv" styleClass="styleAppDlg"
+		header="Listagem e Formulário - Desmarque as opções desnecessárias">
+		<h:form prependId="false">
+			<p:remoteCommand name="updateReportConfig" immediate="true"
+					update="@(.customListRep)" />
+				<p:remoteCommand name="updateReportOptionField"
+					actionListener="#{algoRep.updateFieldConfig()}" immediate="true"
+					update="@(.ui-algo-container-field)"
+					oncomplete="updateElementPropertyField();" />
+				<p:remoteCommand name="updateReportStatusField"
+					actionListener="#{algoRep.updateFieldShow()}" immediate="false"
+					update="@(.ui-algo-container-field)"
+					oncomplete="updateElementPropertyField();" />
+				<p:remoteCommand name="updateReport"
+					actionListener="#{algoRep.updateReport()}" immediate="false"
+					update="@(.ui-algo-container-field)" />
+				<p:remoteCommand name="updateElementPropertyField" immediate="true" update="@(.elementPropertyField)"/>		
+		</h:form>
+<h:form binding="#{admAlgorepContainerFieldForm}"
+	styleClass="ui-algo-container-fieldx elementPropertyField" prependId="false"
+	>
+		<h:panelGrid rendered="false" columns="2" styleClass="configFactoy">
+			<h:panelGroup>
+				<ui:include src="algodevListFactory.xhtml"></ui:include>
+			</h:panelGroup>
+			<h:panelGroup>
+				<ui:include src="algodevFormFactory.xhtml"></ui:include>
+			</h:panelGroup>
+		</h:panelGrid>
+		<p:remoteCommand name="processConfigReport" immediate="false"
+			process="@form" oncomplete="updateReport()" />
+            <div >
+
+                <!--p:panel styleClass="elementPropertyFieldx"  toggleable="true" header="#{msg['property']}" rendered="#{algoRep.formRendered}"-->
+
+                    <h:panelGroup  styleClass="elementPropertyFieldx" >			
+		<div onmousedown="createEventOrderListRep();">
+			<table class="customListRep"
+				style="vertical-align: top; display: inline-block;">
+				<tr>
+					<td style="vertical-align: top;width: 50%;"><p:orderList immediate="true"
+							styleClass="ui-report-config customListRep ui-report-config-field"
+							converter="ObjectConverter" value="#{algoRep.fieldOptionsAll}"
+							var="fo" itemValue="#{fo}" controlsLocation="bottom"
+							id="customListRep">
+							<f:facet name="caption"> Campos</f:facet>
+
+							<p:column>
+								<div
+									style="display: inline-table; width: 100%; vertical-align: middle;">
+									<span class="ui-icon ui-icon-arrow-2-n-s"
+										style="display: inline-block;"> </span>
+									<div class="ui-report-field"
+										style="display: inline-block; overflow: hidden; width: 65%; max-height: 25px; white-space: nowrap; #{fo.get('used')?'font-weight: bold;':''}#{!fo.get('visible')?'text-decoration: line-through;':''}">
+										<input type="hidden" class="ui-report-field-object"
+											value="#{fo.get('property')}" />
+										#{fo.get('head')}
+									</div>
+									<p:commandLink immediate="true"
+										onclick="fieldObject = '#{fo.get('property')}';
+			            showConfigFieldDlg(this, '#{fo.get('visible')}');"
+										styleClass="ui-icon ui-icon-gear"
+										style="display: inline-block;">
+									</p:commandLink>
+								</div>
+							</p:column>
+						</p:orderList></td>
+					<td style="vertical-align: top;width: 50%;"><h:panelGroup>
+							<p:orderList immediate="true" converter="ObjectConverter"
+								value="#{algoRep.fieldOptionsFil}" var="fo" itemValue="#{fo}"
+								controlsLocation="bottom" id="customListRep2"
+								styleClass="ui-report-config ui-report-config-fil customListRep customListRepOpt">
+								<f:facet name="caption">Filtro</f:facet>
+
+								<p:column>
+									<div style="display: inline-table; width: 100%;"> <span
+										class="ui-icon ui-icon-arrow-2-n-s"
+										style="display: inline-block;"> </span>
+										<div class="ui-report-field"
+											style="display: inline-block; overflow: hidden; width: 65%; max-height: 25px; white-space: nowrap; #{fo.get('used')?'font-weight: bold ':''}">
+
+											<input type="hidden" class="ui-report-field-object"
+												value="#{fo.get('property')}" /> #{fo.get('head')}
+										</div> <p:commandLink immediate="true"
+											onclick="fieldObject = '#{fo.get('property')}';
+			            showConfigFieldDlg(this, '#{fo.get('visible')}', 'fil');"
+											styleClass="ui-icon ui-icon-gear"
+											style="display: inline-block;">
+										</p:commandLink>
+									</div>
+								</p:column>
+							</p:orderList>
+							<p:orderList immediate="true" converter="ObjectConverter"
+								value="#{algoRep.fieldOptionsRow}" var="fo" itemValue="#{fo}"
+								controlsLocation="bottom" id="customListRep3"
+								styleClass="ui-report-config ui-report-config-row customListRep customListRepOpt">
+								<f:facet name="caption">Linhas</f:facet>
+
+								<p:column>
+									<div style="display: inline-table; width: 100%;"> <span
+										class="ui-icon ui-icon-arrow-2-n-s"
+										style="display: inline-block;"> </span>
+										<div class="ui-report-field"
+											style="display: inline-block; overflow: hidden; width: 65%; max-height: 25px; white-space: nowrap; #{fo.get('used')?'font-weight: bold ':''}">
+											<input type="hidden" class="ui-report-field-object"
+												value="#{fo.get('property')}" /> #{fo.get('head')}
+										</div> <p:commandLink immediate="true"
+											onclick="fieldObject = '#{fo.get('property')}';
+			            showConfigFieldDlg(this, '#{fo.get('visible')}', 'row');"
+											styleClass="ui-icon ui-icon-gear"
+											style="display: inline-block;">
+										</p:commandLink>
+									</div>
+								</p:column>
+							</p:orderList>
+							<p:orderList immediate="true" converter="ObjectConverter"
+								value="#{algoRep.fieldOptionsCol}" var="fo" itemValue="#{fo}"
+								controlsLocation="bottom" id="customListRep4"
+								styleClass="ui-report-config ui-report-config-col customListRep customListRepOpt">
+								<f:facet name="caption">Colunas</f:facet>
+
+								<p:column>
+									<div style="display: inline-table; width: 100%;"> <span
+										class="ui-icon ui-icon-arrow-2-n-s"
+										style="display: inline-block;"> </span>
+										<div class="ui-report-field"
+											style="display: inline-block; overflow: hidden; width: 65%; max-height: 25px; white-space: nowrap; #{fo.get('used')?'font-weight: bold ':''}">
+											<input type="hidden" class="ui-report-field-object"
+												value="#{fo.get('property')}" /> #{fo.get('head')}
+										</div> <p:commandLink immediate="true"
+											onclick="fieldObject = '#{fo.get('property')}';
+			            showConfigFieldDlg(this, '#{fo.get('visible')}', 'col');"
+											styleClass="ui-icon ui-icon-gear"
+											style="display: inline-block;">
+										</p:commandLink>
+									</div>
+								</p:column>
+							</p:orderList>
+							<p:orderList immediate="true" converter="ObjectConverter"
+								value="#{algoRep.fieldOptionsVal}" var="fo" itemValue="#{fo}"
+								controlsLocation="bottom" id="customListRep5"
+								styleClass="ui-report-config ui-report-config-val customListRep customListRepOpt">
+								<f:facet name="caption">Valores</f:facet>
+
+								<p:column>
+									<div style="display: inline-table; width: 100%;"> <span
+										class="ui-icon ui-icon-arrow-2-n-s"
+										style="display: inline-block;"> </span>
+										<div class="ui-report-field"
+											style="display: inline-block; overflow: hidden; width: 65%; max-height: 25px; white-space: nowrap; #{fo.get('used')?'font-weight: bold ':''}">
+											<input type="hidden" class="ui-report-field-object"
+												value="#{fo.get('property')}" /> #{fo.get('head')}
+										</div> <p:commandLink immediate="true"
+											onclick="fieldObject = '#{fo.get('property')}';
+			            showConfigFieldDlg(this, '#{fo.get('visible')}', 'val');"
+											styleClass="ui-icon ui-icon-gear"
+											style="display: inline-block;">
+										</p:commandLink>
+									</div>
+								</p:column>
+							</p:orderList>
+						</h:panelGroup></td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" class="fieldShowAll"
+						onchange="showAllFields();" />Exibir Todos</td>
+				</tr>
+			</table>
+		</div>
+		
+
+		<script>
+			        var dragObj1;
+			        var dragObj2;
+			        var fieldObject;
+			        var fieldSrc;
+			        function showConfigFieldDlg(elSource, checkStatus, src) {
+			            $('.ConfigField').hide();
+			            $('.ConfigFieldVal').hide();
+			            fieldSrc = src;
+			            if (src === 'val') {
+			                $('.ConfigFieldVal').show();
+			            } else if (src === 'row') {
+			
+			            } else if (src === 'col') {
+			
+			            } else if (src === 'fil') {
+			
+			            } else {
+			                $('.ConfigField').show();
+			                $('.fieldShow').attr('checked', JSON.parse(checkStatus));
+			                //alert(checkStatus);
+			                //ConfigFieldWv.jq.css({left:$(elSource).offset().left,top:$(elSource).offset().top});
+			            }
+			            ConfigFieldWv.show();
+			            ConfigFieldWv.jq.css('left', ($(elSource).offset().left - 200) + 'px');
+			            ConfigFieldWv.jq.css('top', $(elSource).offset().top + 'px');
+			
+			        }
+			        function showAllFields() {
+			            fieldShowAllBool = JSON.parse($('.fieldShowAll').is(':checked'));
+			            updateReportStatusField([{name: 'fieldShowAll', value: fieldShowAllBool}]);
+			        }
+			        function prepareUpdateReport() {
+			            //alert(!!$('.fieldShow').is(':checked'));
+			            if (fieldSrc !== undefined) {
+			                if (fieldSrc === 'val') {
+			                    //updateReportStatusField([{name: 'fieldObject', value: fieldObject}, {name: 'fieldShow', value: !!$('.fieldShow').is(':checked')}])
+			                } else if (fieldSrc === 'row') {
+			
+			                } else if (fieldSrc === 'col') {
+			
+			                } else if (fieldSrc === 'fil') {
+			
+			                }
+			            } else {
+			                updateReportStatusField([{name: 'fieldObject', value: fieldObject}, {name: 'fieldShow', value: !!$('.fieldShow').is(':checked')}]);
+			            }
+			        }
+			        function createDragAndDrop() {
+			            /*
+			             $(".ui-sortable").sortable({
+			             receive: function(event, ui) {
+			             dragObj1 = ui.item.attr('data-item-value');
+			             //dragObj2 = ui.item;
+			             },
+			             update: function(event, ui) {
+			             //dragObj1 = this;
+			             dragObj2 = ui.item.index();
+			             }
+			             });
+			             $( "ul, li" ).disableSelection();
+			             */
+			            $('.ui-report-field').draggable({
+			                scope: 'ui-algo',
+			                cursor: "crosshair",
+			                cancel: "",
+			                helper: "clone",
+			                zIndex: 100,
+			                scroll: false,
+			                revert: "invalid"
+			            });
+			            $('.ui-report-config').droppable({
+			                activeClass: 'ui-state-active',
+			                hoverClass: 'ui-state-highlight',
+			                tolerance: 'pointer',
+			                scope: 'ui-algo',
+			                drop: function(event, ui) {
+			                    var destin = "";
+			                    if ($(this).is('.ui-report-config-field')) {
+			                        destin = '';
+			                    } else if ($(this).is('.ui-report-config-fil')) {
+			                        destin = 'fil';
+			                    } else if ($(this).is('.ui-report-config-row')) {
+			                        destin = 'row';
+			                    } else if ($(this).is('.ui-report-config-col')) {
+			                        destin = 'col';
+			                    } else if ($(this).is('.ui-report-config-val')) {
+			                        destin = 'val';
+			                    }
+			
+			                    var object = $(ui.draggable).find('.ui-report-field-object').val();
+			                    updateReportOptionField([{name: 'fieldObject', value: object}, {name: 'fieldDestin', value: destin}]);
+			                    //window.clearTimeout(timeoutID);
+			                    //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+			                    //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+			                    //alert(ui.position['top']+":"+ui.position['left']);
+			                    //alert(ui.offset['top']+":"+ui.offset['left']); 
+			                    //var timeCount = $(this).find('.ui-algo-element-container').length + 1 * 1000;
+			
+			                    //prepareDrop(ui, this, styleStr, timeCount);
+			
+			
+			                    //exibirConfirm("Informe os parâmetros.", "Vincular Dados", callbackFunc);
+			                }
+			            });
+			            $(".ui-sortable").sortable("option", "scroll", false);
+			            $(".ui-sortable").sortable("option", "axis", "y");
+			            //$(".ui-sortable").sortable("option", "revert", true);
+			            //$(".ui-sortable").sortable("refresh");
+			            //$( ".ui-sortable" ).sortable( "option", "connectWith", "#shopping-cart" );
+			        }
+			        createDragAndDrop();
+			        $('.fieldShowAll').attr('checked', fieldShowAllBool);
+			                    </script>
+			                    </h:panelGroup>
+			                    		<!-- /p:panel-->
+		</div>
+		<style>
+table.customListRep {
+	width: 100% !important;		
+	position: relative;
+}
+table.ui-report-config-field{
+	/*width: 50% !important;*/	
+	position: relative;
+}
+.customListRep tbody tr td {
+	/*width: 100% !important;*/
+	font-size: 10px !important;
+	padding: 0px !important;
+	border-width: 0px !important;
+	padding: 0px !important;
+	border: none !important;
+	position: relative;
+}
+
+.customListRep tbody tr td ul {
+	width: 100% !important;
+	height: 400px !important;
+	position: relative;
+	/*overflow: hidden !important;*/
+}
+
+.customListRepOpt tbody tr td ul {
+	height: 78px !important;
+	position: relative;
+	/*overflow: hidden !important;*/
+}
+</style>
+
+		<p:inputTextarea value="#{admAlgodevBean.bean.requirementStyle}"
+			styleClass="no-upper" style="width: 450px;height: 50px;" cols="30">
+			<p:ajax event="blur" immediate="true" process="@this" />
+		</p:inputTextarea>
+
+		<p:commandButton value="Gerar" immediate="true"
+			actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}"
+			process="@(.styleAppDlg)" update="@(.tabViewConfig)"
+			onstart="clearContainerPage();updateCurrentConteiner();"
+			oncomplete="constructorDone();updateOpenProjectDlg();prepareUpdateMenu();updateTabViewConfig();" />
+</h:form>
+	</p:dialog>
+		<p:dialog header="Configurar Campo" resizable="false"
+			widgetVar="ConfigFieldWv" onHide="prepareUpdateReport()">
+			<h:form  prependId="false">
+			<h:panelGrid columns="2" styleClass="ConfigField">
+				<h:outputLabel value="Visível" />
+				<h:selectBooleanCheckbox styleClass="fieldShow" immediate="true">
+				</h:selectBooleanCheckbox>
+			</h:panelGrid>
+			<h:panelGrid columns="2" styleClass="ConfigFieldVal">
+				<h:outputLabel value="Soma" />
+				<h:selectBooleanCheckbox styleClass="sumShow" immediate="true">
+				</h:selectBooleanCheckbox>
+				<h:outputLabel value="Média" />
+				<h:selectBooleanCheckbox styleClass="averageShow" immediate="true">
+				</h:selectBooleanCheckbox>
+				<h:outputLabel value="Contagem" />
+				<h:selectBooleanCheckbox styleClass="countShow" immediate="true">
+				</h:selectBooleanCheckbox>
+			</h:panelGrid>
+			</h:form>
+			
+		</p:dialog>	
+</f:view>		
+</html>

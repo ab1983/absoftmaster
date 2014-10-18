@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      > 
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{purSolicitationBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Cadastro Solicitação" style="width: 900px;">
+        <p:focus for="purSolicitationObservation" rendered="#{purSolicitationBean.bean.observation == null}"/>                
+        <p:focus for="supplyItemIdSelSolicitationBean" rendered="#{purSolicitationBean.bean.observation != null}"/>   
+        <h:panelGrid columns="6">
+            <h:outputText value="Número:"/>
+            <p:inputText value="#{purSolicitationBean.bean.seqnum}" required="true" readonly="true" requiredMessage="Número #{msg.required}."/>
+            <h:outputText value="Data:"/>
+            <p:inputText value="#{purSolicitationBean.bean.dateRegistration}" required="true" requiredMessage="Data #{msg.required}." readonly="true">
+                <f:convertDateTime pattern="dd/MM/yyyy"/>              
+            </p:inputText>        
+            <p:column>
+                <h:outputText value="Observação:"/>                        
+            </p:column>
+            <p:column colspan="3">
+                <p:inputTextarea cols="50" autoResize="false" style="max-height: 50px;max-width: 300px;min-height: 50px;min-width: 300px;" id="purSolicitationObservation" value="#{purSolicitationBean.bean.observation}"/>                        
+            </p:column>
+        </h:panelGrid>
+        <p:fieldset style="width: 95%;">
+            <f:facet name="legend">
+                Detalhes
+            </f:facet>
+
+            <h:panelGrid columns="6" styleClass="itemPanel" id="purSolicitationBeanItemPanel">
+                <h:outputText value="Item Suprimento"/>
+                <h:outputText value="UN"/>
+                <h:outputText value="Quantidade"/>
+                <h:outputText value="Observação"/>
+                <h:outputText value=""/>
+                <h:outputText value=""/>
+                <h:panelGroup>
+                    <p:selectOneMenu  id="supplyItemIdSelSolicitationBean" widgetVar="supplyItemIdWv" value="#{purSolicitationBean.solicitationItem.supplyItem}" converter="#{baseBean.getConverter(stkSupplyItemBean.beanList,null,'supplyItemId')}" filter="true" filterMatchMode="contains" style="width: 150px;">
+                        <f:selectItem itemLabel="#{msg.select}"/>
+                        <f:selectItems  value="#{stkSupplyItemBean.beanList}" var="si" itemLabel="#{si.description}" itemValue="#{si}"/>
+                        <p:ajax update="unitOfMeasureSolicitationBean"></p:ajax>
+                    </p:selectOneMenu> 
+                    <p:commandButton action ="#{stkSupplyItemBean.indexBeanNewWin(!purSolicitationBean.notReadOnly)}" icon="ui-icon-newwin" immediate="true" update=":basePanel" style="float:right;"/> 
+                </h:panelGroup>
+                <h:outputText id="unitOfMeasureSolicitationBean" value="#{purSolicitationBean.solicitationItem.supplyItem.unitOfMeasure.abbreviation}"/>
+                <p:inputText id="amount" widgetVar="amountWv" styleClass="maskMoney" value="#{purSolicitationBean.solicitationItem.amount}">
+                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                </p:inputText>
+                <p:inputText id="observation"  value="#{purSolicitationBean.solicitationItem.observation}"> 
+                </p:inputText>                
+                <p:commandButton icon="ui-icon-check" action="#{purSolicitationBean.addItem()}"  update="@form" oncomplete="supplyItemIdWv.focus()"></p:commandButton><p:commandButton immediate="true" icon="ui-icon-close" actionListener="#{purSolicitationBean.cancelEditItem(solicitationForm.id)}" update="@form"></p:commandButton>
+                <script>applyMaskMoney()</script> 
+            </h:panelGrid>
+            <p:dataTable emptyMessage="Nenhum item encontrado." var="solicitacionItem" value="#{purSolicitationBean.bean.solicitationItemList}" scrollable="true" scrollHeight="60">
+                <p:column headerText="Item de Suprimento">  
+                    #{solicitacionItem.supplyItem.description}  
+                </p:column>  
+                <p:column headerText="Quantidade">  
+                    <h:outputText value="#{solicitacionItem.amount}">  
+                        <f:convertNumber type="number" pattern="#,##0.00"/>  
+                    </h:outputText>                                                
+                </p:column>  
+                <p:column headerText="Observação">  
+                    #{solicitacionItem.observation} 
+                </p:column>                 
+                <p:column headerText="Ação" style="text-align: center;">  
+                    <p:commandLink action="#{purSolicitationBean.startEditItem(solicitationForm.id)}"  value="Editar" immediate="true" update="@(.itemPanel)">
+                        <f:setPropertyActionListener target="#{purSolicitationBean.solicitationItem}" value="#{solicitacionItem}"/> 
+                        <!--pe:resetInput for=":formMain:itemPanel" /--> 
+                        <!--p:resetInput target=":formMain:itemPanel"/-->
+                    </p:commandLink> |
+                    <p:commandLink action="#{purSolicitationBean.removeItem()}" value="Excluir" immediate="true"  update="@form">
+                        <f:setPropertyActionListener target="#{purSolicitationBean.solicitationItem}" value="#{solicitacionItem}"/>
+                    </p:commandLink>  
+                </p:column>                     
+            </p:dataTable>
+        </p:fieldset>
+        <p:commandButton value="Gravar"   action="#{purSolicitationBean.doBeanSave()}" update="@form">
+        </p:commandButton>
+    </p:panel>
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');     
+        });                    
+
+    </script>
+</html>

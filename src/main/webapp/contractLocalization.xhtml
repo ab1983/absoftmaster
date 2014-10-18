@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:h="http://java.sun.com/jsf/html"       
+       xmlns:p="http://primefaces.org/ui">
+    <p:fieldset>
+        <h:panelGrid columns="4">
+            <h:outputText rendered="false" value="#{msg['postalCode']}:"/>
+            <p:inputMask rendered="false" mask="#{msg.postalCodeMask}" value="#{admContractBean.company.location.postalcode}" required="true" requiredMessage="#{msg['postalCode']} #{msg.required}."/>                                   
+            <h:outputText rendered="false" value="#{msg['number']}:"/>
+            <p:inputText rendered="false" value="#{admContractBean.company.location.number}" required="true" requiredMessage="#{msg['number']} #{msg.required}."/> 
+            <h:outputText rendered="false" value="#{msg['complement']}:"/>
+            <p:inputText rendered="false" value="#{admContractBean.company.location.complement}"/>  
+            <h:panelGroup>
+                <h:outputText value="#{msg['city']}"/>:<font color="red">*</font> 
+            </h:panelGroup>
+            <p:inputText value="#{admContractBean.company.location.city}" required="true" requiredMessage="#{msg['city']} #{msg.required}."/> 
+            <h:panelGroup>
+                <h:outputText value="#{msg['state']}"/>:<font color="red">*</font> 
+            </h:panelGroup>
+            <p:inputText value="#{admContractBean.company.location.state}" required="true" requiredMessage="#{msg['state']} #{msg.required}."/>                    
+            <h:outputText value="#{msg['phone']}:"/>
+            <p:inputMask  rendered="true" mask="#{msg.phoneMask}" value="#{admContractBean.company.location.phone}" required="false" requiredMessage="#{msg['phone']} #{msg.required}."/>   
+        </h:panelGrid>
+        <h:panelGroup rendered="true">
+            <font color="red">Telefone não é obrigatório, mas caso queira treinamento grátis é necessário informar.</font> 
+        </h:panelGroup>
+    </p:fieldset>      
+</html>

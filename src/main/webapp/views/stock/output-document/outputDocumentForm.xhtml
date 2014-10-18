@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      > 
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{stkOutputDocumentBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Cadastro Documento" style="width: 950px;">
+        <!--p:focus for="fornecedorId" rendered="#{stkOutputDocumentBean.bean.fornecedor.fornecedorId == null}"/>                
+        <p:focus for="supplyItemIdSelInputDocumentBean" rendered="#{stkOutputDocumentBean.bean.fornecedor.fornecedorId != null}"/-->   
+        <h:panelGrid columns="6" >
+            <!--h:outputText value="Fornecedor"/>
+            <p:selectOneMenu id="fornecedorId" value="#{stkOutputDocumentBean.bean.fornecedor.fornecedorId}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Fornecedor #{msg.required}.">
+                <f:selectItem itemLabel="Selecione"/>
+                <f:selectItems  value="#{stkOutputDocumentBean.fornecedorList}" var="item" itemLabel="#{item.cpfCnpj}-#{item.razaoSocial}" itemValue="#{item.fornecedorId}"/>
+                <p:ajax listener="#{stkOutputDocumentBean.updateOrderList()}" update="solicitationFilter"/>
+            </p:selectOneMenu-->                        
+            <h:outputText  rendered="false" value="N. Documento"/>
+            <p:inputText  rendered="false" value="#{stkOutputDocumentBean.bean.documentNumber}" required="true" requiredMessage="N. Documento #{msg.required}."/>
+            <h:outputText  rendered="false" value="Série"/>
+            <p:inputText  rendered="false" value="#{stkOutputDocumentBean.bean.serialNumber}" required="true" requiredMessage="Série #{msg.required}."/>
+            <h:outputText value="Tipo Docto" rendered="false"/>
+            <p:selectOneMenu  rendered="false" value="#{stkOutputDocumentBean.bean.tipoDocumento}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Tipo Docto #{msg.required}." converter="#{baseBean.getConverter(stkOutputDocumentBean.gerTipoDocumentoList, null, 'tipoDocumentoId')}">
+                <f:selectItem itemLabel="Selecione"/>
+                <f:selectItems  value="#{stkOutputDocumentBean.gerTipoDocumentoList}" var="item" itemLabel="#{item.codigo}-#{item.descricao}" itemValue="#{item}"/>
+            </p:selectOneMenu>                 
+            <!--h:outputText value="Parcela"/>
+            <p:inputText value="#{stkOutputDocumentBean.bean.portion}" required="true" requiredMessage="Parcela #{msg.required}."/-->
+            <h:outputText  rendered="false" value="Data Emissão"/>     
+            <p:calendar  rendered="false" locale="br" value="#{stkOutputDocumentBean.bean.issuanceDate}"  pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Emissão #{msg.required}." />                 
+            <h:outputText value="Data Saída"/>               
+            <p:calendar locale="br" value="#{stkOutputDocumentBean.bean.outputDate}" pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Entrada #{msg.required}." />                 
+            <!--h:outputText value="Data Vencimento"/>      
+            <p:calendar locale="br" value="#{stkOutputDocumentBean.bean.expirationDate}" pattern="dd/MM/yyyy" id="dataVencimento" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Vencimento #{msg.required}." /-->                                         
+        </h:panelGrid>
+        <p:dataTable  var="solicitationVar"  rowKey="#{solicitationVar.solicitationId}" id="solicitationFilter" value="#{stkOutputDocumentBean.solicitationList}" selection="#{stkOutputDocumentBean.bean.solicitationList}" emptyMessage="#{msg.emptyMessage}" scrollable="true" scrollHeight="40">  
+            <f:facet name="header">
+                Solicitações em Aberto
+            </f:facet>
+            <p:column selectionMode="multiple" style="width:20px; text-align: center;" />                     
+            <p:column>
+                <f:facet name="header">
+                    Número
+                </f:facet>
+                #{solicitationVar.number}
+            </p:column>
+            <p:column>
+                <f:facet name="header">
+                    Observação
+                </f:facet>
+                #{solicitationVar.observation}
+            </p:column>                        
+            <p:column>
+                <f:facet name="header">
+                    Data Registro
+                </f:facet>
+                <h:outputText value="#{solicitationVar.dateRegistration}">  
+                    <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                </h:outputText> 
+            </p:column>                                                        
+        </p:dataTable>        
+        <p:fieldset style="width: 95%;">
+            <f:facet name="legend">
+                Detalhes
+            </f:facet>
+
+            <h:panelGrid columns="7" id="itemPanelstkOutputDocumentBean" styleClass="itemPanel">
+                <h:outputText value="Item Suprimento"/>
+                <h:outputText value="UN"/>
+                <h:outputText value="Quantidade"/>
+                <h:outputText value="Preço Unitário" rendered="true"/>
+                <h:outputText value="#{msg['brand']}"/>
+                <h:outputText value=""/>
+                <h:outputText value=""/>
+                <h:panelGroup>
+                    <p:selectOneMenu  id="supplyItemIdSelOutputDocumentBean" widgetVar="supplyItemIdWv" value="#{stkOutputDocumentBean.outputDocumentItem.movementItem.movement}"  converter="#{baseBean.getConverter(stkMovementBean.beanList,null, 'movementId')}" filter="true" filterMatchMode="contains" style="width: 150px;">
+                        <f:selectItem itemLabel="#{msg.select}"/>
+                        <f:selectItems  value="#{stkMovementBean.beanList}" var="si" itemLabel="#{si.supplyItem.description}" itemValue="#{si}"/>
+                        <p:ajax listener="#{stkOutputDocumentBean.updateSupplyItem()}" update="unitOfMeasureOutputDocumentBean"></p:ajax>
+                    </p:selectOneMenu> 
+                    <p:commandButton action ="#{stkSupplyItemBean.indexBeanNewWin()}" icon="ui-icon-newwin" immediate="true" update=":basePanel" style="float:right;"/> 
+                </h:panelGroup>
+                <h:outputText id="unitOfMeasureOutputDocumentBean" value="#{stkOutputDocumentBean.outputDocumentItem.movementItem.movement.supplyItem.unitOfMeasure.abbreviation}"/>
+                <p:inputText id="amount" widgetVar="amountWv" styleClass="maskMoney item-form" value="#{stkOutputDocumentBean.outputDocumentItem.movementItem.amount}">
+                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                </p:inputText>
+                <p:inputText id="unitPrice"  rendered="true" readonly="true" widgetVar="unitPriceWv" styleClass="maskMoney item-form" value="#{stkOutputDocumentBean.outputDocumentItem.movementItem.unitPrice}">
+                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                </p:inputText>     
+                <p:selectOneMenu value="#{stkSupplyItemBean.bean.brand}" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{msg['brand']} #{msg['required']}." converter="#{baseBean.getConverter(stkBrandBean.beanList,null, 'brandId')}">
+                    <f:selectItem itemLabel="#{msg['select']}"/>
+                    <f:selectItems  value="#{stkBrandBean.beanList}" var="item" itemLabel="#{item.code}-#{item.description}" itemValue="#{item}"/>
+                    <p:ajax process="@this"/>
+                </p:selectOneMenu>               
+                <p:commandButton icon="ui-icon-check" action="#{stkOutputDocumentBean.addItem()}"  update="@form" oncomplete="supplyItemIdWv.focus()"></p:commandButton><p:commandButton immediate="true" icon="ui-icon-close" actionListener="#{stkOutputDocumentBean.cancelEditItem(outputDocumentForm.id)}" update="@form"></p:commandButton>
+            </h:panelGrid>
+            <p:dataTable emptyMessage="Nenhum item encontrado." var="outputDocumentItem" value="#{stkOutputDocumentBean.bean.outputDocumentItemList}" scrollable="true" scrollHeight="60">
+                <p:column headerText="Item de Suprimento">  
+                    #{outputDocumentItem.movementItem.movement.supplyItem.description}  
+                </p:column>  
+                <p:column headerText="Quantidade">  
+                    <h:outputText value="#{outputDocumentItem.movementItem.amount}">  
+                        <f:convertNumber type="number" pattern="#,##0.00"/>  
+                    </h:outputText>                                                
+                </p:column>  
+                <p:column headerText="Preço Unitário">  
+                    <h:outputText value="#{outputDocumentItem.movementItem.unitPrice}">  
+                        <f:convertNumber type="number" pattern="#,##0.00"/>  
+                    </h:outputText>  
+                </p:column>                 
+                <p:column headerText="Ação" style="text-align: center;">  
+                    <p:commandLink action="#{stkOutputDocumentBean.startEditItem(outputDocumentForm.id)}"  value="Editar" immediate="true" update="@(.itemPanel)">
+                        <f:setPropertyActionListener target="#{stkOutputDocumentBean.outputDocumentItem}" value="#{outputDocumentItem}"/> 
+                        <!--pe:resetInput for=":formMain:itemPanel" /--> 
+                        <!--p:resetInput target=":formMain:itemPanel"/-->
+                    </p:commandLink> |
+                    <p:commandLink action="#{stkOutputDocumentBean.removeItem()}" value="Excluir" immediate="true"  update="@form">
+                        <f:setPropertyActionListener target="#{stkOutputDocumentBean.outputDocumentItem}" value="#{outputDocumentItem}"/>
+                    </p:commandLink>  
+                </p:column>                     
+            </p:dataTable>
+        </p:fieldset>
+        <p:commandButton value="Gravar"   action="#{stkOutputDocumentBean.doBeanSave()}" update="@form">
+        </p:commandButton>
+    </p:panel>
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');     
+            $(".maskMoney").maskMoney({
+                thousands:'.',
+                decimal:',',
+                precision:2
+            });            
+        });                    
+            
+    </script>
+</html>

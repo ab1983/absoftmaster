@@ -1,0 +1,587 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"
+       xmlns:c="http://java.sun.com/jsp/jstl/core"> 
+    <style>
+        .elementPropertyValueFactoryTab{
+            width: 400px;
+            display: block;
+        }
+    </style>
+    <script>
+        var nodeExp;
+        var tabExp;
+        var typeExp = "form";
+        var teste669 = null;
+    </script>
+    <h:form binding="#{admAlgodevContainerForm}" styleClass="ui-algo-dev-form" prependId="false" onsubmit="javascript:return false">
+        <p:panel binding="#{algoContainerBind}" style="width: 1024px;height: 450px;" styleClass="ui-algo-container" id="algoContainer">
+
+        </p:panel>
+        <p:droppable id="algoContainerDrop1" scope="ui-algo" activeStyleClass="ui-state-active" hoverStyleClass="ui-state-highlight" for="algoContainer" tolerance="fit" accept=".ui-panel-content .ui-algo-element" binding="#{algoContainerDropBind}" onDrop="(function(event, ui) {
+                handleDrop(event, ui);
+            })"></p:droppable>      
+        <f:event rendered="true" type="preRenderComponent" listener="#{admAlgodevBean.setAlgoContainerEvt(baseBean.getComponentEvent(algoContainerBind))}"/>        
+        <f:event rendered="true" type="preRenderComponent" listener="#{admAlgodevBean.setAlgoPaletteEvt(baseBean.getComponentEvent(algoPaletteBind))}"/>           
+        <p:remoteCommand name="updateCurrentConteiner" immediate="true" update="@(.containerPage)">
+            <f:setPropertyActionListener value="#{algoContainerBind}" target="#{admAlgodevBean.algoContainer}" />                            
+            <f:setPropertyActionListener value="#{algoPaletteBind}" target="#{admAlgodevBean.algoPalette}" />      
+        </p:remoteCommand>
+        <p:remoteCommand name="updateCurrentForm" immediate="true" update="@form"/>
+        <p:remoteCommand name="removeChildren" actionListener="#{admAlgodevBean.removeComponent()}"  onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();" immediate="true"/>
+        <p:remoteCommand name="removeComponent" actionListener="#{admAlgodevBean.removeComponent()}"  onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();" immediate="true"/>
+        <p:remoteCommand name="onDropChildren" immediate="true" actionListener="#{admAlgodevBean.onDrop()}">
+            <f:setPropertyActionListener rendered="false" value="#{algoContainerBind}" target="#{admAlgodevBean.algoContainer}" />  
+            <f:setPropertyActionListener rendered="false" value="#{algoPaletteBind}" target="#{admAlgodevBean.algoPalette}" />  
+        </p:remoteCommand>
+        <p:remoteCommand name="onDropComponent" immediate="true"  update="@form" actionListener="#{admAlgodevBean.onDrop()}">
+        </p:remoteCommand> 
+        <p:remoteCommand name="createByConstructor" immediate="true"  update="@form" actionListener="#{admAlgodevBean.createByConstructor()}" oncomplete="containerPageUpdate();updateOpenProjectDlg();updateMenu();">
+        </p:remoteCommand>           
+        <p:remoteCommand name="updateMenu" immediate="true" actionListener="#{gerLoginBean.setModel(null)}" update="@(.startMenu)"/>
+        <p:remoteCommand name="onSortComponent" immediate="true" update="@form" actionListener="#{admAlgodevBean.onSort()}">
+        </p:remoteCommand>  
+        <p:remoteCommand name="containerPageUpdate" immediate="true" update="@(.containerPage)"/>
+
+        <script type="text/javascript">
+        /* <![CDATA[ */
+        var currentElModel = null;
+        var timeoutID;
+        var propertyOk = true;
+        var dropCallbackFunc = null;
+        var dropCallbackParam = null;
+        function handleDrop(event, ui) {
+            //alert(ui.offset['left']);
+            var elSource = $(event.target);
+            teste23 = elSource;
+            //alert(event.offsetX+"-"+teste23.offset().top);
+            var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - elSource.offset().top + 45) + 'px;left:' + parseInt(ui.offset['left'] - elSource.offset().left + 20) + 'px;';
+            //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+            //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top']) + 'px;left:' + parseInt(ui.offset['left']) + 'px;';
+            //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+            //alert(ui.position['top']+":"+ui.position['left']);
+            //alert(ui.offset['top']+":"+ui.offset['left']);
+            timeoutID = window.setTimeout(function(ui, elSource, styleStr) {
+                prepareDrop(ui, elSource, styleStr, 0);
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+            }, 1000, ui, elSource, styleStr);
+
+        }
+        function positionChange(dir, pos) {
+            if (currentEl !== null) {
+                window.clearTimeout(timeoutID);
+                //alert($(currentEl).attr('id'));
+                //alert($(currentEl).offset()[dir]);
+                //alert(parseFloat($(currentEl).offset()[dir])+parseFloat(pos));
+                //var posObj = {top:$(currentEl).offset()['top'],left:$(currentEl).offset()['left']}
+                //alert(currentEl);
+                var currentElObj = $(esc(currentEl));
+                //alert(currentElObj);
+                var posObj = $(currentElObj).offset();
+                posObj[dir] = $(currentElObj).offset()[dir] + parseInt(pos);
+                $(currentElObj).offset(posObj);
+                //$(currentEl).offset({ dir: (parseFloat($(currentEl).offset()[dir])+parseFloat(pos))});
+                //alert($(currentEl).offset()[dir]);
+                //$(currentEl).css(dir,parseInt($(currentEl).css(dir))+parseInt(pos));  
+                //updateElementAux(currentEl);
+                var param_id = {name: 'param_id', value: $(currentElObj).attr('id')};
+                var style = {name: 'style', value: $(currentElObj).attr('style')};
+                var tabindex = {name: 'tabindex', value: createTabindex(currentElObj)};
+                var prop = [param_id, style, tabindex];
+                timeoutID = window.setTimeout(function(prop) {
+                    updateElementAux(prop);
+                }, 2000, prop);
+            } else {
+                alert('Nenhum Elemento selecionado!');
+            }
+        }
+        function updateElementAux(property) {
+            currentEl = null;
+            for (var i in property) {
+                if (property[i].name === 'param_id' && property[i].value !== null && property[i].value.indexOf('algoContainer') === -1) {
+                    currentEl = property[i].value;
+                    break;
+                }
+            }
+            if (currentEl !== null) {
+                updateElementJs(property);
+            } else {
+                alert('Nenhum elemento selecionado.');
+            }
+        }
+        var senderSort = null;
+        function init() {
+            registerHotkeys('#{algoContainerBind.id}');
+            $(function() {
+                $(".sortable").sortable({
+                    placeholder: "ui-state-highlight",
+                    connectWith: ".connectedSortable",
+                    start: function(e, ui) {
+                        // creates a temporary attribute on the element with the old index
+                        $(this).attr('data-previndex', ui.item.index());
+                    },
+                    update: function(e, ui) {
+                        // gets the new and old index then removes the temporary attribute
+                        var newIndex = ui.item.index();
+                        var oldIndex = $(this).attr('data-previndex');
+
+                    },
+                    stop: function(event, ui) {
+                        //alert($(ui.placeholder).attr('id'));
+                        //alert($(ui.helper).attr('id'));
+                        //alert($(ui.sender).attr('id'));
+                        //alert($(this).attr('id'));
+                        var newIndex = ui.item.index();
+                        var oldIndex = $(this).attr('data-previndex');
+                        window.clearTimeout(timeoutID);
+                        //$(ui.sender).attr('data-target', $(this).attr('id'));
+                        //senderSort = ui.sender;
+                        //alert($(ui.sender).attr('id'));
+                        var param_id = {name: 'elementModelId', value: $(this).attr('id')};
+                        //var style = {name: 'style', value: $(this).attr('style')};
+                        var oldIndexParam = {name: 'oldIndexParam', value: oldIndex};
+                        var newIndexParam = {name: 'newIndexParam', value: newIndex};
+                        var targetId = {name: 'targetId', value: $(this).attr('data-target')};
+                        var prop = [param_id, oldIndexParam, newIndexParam, targetId];
+                        timeoutID = window.setTimeout(function(prop) {
+                            onSortComponent(prop);
+                        }, 2000, prop);
+                        //alert(newIndex +'-'+oldIndex);
+                        //alert("target: " + $(this).attr('data-target'));
+                        $(this).removeAttr('data-target');
+                        $(this).removeAttr('data-previndex');
+                    },
+                    receive: function(event, ui) {
+                        $(ui.sender).attr('data-target', $(this).attr('id'));
+                        //alert("receive: "+$(ui.sender).attr('id'));
+                    }
+                });
+                $(".sortable").disableSelection();
+                $(".sortable").resizable();
+
+
+                //$(".ui-icon-sortable").addClass( "ui-icon ui-icon-grip-dotted-vertical" );
+                $(".ui-icon-sortable").addClass("ui-icon ui-icon-arrow-4");
+                //$(".ui-icon-sortable").addClass( "ui-icon ui-icon-arrow-4-diag" );
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').resizable();
+            $('.elementPanel .ui-panel-content .ui-algo-element-value').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                helper: "clone",
+                revert: false
+            });
+            $('.elementPanel .ui-panel-content .ui-algo-element-container').draggable({
+                scope: 'ui-algo', //
+                cursor: "crosshair",
+                cancel: "",
+                helper: "clone",
+                revert: false
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-value').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                grid: [10, 10]
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                grid: [10, 10]
+            });
+
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').droppable({
+                activeClass: 'ui-state-active',
+                hoverClass: 'ui-state-highlight',
+                tolerance: 'touch',
+                scope: 'ui-algo',
+                drop: function(event, ui) {
+                    window.clearTimeout(timeoutID);
+                    var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+                    //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+                    //alert(ui.position['top']+":"+ui.position['left']);
+                    //alert(ui.offset['top']+":"+ui.offset['left']); 
+                    var timeCount = $(this).find('.ui-algo-element-container').length + 1 * 1000;
+
+                    prepareDrop(ui, this, styleStr, timeCount);
+
+
+                    //exibirConfirm("Informe os parâmetros.", "Vincular Dados", callbackFunc);
+                }
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').dblclick(function(event) {
+                event.preventDefault();
+                if (window.showPropertyValue !== undefined) {
+                    showPropertyValue();
+                }
+                //updateElementAux(this,{name:'style',value:$(this).attr('style')});
+            });
+            var oldTabIndex = 0;
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').mouseup(function(event) {
+                oldTabIndex = createTabindex(this);
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').mouseup(function(event) {
+                if ($(elClicked).closest("form").is('.ui-algo-dev-form')) {
+                    window.setTimeout(function(thisEl) {
+                        event.preventDefault();
+                        var newTabIndex = createTabindex(thisEl);
+                        var actualTabIndex = newTabIndex !== oldTabIndex ? newTabIndex : $(thisEl).attr('tabindex');
+                        //alert('oi');
+                        if (propertyOk) {
+                            propertyOk = false;
+                            var prop = [{name: 'param_id', value: thisEl.id}, {name: 'style', value: $(thisEl).attr('style')}, {name: 'tabindex', value: actualTabIndex}];
+                            updateElementAux(prop);
+                            window.setTimeout(function() {
+                                propertyOk = true;
+                            }, 1000);
+                        }
+                    }, 500, this);
+                }
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').each(function() {
+                //var aClick = $(this).attr('onClick');
+                //if(aClick===undefined){
+                //alert(aClick);                        
+                //aClick = function(){};
+                //}
+                $(this).prop("onclick", null);
+                //$(this).attr('onClick',null);
+                //$(this).off("click", aClick);
+                //$(this).unbind("click", aClick);   
+                //$(this).click(function(event){ 
+                //  return false;
+                //});   
+                //$(this).on("click", aClick);
+
+            });
+            $('.elementPanel .ui-panel-content .ui-algo-element').click(function(event) {
+                event.preventDefault();
+                currentElModel = this;
+            });
+
+        }
+
+        function prepareDrop(ui, el, styleStr, timeCount) {
+            dropCallbackParam = {timeCount: timeCount, ui: ui, styleStr: styleStr, el: el};
+            dropCallbackFunc = function(p, value, dataList) {
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                timeoutID = window.setTimeout(function(ui, styleStr, el) {
+                    //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+                    onDropComponent([{name: 'value', value: value}, {name: 'datalist', value: dataList}, {name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                }, p.timeCount, p.ui, p.styleStr, p.el, value, dataList);
+            };
+            //elementPropertyApplyWv.jq.click(dropCallbackFunc);
+            if (ui.draggable.parents('.ui-algo-container,.ui-algo-element-container').attr('id') !== $(el).attr('id')) {
+                if (ui.draggable.is('.elementPanel .ui-panel-content .ui-algo-element')) {
+                    $('.prepareElementPropertyValue').val('');
+                    if (ui.draggable.is('.data-list')) {
+                        dataListChkBox.check();
+                        dataListChkBox.jq.show();
+                        $('.panelGridEntityProperty').show();
+                    } else {
+                        dataListChkBox.uncheck();
+                        dataListChkBox.jq.hide();
+                        $('.panelGridEntityProperty').hide();
+                    }
+                    preparePropertyDlg.show();
+                } else {
+                    onDropComponent([{name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                }
+            }
+        }
+        function createTabindex(el) {
+            return $(el).offset().top / 10 * 100 + $(el).offset().left / 10;
+        }
+        function registerHotkeys(containerId) {
+
+            var key = 'keydown.moveElem_' + containerId;
+
+            $(document).off(key).on(key, function(e) {
+                var keyCode = $.ui.keyCode;
+                //var active = parseInt(dlgWidget.jq.css('z-index')) === PrimeFaces.zindex;
+
+                //if (dlgWidget.jq.hasClass('ui-overlay-visible') && active) {
+                if (e.which === keyCode.ESCAPE) {
+                    //dlgWidget.hide();
+                } else if (e.which === keyCode.ENTER || e.which === keyCode.NUMPAD_ENTER) {
+                    //dlgWidget.jq.find('button:submit:first').click();
+                    //e.preventDefault();
+                } else if (e.ctrlKey && e.which === keyCode.LEFT) {
+                    positionChange('left', -2);
+                } else if (e.ctrlKey && e.which === keyCode.RIGHT) {
+                    positionChange('left', +2);
+                } else if (e.ctrlKey && e.which === keyCode.UP) {
+                    positionChange('top', -2);
+                } else if (e.ctrlKey && e.which === keyCode.DOWN) {
+                    positionChange('top', +2);
+                } else if (e.which === keyCode.DELETE) {
+                    var propShow = false;
+                    $('.propertyDlg').each(
+                            function() {
+                                if ($(this).css("visibility") !== "hidden") {
+                                    propShow = true;
+                                }
+                            });
+                    if (currentEl !== null && currentEl !== undefined && !propShow) {
+                        removeComponent();
+                    }
+                }
+                // }
+            });
+        }
+        function showPropertyItem(property) {
+            //alert(property.type);
+            if (property.type === 'boolean') {
+                propertyBoolDlg.show();
+                if (property.value === 'true') {
+                    elementPropertyValueBoolWv.check();
+                } else {
+                    elementPropertyValueBoolWv.uncheck();
+                }
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+            } else if (property.type === 'int' || property.name.toLowerCase().indexOf('width') !== -1 || property.name.toLowerCase().indexOf('height') !== -1) {
+                elementPropertyValueIntWv.value = parseInt(property.value);
+                $(".elementPropertyValue").val(parseInt(property.value));
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+                propertyIntDlg.show();
+            } else {
+                $(".elementPropertyValue").val(property.value);
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+                propertyDlg.show();
+            }
+            //$(".elementPropertyApply").click();
+        }
+        init();
+        /* ]]> */
+        </script>
+
+    </h:form>
+    <p:tooltip showEffect="clip" hideEffect="explode">
+    </p:tooltip>    
+    <h:form binding="#{admAlgodevBeanForm}"  prependId="false" styleClass="openProjectDlg">
+        <h:panelGroup  binding="#{requirementName}" layout="block">
+            <h:panelGroup  layout="block" rendered="#{!admAlgodevBean.formRendered}">                
+                <div style="display:inline-table;vertical-align: middle;right: 450px;">
+                    <h:panelGrid columns="2" rendered="true">
+                        <p:outputLabel value="Página:"> 
+                        </p:outputLabel>
+                        <p:selectOneMenu value="#{admAlgodevBean.containerPage}" id="options2" styleClass="containerPage"> 
+                            <f:selectItems value="#{admAlgodevBean.doElementsConatainerList()}"/>
+                            <p:ajax onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+                </div>
+                <p:commandButton  value="#{msg['list']}" icon="ui-icon-search" action="#{admAlgodevBean.doBeanList()}" immediate="true" onstart="updateCurrentConteiner();" oncomplete="openProjectDlg.show();updateCurrentForm();"/> 
+                <p:commandButton value="#{msg['save']}" process="@form" update="@(.openProjectDlg)" action ="#{admAlgodevBean.doBeanSave()}" icon="ui-icon-document" oncomplete="prepareUpdateMenu();">
+                    <f:setPropertyActionListener value="#{algoContainerBind}" target="#{admAlgodevBean.algoContainer}" />   
+                </p:commandButton>    
+                <p:commandButton value="#{msg['build']}" icon="ui-icon-newwin" onclick="prepareConfigDlg.show();" immediate="true"/>                 
+                <p:commandButton value="#{msg['exclude']}" rendered="#{admAlgodevBean.bean.requirementId!=null}" icon="ui-icon-trash" onclick="confirmAction(function() {
+                confirmExclude()
+            })">                      
+
+                </p:commandButton>    
+                <p:remoteCommand name="confirmExclude" update="@(.openProjectDlg)" onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();prepareUpdateMenu();"  actionListener="#{admAlgodevBean.doBeanRemove()}" immediate="true"/>               
+                <p:commandButton value="#{msg['run']}" rendered="#{admAlgodevBean.bean.requirementId!=null}" action ="#{app.indexBeanNewWin(admAlgodevBean.autorizationUserIdTemp)}" icon="ui-icon-newwin" immediate="true" update=":basePanel"/>                 
+                <div style="width: 250px;position: absolute;top: 0;right: 0;z-index: 100;">
+                    <p:panel binding="#{algoPaletteBind}" id="elementPanel" styleClass="elementPanel" toggleable="true" header="#{msg['elementPallete']}" collapsed="true">
+                        <ui:include src="algodevElementPanel.xhtml"/>
+                    </p:panel>
+                    <p:panel id="elementProperty" styleClass="elementProperty"  toggleable="true" header="#{msg['property']} #{admAlgodevBean.elementSelected.getClass().getSimpleName()}">
+                        <h:panelGroup rendered="#{admAlgodevBean.elementPropertiesSelected.size()>0 or admAlgodevBean.elementSelected.childCount>0 or admAlgodevBean.elementSelected.facetCount>0}">
+
+                            <table style="font-size: 10px; ">
+                                <tr><td style="width: 150px;max-width: 150px;min-width:150px; overflow: hidden;white-space:nowrap;">#{msg['children']}</td><td colspan="2"><p:commandButton immediate="true" icon="ui-icon ui-icon-arrowreturnthick-1-w" onstart="updateElementAux([{name: 'param_id', value: esc('#{admAlgodevBean.elementSelected.getParent().getClientId()}')}]);"/><p:commandButton id="childrenBtn" immediate="true" actionListener="#{admAlgodevBean.setChildrenElementSelected(admAlgodevBean.elementSelected.children)}" value="#{admAlgodevBean.elementSelected.childCount}" onstart="updateChildren();" oncomplete="childrenWv.show();"/></td></tr>                                
+                                <tr><td style="width: 150px;max-width: 150px;min-width:150px; overflow: hidden;white-space:nowrap;">#{msg['facets']}</td><td colspan="2"><p:commandButton immediate="true" icon="ui-icon ui-icon-arrowreturnthick-1-w" onstart="updateElementAux([{name: 'param_id', value: esc('#{admAlgodevBean.elementSelected.getParent().getClientId()}')}]);"/><p:commandButton id="facetsBtn" immediate="true" actionListener="#{admAlgodevBean.setFacetsElementSelected(admAlgodevBean.elementSelected.facets)}" value="#{admAlgodevBean.elementSelected.facetCount}" onstart="updateChildren();" oncomplete="childrenWv.show();"/></td></tr>                                
+                                <c:forEach items="#{admAlgodevBean.elementPropertiesSelected}" var="elementPropertyItem">                                    
+                                    <c:choose>                                        
+                                        <c:when test="#{!elementPropertyItem.key.startsWith('on') and 'required disabled readonly required requiredMessage style styleClass placeholder value'.contains(elementPropertyItem.key)}">
+                                            <tr><td style="width: 150px;max-width: 150px;min-width:150px; overflow: hidden;white-space:nowrap;">#{elementPropertyItem.key}</td><td style="width: 50px;max-width: 50px;min-width: 50px;height:5px;max-height:5px; border:solid 1px; overflow: hidden;white-space:nowrap;">#{elementPropertyItem.value[0]}</td><td><c:if test="#{elementPropertyItem.key == 'value'}"><script>function showPropertyValue() {
+            showPropertyItem({name: '#{elementPropertyItem.key}', value: "#{elementPropertyItem.value[0]}", type: "#{elementPropertyItem.value[1]}"});
+        }</script> </c:if> <a href="javascript:void(0);" onclick='showPropertyItem({name: "#{elementPropertyItem.key}", value: "#{elementPropertyItem.value[0]}", type: "#{elementPropertyItem.value[1]}"});'>...</a></td></tr>
+                                        </c:when>
+                                    </c:choose>
+                                </c:forEach>
+                                <tr><td style="width: 150px;max-width: 150px;min-width:150px; overflow: hidden;white-space:nowrap;">#{msg['advanced']}</td><td colspan="2"><p:commandButton styleClass="advancedProp advancedPropBtn1" immediate="true" icon="ui-icon ui-icon-circle-plus" onclick="$('.advancedProp').show();
+            $(this).hide();
+            $('.advancedPropBtn2').show();"/><p:commandButton styleClass="advancedProp advancedPropBtn2" immediate="true" icon="ui-icon ui-icon-circle-minus" style="display: none;" onclick="$('.advancedProp').hide();
+            $(this).hide();
+            $('.advancedPropBtn1').show();"/></td></tr>                                
+                                <c:forEach items="#{admAlgodevBean.elementPropertiesSelected}" var="elementPropertyItem">                                    
+                                    <c:choose>                                        
+                                        <c:when test="#{!elementPropertyItem.key.startsWith('on') and !'required disabled readonly required requiredMessage style styleClass placeholder value'.contains(elementPropertyItem.key)}">
+                                            <tr class="advancedProp" style="display: none;"><td style="width: 150px;max-width: 150px;min-width:150px; overflow: hidden;white-space:nowrap;">#{elementPropertyItem.key}</td><td style="width: 50px;max-width: 50px;min-width: 50px;height:5px;max-height:5px; border:solid 1px; overflow: hidden;white-space:nowrap;">#{elementPropertyItem.value[0]}</td><td><c:if test="#{elementPropertyItem.key == 'value'}"><script>function showPropertyValue() {
+            showPropertyItem({name: '#{elementPropertyItem.key}', value: "#{elementPropertyItem.value[0]}", type: "#{elementPropertyItem.value[1]}"});
+        }</script> </c:if> <a href="javascript:void(0);" onclick='showPropertyItem({name: "#{elementPropertyItem.key}", value: "#{elementPropertyItem.value[0]}", type: "#{elementPropertyItem.value[1]}"});'>...</a></td></tr>
+                                        </c:when>
+                                    </c:choose>
+                                </c:forEach>                                 
+                                <tr><td style="width: 150px;max-width: 150px;min-width:150px; overflow: hidden;white-space:nowrap;">#{msg['events']}</td><td colspan="2"><p:commandButton styleClass="eventProp eventPropBtn1" immediate="true" icon="ui-icon ui-icon-circle-plus" onclick="$('.eventProp').show();
+            $(this).hide();
+            $('.eventPropBtn2').show();"/><p:commandButton styleClass="eventProp eventPropBtn2" immediate="true" icon="ui-icon ui-icon-circle-minus" style="display: none;" onclick="$('.eventProp').hide();
+            $(this).hide();
+            $('.eventPropBtn1').show();"/></td></tr>                                
+                                <c:forEach items="#{admAlgodevBean.elementPropertiesSelected}" var="elementPropertyItem">                                    
+                                    <c:choose>                                        
+                                        <c:when test="#{elementPropertyItem.key.startsWith('on')}">
+                                            <tr class="eventProp" style="display: none;"><td style="width: 150px;max-width: 150px;min-width:150px; overflow: hidden;white-space:nowrap;">#{elementPropertyItem.key}</td><td style="width: 50px;max-width: 50px;min-width: 50px;height:5px;max-height:5px; border:solid 1px; overflow: hidden;white-space:nowrap;">#{elementPropertyItem.value[0]}</td><td><c:if test="#{elementPropertyItem.key == 'value'}"><script>function showPropertyValue() {
+            showPropertyItem({name: '#{elementPropertyItem.key}', value: "#{elementPropertyItem.value[0]}", type: "#{elementPropertyItem.value[1]}"});
+        }</script> </c:if> <a href="javascript:void(0);" onclick='showPropertyItem({name: "#{elementPropertyItem.key}", value: "#{baseBean.encodeHtml(elementPropertyItem.value[0])}", type: "#{elementPropertyItem.value[1]}"});'>...</a></td></tr>
+                                        </c:when>
+                                    </c:choose>
+                                </c:forEach>                                
+                            </table>
+                        </h:panelGroup>
+                    </p:panel>                
+                </div> <br/><br/>
+            </h:panelGroup>
+        </h:panelGroup>
+        <p:overlayPanel  appendToBody="true" for="childrenBtn" showEvent="complete" hideEffect="fade" widgetVar="childrenWv" dynamic="false" at="right bottom" my="right bottom" > 
+            <p:orderList styleClass="customList" id="customList" value="#{admAlgodevBean.childrenElementSelected}" converter="ComponentConverter" var="child"  
+                         itemValue="#{child}" controlsLocation="left">  
+                <f:facet name="caption">#{msg['components']}</f:facet>  
+                <p:column style="width:95%;">  
+                    <p:commandLink value="#{child.getId()} - #{child.getClass().getSimpleName()}" immediate="true" onstart="currentChild = esc('#{child.getClientId()}');" ondblclick="updateElementJs([{name: 'param_id', value: currentChild}]);
+            currentEl = esc('#{child.getClientId()}');
+            cancelEventOrderList = true;
+            childrenWv.hide();" onmousedown="createEventOrderList();"/>
+                </p:column>  
+            </p:orderList>    
+            <p:remoteCommand name="processChildren" immediate="true" onstart="processChildrenStart();" oncomplete="updateCurrentForm();"/>
+            <p:remoteCommand name="processChildrenStart" process="customList" partialSubmit="true" update="childrenBtn" immediate="true"  oncomplete="updateCurrentForm();"/>                
+            <p:commandButton value="#{msg['copy']}" immediate="true" onclick="onDropComponent([{name: 'elementModelId', value: currentChild}, {name: 'elementContainerId', value: '#{child.getParent().getClientId()}'}, {name: 'param_action', value: 'add'}]);"  oncomplete="updateChildren();updateCurrentForm();"/>
+            <p:commandButton value="#{msg['exclude']}" immediate="true" onclick="removeComponent([{name: 'param_id', value: currentChild}]);" oncomplete="updateChildren();updateCurrentForm();"/>
+            <p:commandButton value="#{msg['open']}" immediate="true" onstart="updateElementJs([{name: 'param_id', value: currentChild}]);" oncomplete="currentEl=currentChild;childrenWv.hide();"/>
+            <p:remoteCommand update="customList" name="updateChildren" immediate="true"/>
+        </p:overlayPanel> 
+        <p:remoteCommand name="updateElementProperty" immediate="true" update="@(.elementProperty)"/>
+        <p:remoteCommand name="updateProjectProperty" immediate="true" update="@(.projectProperty)"/>
+        <p:remoteCommand name="updateElementJs" actionListener="#{admAlgodevBean.updateElement()}" immediate="true" update="@(.elementProperty)" oncomplete="updateElementProperty();">
+        </p:remoteCommand>
+
+        <!--p:hotkey bind="ctrl+shift+right" oncomplete="positionChange('left',-2)"/>  
+        <p:hotkey bind="ctrl+shift+top" oncomplete="positionChange('top',+2)"/>  
+        <p:hotkey bind="ctrl+shift+botton" oncomplete="positionChange('top',-2)"/-->  
+        <script type="text/javascript"> /* <![CDATA[ */
+        var currentEl = null;
+        var currentChild = null;
+        var cancelEventOrderList = false;
+        function createEventOrderList() {
+            cancelEventOrderList = false;
+            var func = 'mouseup.eventOrderList';
+            $('.customList').off(func).on(func, function(event) {
+                //event.preventDefault();
+                eventOrderListTimeout = window.setTimeout(function() {
+                    if (!cancelEventOrderList) {
+                        processChildren();
+                    }
+                }, 1000);
+            });
+
+        }
+        function supendEventOrderList() {
+            window.setTimeout(function() {
+                window.clearTimeout(eventOrderListTimeout);
+            }, 500);
+        }
+        function prepareUpdateMenu() {
+            window.setTimeout(function() {
+                updateMenu();
+            }, 5000);
+        }
+        function confirmAction(action) {
+            showConfirm('Você irá excluir permanentemente este registro. Deseja continuar?', 'Confirmação', function(bool) {
+                //alert(bool);
+                if (bool) {
+                    action();
+                }
+            });
+            return false;
+        }
+        /* ]]> */
+        </script>
+        <!--p:hotkey bind="r" onsuccess="positionChange('left',+2);"/-->  
+        <p:remoteCommand name="cleanUpApp" immediate="true" actionListener="#{admAlgodevBean.cleanUpApp()}" oncomplete="updateCurrentForm();"/>                 
+        <p:remoteCommand name="clearContainerPage" immediate="true" actionListener="#{admAlgodevBean.clearContainerPage()}" oncomplete="updateCurrentForm();"/>                         
+    </h:form>
+    <h:form binding="#{selectBeanForm}">
+        <p:dialog widgetVar="openProjectDlg" styleClass="openProjectDlg" modal="true" dynamic="true" closable="false" style="height: 483px;max-height: 483px;min-height: 483px;  width: 758px;max-width: 758px;min-width: 758px;" resizable="false">
+            <f:facet name="header">
+                <h:panelGroup style="display: inline-block;width: 700px;" > <h:outputText value="#{msg['selectProject']}"/><span class="ui-state-highlight" style="display: inline-block;float:right;"><h:commandLink id="helpProj" style="float:right;" styleClass="ui-icon ui-icon-help" ></h:commandLink></span></h:panelGroup>
+            </f:facet>            
+            <p:dataTable value="#{admAlgodevBean.beanList}" var="item" selection="#{admAlgodevBean.bean}" selectionMode="single" rowKey="#{item.requirementId}" scrollable="true" scrollHeight="380" scrollWidth="700" tableStyle="width:680px;" style="width: 720px;">
+                <p:column width="40%">  
+                    <f:facet name="header">  
+                        <h:outputText value="#{msg['name']}" />  
+                    </f:facet>  
+                    <h:outputText value="#{item.requirementName}" />                      
+                </p:column>  
+                <p:column width="60%">  
+                    <f:facet name="header">  
+                        <h:outputText value="#{msg['description']}" />  
+                    </f:facet>  
+                    <h:outputText value="#{item.service.description}" />                      
+                </p:column>                 
+                <p:ajax event="rowSelect" process="@(.openProjectDlg)" update="@(.openProjectBtn)"/>
+            </p:dataTable>            
+            <p:commandButton value="#{msg['open']}" styleClass="openProjectBtn" process="@(.openProjectDlg)" update="@this" oncomplete="#{admAlgodevBean.bean.requirementId!=null?'openProject()':''}"/>         
+            <p:commandButton value="#{msg['new']}" action="#{admAlgodevBean.doBeanNew()}" update="@(.openProjectDlg)" onstart="(!$('.openConstructor').is(':checked')?'':prepareConfigDlg.show());$('#selectProjectDiv').html('');updateCurrentConteiner();" oncomplete="openProjectDlg.hide();updateCurrentForm();"/>                     
+            <input type="checkbox" value="openConstructor" class="openConstructor" checked="true"/>Usar o construtor para guiar seus passos no novo projeto.
+            <p:commandButton value="#{msg['cancel']}" onstart="openProjectDlg.hide();tabViewWv.remove(tabViewWv.getActiveIndex())" actionListener="#{baseBean.onClose}" style="float:right;"/>         
+            <p:remoteCommand name="openProject"  action="#{admAlgodevBean.doBeanForm()}" update="@(.openProjectDlg)" onstart="$('#projectPropertyDiv').html('');updateCurrentConteiner();" oncomplete="openProjectDlg.hide();updateProjectProperty();updateCurrentForm();"/>
+        </p:dialog>      
+        <p:tooltip showEffect="clip" hideEffect="explode" for="helpProj">            
+            <h:outputText value="Selecione um projeto existente e clique em 'Abrir' ou clique em 'Novo' para criar seu próprio projeto." escape="false" /><br />        
+        </p:tooltip>         
+        <p:dialog widgetVar="createProjectDlg" styleClass="openProjectDlg" header="Tipo de Projeto" modal="true" dynamic="true" closable="false" style="height: 283px;max-height: 283px;min-height: 283px;  width: 558px;max-width: 558px;min-width: 558px;" resizable="false">
+            <h:outputText value="Informe o tipo do projeto:"/>
+            <br/><br/>
+            <p:commandButton style="width: 500px;" value="Criar um sistema usando o construtor." icon="ui-icon-newwin" onclick="prepareConfigDlg.show();
+            createProjectDlg.hide();" immediate="true"/>  
+            <br/>
+            <h:outputText value="Ele guiará seus passos e criará um sistema seguindo o modelo padrão."/>
+            <br/><br/>
+            <p:commandButton style="width: 500px;" value="Criar um sistema à mão livre."  icon="ui-icon-pencil" onclick="createProjectDlg.hide();" immediate="true"/>         
+            <br/>
+            <h:outputText value="Arraste e solte todos os elementos necessários para construir o sistema."/>
+        </p:dialog>          
+    </h:form>   
+    <h:form binding="#{createProjectForm}" styleClass="openProjectDlg">
+        <ui:include src="algodevExpression.xhtml"/>
+        <p:dialog dynamic="true" widgetVar="prepareConfigDlg" visible="false" header="#{msg['projectConfiguration']}" closable="true" style="height: 883px;max-height: 883px;min-height: 483px;  width: 988px;max-width: 988px;" resizable="false">         
+            <p:tabView id="tabViewConfig" styleClass="tabViewConfig" activeIndex="#{admAlgodevBean.actualConstructorTabIndex}" widgetVar="prepareConfigTabView" style="width: 850px;max-width: 850px;min-width: 850px;">
+                <ui:include src="algodevProject.xhtml"></ui:include>      
+            </p:tabView>
+        </p:dialog>                
+    </h:form> 
+    <ui:include src="algodevConfigField.xhtml"></ui:include>   
+    <script>
+        cleanUpApp();
+        #{admAlgodevBean.bean.requirementId!=null?'':'openProjectDlg.show()'};
+
+        function nextPrepareConfigTab() {
+            prepareConfigTabView.select(prepareConfigTabView.getActiveIndex() + 1);
+        }
+        function prevPrepareConfigTab() {
+            prepareConfigTabView.select(prepareConfigTabView.getActiveIndex() - 1);
+        }
+        function dropByWizDataList() {
+            onDropComponent([{name: 'datalist', value: true}, {name: 'elementModelId', value: '#{dataTableElement.getClientId()}'}, {name: 'elementContainerId', value: '#{algoContainerBind.getClientId()}'}]);
+        }
+        function dropByWizDataListForm() {
+            onDropComponent([{name: 'datalist', value: true}, {name: 'dataform', value: true}, {name: 'param_action', value: 'new'}, {name: 'elementContainerId', value: '#{algoContainerBind.getClientId()}'}]);
+        }
+        function dropByWizDataGrid() {
+            onDropComponent([{name: 'datagrid', value: true}, {name: 'elementContainerId', value: '#{algoContainerBind.getClientId()}'}]);
+        }
+    </script>
+</html>

@@ -1,0 +1,241 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:form style="height: 40px;">
+        <script>
+            var menuUpdate = 0;
+        </script>
+        <div class="barratop-index ui-state-active" style="width: 99%;float: right;margin-left: 90px;">
+            <!--p:commandButton id="dynaButton" value="Inicial" type="button"/--> 
+            <div style="float: right;width: 100%;height: 30px;position: relative;margin-right: 40px;margin-left: 90px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 120px;">
+
+                        </td>
+                        <td>
+                            <div style="height: 30px;display: inline-block;top:20%;"><h:outputText style="float:left;font-size: 16px;vertical-align: middle;top:20%;position: absolute;" class="ui-state-active text-ui" value="#{baseBean.title}"/></div>                            
+                            <div style="float:right;height: 30px;display: inline-block;top:20%;">
+                                <div style="position: relative;margin-right: 5px;height: 30px;display: inline-block;top:20%;" class="ui-state-active text-ui">
+                                    <span  class="ui-state-active text-ui"> #{msg['hello']}, #{gerLoginBean.user.name}! </span>  <span  class="ui-state-active text-ui"><h:outputText rendered="#{gerLoginBean.user.contract!=null}" value=" | #{msg['suport']}: #{gerLoginBean.user.contract.representative.contact}"/></span>
+                                </div>                    
+                            </div>                            
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div> 
+        <p:commandButton rendered="true" id="configBtn" styleClass="ui-state-highlight" icon="ui-icon ui-icon-home" style="left: 0px;position: absolute;padding: 0px;margin: 0px;margin-left: 15px;top:0;margin-top: 0px;padding-top: 5px;height: 30px;"/>
+        <p:graphicImage style="right: 0px;position: absolute;padding: 0px;margin: 0px;margin-right: 15px;top:0;margin-top: 0px;padding-top: 0px;height: 38px;" value="#{gerLoginBean.user.contract.systemLogo}" />          
+        <p:overlayPanel for="configBtn" showEvent="mouseoverx" dismissable="true" widgetVar="configMenuMsgWv" appendToBody="true" hideEffect="blind" >
+            <h:outputLabel value="Menu Atualizado! Clique aqui para acessar."/>
+        </p:overlayPanel>
+        <p:overlayPanel  styleClass="startMenu" for="configBtn" onShow="actionMenuItemHandle();" showEvent="mouseover" dismissable="true" widgetVar="configMenuWv" appendToBody="true" hideEffect="blind" >
+            <div>
+                <table style="height: 100%;">
+                    <tr>
+                        <td onkeyup="//configMenuWv.hide();" style="height: 100%;position: relative;vertical-align: top;">
+                            <table style="height: 100%;max-height: 400px;">
+                                <tr style="height: 90%;">
+                                    <td style="vertical-align: top;">
+                                        <p:menu>
+                                            <p:menuitem value="Página Inicial" action='#{baseBean.main()}' update=":basePanel" styleClass="actionMenuItem"/>  
+                                            <p:separator /> 
+                                            <p:menuitem value="Personalizar"  onclick="configDlg.show();" styleClass="actionMenuItem"/>  
+                                            <p:separator /> 
+                                            <p:menuitem value="Atualizar" ajax="false" url="/f/index.xhtml" styleClass="actionMenuItem"/>                                               
+                                        </p:menu>                                    
+                                    </td>
+                                </tr>
+                                <tr style="height: 10%;">
+                                    <td>
+                                        <p:menu style="bottom: 0px;vertical-align: bottom;">
+                                            <p:menuitem  icon="ui-icon ui-icon-power" value="Sair" action="#{gerLoginBean.doLogout()}" ajax="false" update=":basePanel" styleClass="actionMenuItem"/>  
+                                        </p:menu>                                                                                                  
+                                    </td>                                
+                                </tr>
+                            </table>
+                        </td>                                
+                        <td onkeyup="//configMenuWv.hide();">
+                            <h:panelGroup>                                
+                                <p:tieredMenu  widgetVar="startMenuWv" model="#{gerLoginBean.model}" autoDisplay="true" style="width: 200px;" >
+
+                                </p:tieredMenu>
+                                <script>
+            //alert('oi1');
+            if (menuUpdate > 0) {
+                //alert('oi2');
+                configMenuMsgWv.show();
+                window.setTimeout(function() {
+                    configMenuMsgWv.hide()
+                }, 5000);
+            } else {
+                //alert('oi3');
+                menuUpdate = 1;
+            }
+                                </script>
+                            </h:panelGroup>
+                        </td>            
+                    </tr>
+                </table>
+            </div>
+        </p:overlayPanel>
+        <hr/>
+        <p:dialog widgetVar="configDlg" header="#{msg['configuration']}" dynamic="true" width="400px" height="200px" resizable="false">
+            <h:panelGrid columns="2" cellpadding="10">    
+                <h:outputText value="#{msg['theme']}:" />  
+                <p:selectOneMenu panelStyle="width:250px"  
+                                 effect="fade" var="p" style="width:160px"  filter="true" filterMatchMode="startsWith" value="#{themeSwitcherBean.theme}">  
+                    <f:selectItem itemLabel="#{msg['choose_theme']}" itemValue="" />  
+                    <f:selectItems value="#{themeSwitcherBean.themeList}" var="theme"/>  
+
+                    <p:column>  
+                        <p:graphicImage url="resources/images/themes/#{p.image}.png" width="40" height="50"/>  
+                    </p:column>  
+
+                    <p:column>  
+                        #{p.name}  
+                    </p:column>  
+                    <!--f:ajax render="@all" /-->
+                </p:selectOneMenu >  
+                #{msg['language']} : 
+                <p:selectOneMenu value="#{languageBean.localeCode}"
+                                 valueChangeListener="#{languageBean.countryLocaleCodeChanged}">
+                    <f:selectItem itemValue="#{msg.select}"/>
+                    <f:selectItems value="#{languageBean.countriesInMap}" var="item" itemValue="#{item.value}" /> 
+                    <!--f:ajax render="@all"/-->
+                </p:selectOneMenu>                 
+            </h:panelGrid>  
+            <p:commandButton value="Aplicar" ajax="false" update="@form"/>
+            <p:separator />              
+        </p:dialog>
+        <!--p:menuButton value="Options"--> 
+
+        <p:menubar styleClass="startMenu" rendered="false"  model="#{gerLoginBean.model}" autoDisplay="true" widgetVar="startMenu" style="width: 80px;height: 20px;margin-left: 5px;position: absolute;padding: 0px;margin: 0px;top:0;margin-top: 0px;padding-top: 7px;">  
+            <!--p:menu overlay="true" trigger="dynaButton" my="left bottom" at="left bottom"-->
+            <!--f:facet name="options">  
+                <p:inputText style="margin-right:10px"/>  
+                <p:commandButton value="Logout" icon="ui-icon-extlink" action=""/>  
+            </f:facet--> 
+            <!--/p:menu-->
+
+            <p:submenu label="InicialX" icon="ui-icon-home" styleClass="botaoMenu" style="height: 20px;top:0;" rendered="false">   
+                <p:menuitem value="Abrir"  action='#{baseBean.main()}'  update=":basePanel"/>  
+                <p:separator />  
+                <p:submenu label="Cadastro"> 
+                    <p:submenu label="Segurança">  
+                        <p:menuitem value="Usuário" action="views/cadastro/sec/user/userList.xhtml"  update=":basePanel"/>  
+                        <p:menuitem value="Autorização Usuário" action="#{secUserAuthorizationBean.indexBean()}"  update=":basePanel" />                      
+                    </p:submenu>                        
+                    <p:separator />  
+                    <!--p:menuitem value="Departamento" action="#{secUserBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />                  
+                    <p:menuitem value="Funcionário" action="#{funcionarioBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator /-->  
+                    <p:menuitem value="Cliente" action="#{gerClienteBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />  
+                    <p:menuitem value="Fornecedor" action="#{gerFornecedorBean.indexBean()}"  update=":basePanel"/>   
+                    <p:separator />                  
+                    <p:menuitem value="Tipo de Documento" action="#{gerTipoDocumentoBean.indexBean()}"  update=":basePanel"/>                    
+                    <p:separator />                  
+                    <p:menuitem value="Centro de Custo" action="#{centroCustoBean.indexBean()}"  update=":basePanel"/>                   
+                    <p:separator />
+                    <p:submenu label="Suprimentos">  
+                        <p:menuitem value="Categoria do Produto" action="#{stkSupplyCategoryBean.indexBean()}"  update=":basePanel"/>                      
+                        <p:menuitem value="Unidade de Medida" action="#{stkUnitOfMeasureBean.indexBean()}"  update=":basePanel"/>
+                        <p:menuitem value="Marca" action="#{stkBrandBean.indexBean()}"  update=":basePanel"/>
+                        <p:menuitem value="Produto" action="#{stkSupplyItemBean.indexBean()}"  update=":basePanel"/>
+                    </p:submenu>    
+
+                    <p:separator />
+                    <p:menuitem value="CPG - Tipo de Despesa" action="#{tipoDespesaBean.indexBean()}"  update=":basePanel"/>                   
+                    <p:separator />
+                    <p:menuitem value="CRC - Tipo de Receita" action="#{crcTipoReceitaBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />
+                    <p:menuitem value="Obras" action="#{gobObraBean.indexBean()}"  update=":basePanel"/>   
+                    <p:separator />  
+                </p:submenu>
+                <p:submenu label="Financeiro">  
+                    <p:submenu label="Contas a pagar">  
+                        <p:menuitem value="Lançamento Docto" action="#{cpgDocumentoBean.indexBean()}"  update=":basePanel"/>                      
+                    </p:submenu>
+                    <p:separator />  
+                    <p:submenu label="Contas a receber">  
+                        <p:menuitem value="Lançamento Docto" action="#{crcDocumentoBean.indexBean()}"  update=":basePanel"/>                      
+                    </p:submenu>                
+                    <!--p:separator /> 
+                    <p:submenu label="Caixas e Bancos">  
+                        <p:menuitem value="Planej. Orçamentário" action="#{cbcPlanejamentoOrcamentarioBean.indexBean()}"  update=":basePanel"/>                      
+                    </p:submenu-->                 
+                </p:submenu>      
+                <p:submenu label="Suprimentos"> 
+                    <p:submenu label="Estoque">
+                        <p:menuitem value="Entrada" action="#{stkInputDocumentBean.indexBean()}"  update=":basePanel"/> 
+                        <p:menuitem value="Saída" action="#{stkOutputDocumentBean.indexBean()}"  update=":basePanel"/> 
+                    </p:submenu>
+                    <p:separator />  
+                    <p:submenu label="Compra">  
+                        <p:menuitem value="Solicitação" action="#{purSolicitationBean.indexBean()}"  update=":basePanel"/>  
+                        <p:separator />  
+                        <p:menuitem value="Cotação" action="#{purQuotationBean.indexBean()}"  update=":basePanel"/>           
+                        <p:separator />  
+                        <p:menuitem value="Pedido" action="#{purOrderBean.indexBean()}"  update=":basePanel"/>  
+                        <p:separator />  
+                        <p:menuitem value="Aprovação" action="#{purApprovalBean.indexBean()}"  update=":basePanel"/>    
+                        <p:separator />  
+                        <p:menuitem value="Parâmetros" action="#{purParameterBean.indexBean()}"  update=":basePanel"/>                           
+                    </p:submenu>    
+                </p:submenu>   
+                <p:submenu label="Operacional">  
+                    <p:menuitem value="Cronograma de Obras" action="#{grtCronogramaBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />  
+                    <p:menuitem value="Aquisição Imovel" action="#{gobAquisicaoImovelBean.indexBean()}"  update=":basePanel"/>                   
+                </p:submenu>                     
+                <p:submenu label="Relatório">  
+                    <p:menuitem value="Usuário" action="#{secUserBean.indexBean()}"/>  
+                    <p:separator />  
+                    <p:menuitem value="Funcionário" action="#{secUserBean.indexBean()}"/>  
+                    <p:separator />  
+                    <p:menuitem value="Cliente" action="#{secUserBean.indexBean()}"/>  
+                    <p:separator />  
+                    <p:menuitem value="Obras" action="#{secUserBean.indexBean()}"/>   
+                </p:submenu>            
+                <p:menuitem value="Sair" action="#{gerLoginBean.doLogout()}"/>  
+            </p:submenu>               
+
+        </p:menubar>
+        <style>
+            .botaoMenu > a .ui-icon-triangle-1-e{
+                background-position: -64px -16px;            
+            }           
+        </style>
+        <script>
+            function actionMenuItemHandle() {
+
+                var cTarget = null;
+                var func = 'mousedown.actionMenuItem';
+                $('.actionMenuItem').off(func).on(func, function(event) {
+                    //configMenuWv.cfg.dismissable = false;
+                    $(event.currentTarget).click();
+                    cTarget = event.currentTarget;
+                    configMenuWv.hide();
+                    //alert('oi2');
+
+                });
+                var func2 = 'click.actionMenuItem';
+                $('.actionMenuItem').off(func2).on(func2, function(event) {
+                    //configMenuWv.cfg.dismissable = true;
+                    //alert('oi1');
+
+                });
+            }
+        </script>
+        <!--/p:menuButton-->         
+        <p:poll id="updateActiveSession" interval="60"   
+                listener="#{gerLoginBean.updateActiveSession}" />     
+    </h:form>
+</html>

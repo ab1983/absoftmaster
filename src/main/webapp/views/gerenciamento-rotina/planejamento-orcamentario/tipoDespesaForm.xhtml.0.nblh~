@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns:ui="http://java.sun.com/jsf/facelets"
+                template="#{request.contextPath}/../base.xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui">
+    <script>     
+    </script>
+    <ui:define name="subtitle">
+        Cadastro | Tipo Despesa
+    </ui:define>
+    <!--ui:define name="content"-->
+        <h:form id="form">    
+            <p:commandButton  value="Listar" icon="ui-icon-search" action="#{tipoDespesaBean.doBeanList()}"  immediate="true"  update=":mainPanel"> 
+            </p:commandButton>
+            <p:panel header="Cadastro Usuário" style="width: 500px;">
+                <h:panelGrid columns="2">
+                    <h:outputText value="Código"/>
+                    <p:inputText value="#{tipoDespesaBean.bean.codigo}" required="true" requiredMessage="Código obrigatório."/>
+                    <h:outputText value="Descrição"/>
+                    <p:inputText value="#{tipoDespesaBean.bean.descricao}" required="true" requiredMessage="Descrição obrigatório."/>
+                    <h:outputText value="Classificador"/>
+                    <p:inputMask mask="999.999.999.999" value="#{tipoDespesaBean.bean.classificador}" required="true" requiredMessage="Classificador obrigatório."/>                
+                </h:panelGrid>
+                <p:commandButton value="Gravar" action="#{tipoDespesaBean.doBeanSave()}"  update=":mainPanel"></p:commandButton>
+            </p:panel>
+        </h:form>
+        <h:messages style="color:red;"/>
+    <!--/ui:define-->
+
+</html>

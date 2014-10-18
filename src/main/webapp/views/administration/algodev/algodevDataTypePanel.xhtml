@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight"></h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.STRING}</h:panelGroup> 
+    </div>  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('_');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">_</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.LONGSTRING}</h:panelGroup> 
+    </div>                  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('%');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">%</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.DATE}</h:panelGroup> 
+    </div>   
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('@');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">@</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.TIME}</h:panelGroup> 
+    </div>                     
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('#');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">#</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.INTEGER}</h:panelGroup> 
+    </div>  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('$');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">$</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.FLOAT}</h:panelGroup> 
+    </div>   
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('!');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">!</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.BOOLEAN}</h:panelGroup> 
+    </div>  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('*');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">*</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.FILE}</h:panelGroup> 
+    </div>  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('`');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">`</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.ONEEXTERNALOBJECT}</h:panelGroup> 
+    </div>  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('``');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">``</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.MANYEXTERNALOBJECT}</h:panelGroup> 
+    </div>  
+    <div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="position: relative;width: 235px;text-align: center;vertical-align: middle;" onclick="updateServiceDescription('´´');">
+        <h:panelGroup layout="block" style="display: table-cell;width: 15px;height: 25px;vertical-align: middle;display: table-cell;" styleClass="ui-state-highlight">´´</h:panelGroup>
+        <h:panelGroup layout="block" style="display: table-cell;width: 230px;height: 25px;text-align: left;vertical-align: middle;display: table-cell;">#{msg.MANYINTERNALOBJECT}</h:panelGroup> 
+    </div>         
+    <script>
+        function updateServiceDescription(token) {
+            var nome;
+            do {
+                nome = prompt("Qual o nome do campo que será adicionado?");
+            } while (nome === "");
+            if (nome !== null) {
+                var prefix = '';
+                if (serviceDescriptionWv.jq.val() !== '') {
+                    var lastChar = serviceDescriptionWv.jq.val().length > 1 ? serviceDescriptionWv.jq.val().substring(serviceDescriptionWv.jq.val().length - 2, serviceDescriptionWv.jq.val().length) : '';
+                    //alert(lastChar);
+                    if (lastChar.indexOf(',') === -1) {
+                        prefix = ',';
+                    }
+                }
+                serviceDescriptionWv.jq.val(serviceDescriptionWv.jq.val() + prefix + token + nome.toUpperCase());
+            }
+        }
+
+    </script>
+</html>

@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{centroCustoBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Cadastro Centro de Custo" style="width: 500px;">
+        <h:panelGrid columns="2">
+            <h:outputText value="Código"/>
+            <p:inputText value="#{centroCustoBean.bean.seqnum}"  readonly="true" required="true" requiredMessage="Código #{msg.required}."/>
+            <h:outputText value="Descrição"/>
+            <p:inputText value="#{centroCustoBean.bean.descricao}" required="true" requiredMessage="Descrição #{msg.required}."/>
+            <h:outputText value="Classificador"/>
+            <p:inputMask mask="#{msg.classifierCostCenterMask}" value="#{centroCustoBean.bean.classificador}" required="true" requiredMessage="Classificador #{msg.required}."/>                
+        </h:panelGrid>
+        <p:commandButton value="Gravar"  action="#{centroCustoBean.doBeanSave()}" update="@form"></p:commandButton>
+    </p:panel>
+    
+</html>

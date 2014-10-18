@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <p:commandButton value="Listar" action="#{gobAquisicaoImovelBean.doBeanList()}" icon="ui-icon-search" immediate="true"   update="@form"/>   
+    <p:panel header="Etapas Aquisição Imóvel">            
+        <p:wizard widgetVar="wiz"
+                  flowListener="#{gobAquisicaoImovelBean.onFlowProcess}" backLabel="Anterior" nextLabel="Próximo" style="width: 1000px;" binding="#{gobAquisicaoImovelBeanWiz}">
+            <p:tab id="imovelWiz" title="Escolher Imóvel">
+                <ui:include src="selecaoImovel.xhtml"></ui:include>
+            </p:tab>
+
+            <p:tab id="clienteWiz" title="Selecionar Cliente">
+                <ui:include src="selecaoCliente.xhtml"></ui:include>
+            </p:tab>
+
+            <p:tab id="checklistWiz" title="Realizar Check-list">
+                <ui:include src="realizaChecklist.xhtml"></ui:include>
+            </p:tab>
+
+            <p:tab id="complementoWiz" title="Complementar Cliente">                    
+                <ui:include src="complementoCliente.xhtml"></ui:include>
+            </p:tab>
+            <p:tab id="statusWiz" title="Verificar Status">
+                <ui:include src="verificaStatus.xhtml"></ui:include>
+            </p:tab>            
+        </p:wizard>
+    </p:panel>
+</html>

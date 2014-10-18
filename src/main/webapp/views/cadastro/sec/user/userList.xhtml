@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <h:form prependId="false">
+        <div id="usuarioPanel">
+            <h:panelGroup id="usuarioFormPanel" layout="block" rendered="#{secUserBean.formRendered}">
+                <ui:include src="userForm.xhtml"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup id="usuarioListPanel" layout="block" rendered="#{!secUserBean.formRendered}">
+                <p:commandButton value="Incluir" action ="#{secUserBean.doBeanForm()}" icon="ui-icon-document" immediate="true" update="@form"/>       
+                <p:commandButton value="Excluir" rendered="false" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="Lista Usuário" style="width: 800px;" id="listaUsuarioPanel" widgetVar="listaUsuarioPanel">
+                    <p:dataTable var="item" value="#{secUserBean.beanList}">
+                        <p:column>
+                            <f:facet name="header">
+                                Nome
+                            </f:facet>
+                            #{item.name}
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                E-mail
+                            </f:facet>
+                            #{item.email}
+                        </p:column>
+                        <p:column style="text-align:center">
+                            <f:facet name="header">
+                                Ação
+                            </f:facet>
+                            <p:commandLink action="#{secUserBean.doBeanForm()}" value="Editar" immediate="true" update="@form">
+                                <f:setPropertyActionListener target="#{secUserBean.bean}" value="#{item}"/>
+                            </p:commandLink> | 
+                            <p:commandLink action="#{secUserBean.doBeanRemove()}" value="Excluir" immediate="true"   update="@form">
+                                <f:setPropertyActionListener target="#{secUserBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </p:column>                    
+                    </p:dataTable>
+                </p:panel>
+            </h:panelGroup>        
+        </div>
+    </h:form>
+</html>

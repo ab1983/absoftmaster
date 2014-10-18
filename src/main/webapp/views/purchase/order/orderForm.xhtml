@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      > 
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{purOrderBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Cadastro Pedido" style="width: 900px;">
+        <p:focus for="fornecedorIdpurOrderBean" rendered="#{purOrderBean.bean.fornecedor == null}"/>                
+        <p:focus for="supplyItemIdSelOrderBean" rendered="#{purOrderBean.bean.fornecedor != null}"/>   
+        <h:panelGrid columns="4">
+            <h:outputText value="Número:"/>
+            <p:inputText value="#{purOrderBean.bean.number}" required="true" requiredMessage="Número #{msg.required}."/>
+            <h:outputText value="Data:"/>
+            <p:inputText value="#{purOrderBean.bean.dateRegistration}" required="true" requiredMessage="Data #{msg.required}." readonly="true">
+                <f:convertDateTime pattern="dd/MM/yyyy"/>              
+            </p:inputText>        
+            <h:outputText value="Fornecedor:"/>
+            <p:selectOneMenu id="fornecedorIdpurOrderBean" value="#{purOrderBean.bean.fornecedor}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Fornecedor #{msg.required}."  converter="#{baseBean.getConverter(gerFornecedorBean.findBeanList(), null, 'fornecedorId')}">
+                <f:selectItem itemLabel="Selecione"/>
+                <f:selectItems  value="#{gerFornecedorBean.findBeanList()}" var="item" itemLabel="#{item.razaoSocial}-#{item.cpfCnpj}" itemValue="#{item}"/>
+            </p:selectOneMenu>                 
+            <p:column>
+                <h:outputText value="Observação:"/>                        
+            </p:column>
+            <p:column colspan="3">
+                <p:inputTextarea cols="50" autoResize="false" style="max-height: 50px;max-width: 300px;min-height: 50px;min-width: 300px;" id="purOrderObservation" value="#{purOrderBean.bean.observation}"/>                        
+            </p:column>
+        </h:panelGrid>
+        <p:fieldset style="width: 95%;">
+            <f:facet name="legend">
+                Detalhes
+            </f:facet>
+
+            <h:panelGrid id="itemPanelpurOrderBean" columns="8" styleClass="itemPanel">
+                <h:outputText value="Item Suprimento"/>
+                <h:outputText value="UN"/>
+                <h:outputText value="Quantidade"/>
+                <h:outputText value="Preço Unitário"/>
+                <h:outputText value="Prazo Entrega"/>
+                <h:outputText value="Observação"/>
+                <h:outputText value=""/>
+                <h:outputText value=""/>
+                <h:panelGroup>
+                    <p:selectOneMenu  id="supplyItemIdSelOrderBean" widgetVar="supplyItemIdWv" value="#{purOrderBean.supplyItemId}" filter="true" filterMatchMode="contains" style="width: 150px;">
+                        <f:selectItem itemLabel="#{msg.select}" itemValue="0"/>
+                        <f:selectItems  value="#{stkSupplyItemBean.beanList}" var="si" itemLabel="#{si.description}" itemValue="#{si.supplyItemId}"/>
+                        <p:ajax listener="#{purOrderBean.updateSupplyItem()}" update="unitOfMeasureOrderBean"></p:ajax>
+                    </p:selectOneMenu> 
+                    <p:commandButton action ="#{stkSupplyItemBean.indexBeanNewWin()}" icon="ui-icon-newwin" immediate="true" update=":basePanel" style="float:right;"/> 
+                </h:panelGroup>
+                <h:outputText id="unitOfMeasureOrderBean" value="#{purOrderBean.orderItem.supplyItem.unitOfMeasure.abbreviation}"/>
+                <p:inputText id="purOrderBeanorderItemamount" widgetVar="amountWv" styleClass="maskMoney item-form" value="#{purOrderBean.orderItem.amount}">
+                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                </p:inputText>
+                <p:inputText id="purOrderBeanorderItemunitPrice" widgetVar="unitPriceWv" styleClass="maskMoney item-form" value="#{purOrderBean.orderItem.price}">
+                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                </p:inputText>     
+                <p:calendar locale="br" value="#{purOrderBean.orderItem.expectedDeliveryDate}" pattern="dd/MM/yyyy" id="expectedDeliveryDate" styleClass="dateMask item-form" showOn="button"/>                                                         
+                <p:inputText id="purOrderBeanorderItemobservation"  value="#{purOrderBean.orderItem.observation}"> 
+                </p:inputText>                
+                <p:commandButton icon="ui-icon-check" action="#{purOrderBean.addItem()}"  update="@form" oncomplete="supplyItemIdWv.focus()"></p:commandButton><p:commandButton immediate="true" icon="ui-icon-close" actionListener="#{purOrderBean.cancelEditItem(solicitationForm.id)}" update="@form"></p:commandButton>
+            </h:panelGrid>
+            <p:dataTable emptyMessage="Nenhum item encontrado." var="orderItem" value="#{purOrderBean.bean.orderItemList}" scrollable="true" scrollHeight="60">
+                <p:column headerText="Item de Suprimento">  
+                    #{orderItem.supplyItem.description}  
+                </p:column>  
+                <p:column headerText="Quantidade">  
+                    <h:outputText value="#{orderItem.amount}">  
+                        <f:convertNumber type="number" pattern="#,##0.00"/>  
+                    </h:outputText>                                                
+                </p:column>  
+                <p:column headerText="Observação">  
+                    #{orderItem.observation} 
+                </p:column>                 
+                <p:column headerText="Ação" style="text-align: center;">  
+                    <p:commandLink action="#{purOrderBean.startEditItem(orderForm.id)}"  value="Editar" immediate="true" update="@(.itemPanel)">
+                        <f:setPropertyActionListener target="#{purOrderBean.orderItem}" value="#{orderItem}"/> 
+                        <!--pe:resetInput for=":formMain:itemPanel" /--> 
+                        <!--p:resetInput target=":formMain:itemPanel"/-->
+                    </p:commandLink> |
+                    <p:commandLink action="#{purOrderBean.removeItem()}" value="Excluir" immediate="true"  update="@form">
+                        <f:setPropertyActionListener target="#{purOrderBean.orderItem}" value="#{orderItem}"/>
+                    </p:commandLink>  
+                </p:column>                     
+            </p:dataTable>
+        </p:fieldset>
+        <p:commandButton value="Gravar"   action="#{purOrderBean.doBeanSave()}" update="@form">
+        </p:commandButton>
+    </p:panel>
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');     
+            $(".maskMoney").maskMoney({
+                thousands:'.',
+                decimal:',',
+                precision:2
+            });            
+        });                    
+            
+    </script>
+</html>

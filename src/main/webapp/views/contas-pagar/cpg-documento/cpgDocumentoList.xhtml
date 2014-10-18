@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"> 
+    <h:form binding="#{cpgDocumento}" prependId="false">        
+        <h:panelGroup id="mainPanel2" layout="block">
+            <h:panelGroup id="formPanel2" layout="block" rendered="#{cpgDocumentoBean.formRendered}">
+                <ui:include src="#{cpgDocumentoBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup id="listPanel2" layout="block" rendered="#{!cpgDocumentoBean.formRendered}">
+                <p:commandButton value="Incluir" action ="#{cpgDocumentoBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton value="Excluir" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="Lista Documento CP" style="width: 800px;">
+                    <p:dataTable var="item" value="#{cpgDocumentoBean.beanList}" emptyMessage="#{msg.emptyMessage}">
+                        <p:column>
+                            <f:facet name="header">
+                                Número Documento
+                            </f:facet>
+                            #{item.numeroDocto}
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                Fonecedor
+                            </f:facet>
+                            #{item.gerFornecedor.razaoSocial}
+                        </p:column>                        
+                        <p:column>
+                            <f:facet name="header">
+                                Data Emissão
+                            </f:facet>
+                            <h:outputText value="#{item.dataEmissao}">  
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                            </h:outputText>                                  
+                        </p:column>                        
+                        <p:column>
+                            <f:facet name="header">
+                                Data Vencimento
+                            </f:facet>
+                            <h:outputText value="#{item.dataVencimento}">  
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                            </h:outputText>                                  
+                        </p:column>
+                        <p:column style="text-align: center;">
+                            <f:facet name="header">
+                                Ação
+                            </f:facet>
+                            <p:commandLink action="#{cpgDocumentoBean.doBeanForm()}" value="Editar" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{cpgDocumentoBean.bean}" value="#{item}"/>
+                            </p:commandLink> |
+                            <p:commandLink action="#{cpgDocumentoBean.doBeanRemove()}" value="Excluir" immediate="true"    update="@form">
+                                <f:setPropertyActionListener target="#{cpgDocumentoBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </p:column>                    
+                    </p:dataTable>
+                </p:panel>
+                
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+</html>

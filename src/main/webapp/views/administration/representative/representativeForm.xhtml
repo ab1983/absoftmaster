@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"
+       xmlns:c="http://java.sun.com/jsp/jstl/core">  
+    <p:commandButton  value="#{msg['list']}" icon="ui-icon-search" action="#{admRepresentativeBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:focus for="admrepresentativeUserName"/>
+    <p:panel header="#{msg['registration']} #{msg['representative']}" style="width: 1100px;height: 450px;">  
+        <h:panelGrid columns="3">  
+            <p:fieldset legend="Representante" style="width: 300px;float: left;height: 300px;">
+                <h:panelGrid columns="2">            
+                    <h:outputText value="#{msg.name}:"/>
+                    <p:inputText id="admrepresentativeUserName" value="#{admRepresentativeBean.bean.user.name}" required="true" requiredMessage="#{msg.name} #{msg.required}."/>
+                    <h:outputText value="Login:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.user.login}" required="true" requiredMessage="Login #{msg.required}."/>
+                    <h:outputText value="Password:"/>
+                    <p:password redisplay="true" value="#{admRepresentativeBean.bean.user.password}" required="true" requiredMessage="Password #{msg.required}."/>  
+                    <h:outputText value="Email:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.user.email}" required="true" requiredMessage="Email #{msg.required}."/>
+                    <h:outputText value="#{msg.contact}:"/>
+                    <p:inputMask mask="#{msg.phoneMask}" value="#{admRepresentativeBean.bean.contact}" required="true" requiredMessage="#{msg.contact} #{msg.required}."/>                
+                    <h:outputText value="#{msg.company}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.company}"/>      
+                    <h:outputText value="#{msg.supervisor}:"/>
+                    <p:selectOneMenu  id="supervisoradmRepresentativeBean" widgetVar="supervisoradmRepresentativeBeanWv" value="#{admRepresentativeBean.bean.supervisor}" converter="#{baseBean.getConverter(admRepresentativeBean.supervisorList,null,'representativeId')}" filter="true" filterMatchMode="contains" style="width: 150px;">
+                        <c:if test="#{gerLoginBean.user.boss}">
+                            <f:selectItem itemLabel="#{msg.select}"/>
+                        </c:if>
+                        <f:selectItems  value="#{admRepresentativeBean.supervisorList}" var="r" itemLabel="#{r.user.name}" itemValue="#{r}"/>
+                    </p:selectOneMenu>            
+                </h:panelGrid>        
+            </p:fieldset>
+            <p:fieldset legend="Localização" style="width: 300px;float: right;height: 300px;">
+                <h:panelGrid columns="2">
+                    <h:outputText value="#{msg['postalCode']}:"/>
+                    <p:inputMask mask="#{msg.postalCodeMask}" value="#{admRepresentativeBean.bean.location.postalcode}" required="true" requiredMessage="#{msg['postalCode']} #{msg.required}."/>                                   
+                    <h:outputText value="#{msg['phone']}:"/>
+                    <p:inputMask mask="#{msg.phoneMask}" value="#{admRepresentativeBean.bean.location.phone}" required="true" requiredMessage="#{msg['phone']} #{msg.required}."/>   
+                    <h:outputText value="#{msg['address']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.location.address}" required="true" requiredMessage="#{msg['address']} #{msg.required}."/> 
+                    <h:outputText value="#{msg['number']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.location.number}" required="true" requiredMessage="#{msg['number']} #{msg.required}."/> 
+                    <h:outputText value="#{msg['complement']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.location.complement}"/>                 
+                    <h:outputText value="#{msg['neighborhood']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.location.neighborhood}" required="true" requiredMessage="#{msg['neighborhood']} #{msg.required}."/> 
+                    <h:outputText value="#{msg['city']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.location.city}" required="true" requiredMessage="#{msg['city']} #{msg.required}."/> 
+                    <h:outputText value="#{msg['state']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.location.state}" required="true" requiredMessage="#{msg['state']} #{msg.required}."/>                    
+                </h:panelGrid>
+            </p:fieldset> 
+            <p:fieldset legend="Dados Bancários" style="width: 300px;float: right;height: 300px;">
+                <h:panelGrid columns="2">
+                    <h:outputText value="#{msg['bank']}:"/>
+                    <p:selectOneMenu  value="#{admRepresentativeBean.bean.bankAccount.bank}" converter="#{baseBean.getConverter(gerBankBean.beanList,null,'bankId')}" filter="true" filterMatchMode="contains" style="width: 150px;">
+                        <f:selectItem itemLabel="#{msg.select}"/>
+                        <f:selectItems  value="#{gerBankBean.beanList}" var="r" itemLabel="#{r.name}" itemValue="#{r}"/>
+                    </p:selectOneMenu>                      
+                    <h:outputText value="#{msg['agency']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.bankAccount.agencyBank}" required="true" requiredMessage="#{msg['agency']} #{msg.required}."/>   
+                    <h:outputText value="#{msg['accountType']}:"/>
+                    <p:selectOneMenu  value="#{admRepresentativeBean.bean.bankAccount.accountType}" required="true" requiredMessage="#{msg['accountType']} #{msg.required}." filter="true" filterMatchMode="contains" style="width: 150px;">
+                        <f:selectItems  value="#{admRepresentativeBean.accountTypeList}" var="r" itemLabel="#{msg[r.accountTypeName]}" itemValue="#{r}"/>
+                    </p:selectOneMenu>                     
+                    <h:outputText value="#{msg['accountNumber']}:"/>
+                    <p:inputText value="#{admRepresentativeBean.bean.bankAccount.accountNumber}" required="true" requiredMessage="#{msg['accountNumber']} #{msg.required}."/>                  
+                </h:panelGrid>
+            </p:fieldset>               
+        </h:panelGrid>
+        <p:commandButton value="#{msg['save']}" action="#{admRepresentativeBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+</html>

@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      > 
+    <script>
+        //var allowedArray = new Array();
+        //allowedArray[10] = 'teste';
+    </script>
+    <p:commandButton  value="Autorização Grupo" icon="ui-icon-newwin" action="#{secUserAuthorizationBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Autorização do Usuário" style="width: 900px;">
+        <p:focus for="userIdSel"/>                 
+        <h:panelGrid columns="6">
+            <h:outputText value="Usuário:"/>
+            <h:panelGroup>
+                <p:selectOneMenu  id="userIdSel" widgetVar="userIdWv" value="#{secUserAuthorizationBean.bean.userId}" filter="true" filterMatchMode="contains" style="width: 150px;">
+                    <f:selectItem itemLabel="#{msg.select}"/>
+                    <f:selectItems  value="#{secUserBean.beanList}" var="user" itemLabel="#{user.name}" itemValue="#{user.userId}"/>
+                    <p:ajax listener="#{secUserAuthorizationBean.updateUser()}" update="@form"></p:ajax>
+                </p:selectOneMenu> 
+                <p:commandButton action ="#{secUserBean.indexBeanNewWin(secUserAuthorizationBean.notReadOnly)}" icon="ui-icon-newwin" immediate="true" update=":basePanel" style="float:right;"/> 
+            </h:panelGroup>
+        </h:panelGrid>
+        <p:dataTable  var="userAuthorizationVar" binding="#{userAuthorizationBind}" rowKey="#{userAuthorizationVar.serviceContract.service.serviceId}" id="userAuthorizationFilter" value="#{secUserAuthorizationBean.bean.userAuthorizationList}" emptyMessage="#{msg.emptyMessage}" scrollable="true" scrollHeight="250">  
+            <p:column style="width:100px; text-align: center;" headerText="Autorizado" rendered="false"/>                     
+            <f:facet name="header">
+                Serviços Autorizados
+            </f:facet>
+            <p:column filterBy="#{userAuthorizationVar.serviceContract.service.name}" filterMatchMode="contains" filterStyleClass="ui-icon-search">
+                <f:facet name="header">
+                    Serviço
+                </f:facet>
+                #{userAuthorizationVar.serviceContract.service.name}
+            </p:column>
+            <p:column style="width:100px; text-align: center;white-space: normal;">
+                <f:facet name="header">                  
+                    <p:selectBooleanCheckbox binding="#{changeAllAllowed}" style="float:right;">
+                        <p:ajax listener="#{secUserAuthorizationBean.changeAllAllowed(changeAllAllowed.value)}" update="@form"/>
+                    </p:selectBooleanCheckbox>                       
+                    Permitido
+                </f:facet>
+                <p:selectBooleanCheckbox value="#{userAuthorizationVar.authorization.allowed}">
+                </p:selectBooleanCheckbox>                  
+            </p:column>             
+            <p:column style="width:100px; text-align:center  ;white-space: normal;">
+                <f:facet name="header">
+                    <p:selectBooleanCheckbox binding="#{changeAllReadOnly}" style="float:right;">
+                        <p:ajax listener="#{secUserAuthorizationBean.changeAllReadOnly(changeAllReadOnly.value)}" update="@form"/>
+                    </p:selectBooleanCheckbox>                     
+                    Somente Leitura
+                </f:facet>
+                <p:selectBooleanCheckbox value="#{userAuthorizationVar.authorization.readOnly}" />                  
+            </p:column>   
+            <p:column style="width:100px; text-align: center;white-space: normal;">
+                <f:facet name="header">
+                    Parâmetro Autorização
+                </f:facet>
+                <p:commandLink rendered="#{userAuthorizationVar.serviceContract.service.authorizationAddress!=null}" value="Editar" immediate="true" update="@form" oncomplete="secUserAuthorizationBeanuserAuthorizationWv.show()">
+                    <f:setPropertyActionListener target="#{secUserAuthorizationBean.userAuthorization}" value="#{userAuthorizationVar}"/>
+                </p:commandLink>                
+            </p:column>             
+        </p:dataTable>        
+        <p:commandButton value="Gravar"   action="#{secUserAuthorizationBean.doBeanSave()}" update="@form">
+        </p:commandButton>
+    </p:panel>
+    <p:dialog widgetVar="secUserAuthorizationBeanuserAuthorizationWv"  header="Parâmetro Autorização">
+        <ui:include src="#{secUserAuthorizationBean.userAuthorization.serviceContract.service.authorizationAddress}"/>
+    </p:dialog>
+    <script> 
+        function checkAll(){
+            $('.allowed').each(function(){
+                //var idArray = $( this ).attr('id').split(":");
+                //var id = idArray[idArray.length-1];
+                //var obj = jQuery.parseJSON($(id));
+                alert($( this ).attr('id'));
+                //$.each(id,function(key,value) {alert(key)});
+                //alert(obj.string);
+            });
+        }
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');     
+            $(".maskMoney").maskMoney({
+                thousands:'.',
+                decimal:',',
+                precision:2
+            });            
+        });                    
+            
+    </script>
+</html>

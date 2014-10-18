@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"> 
+        <p:commandButton value="Listar" action="#{gobObraBean.doBeanList()}" icon="ui-icon-search" immediate="true" update="@form" />   
+        <p:panel header="Cadastro Obra" style="width: 600px;" id="cadastroPanel" widgetVar="cadastroPanel">
+            <h:panelGrid columns="4">
+                <h:outputText value="Nome Obra:"/>
+                <p:inputText value="#{gobObraBean.bean.nomeObra}" required="true" requiredMessage="Nome obra #{msg.required}."/>   
+                <h:outputText value="Cliente:"/>
+                <p:selectOneMenu value="#{gobObraBean.bean.clienteId}" required="true" requiredMessage="Tipo pessoa #{msg.required}." style="width:100%;">
+                    <f:selectItems  value="#{gobObraBean.clienteList}" var="item" itemLabel="#{item.nome}" itemValue="#{item.clienteId}"/>
+                </p:selectOneMenu>                                      
+                <h:outputText value="Endereço:"/>
+                <p:inputText value="#{gobObraBean.bean.endereco}" required="true" requiredMessage="Endereço #{msg.required}."/>                      
+                <h:outputText value="Cidade:"/>
+                <p:inputText value="#{gobObraBean.bean.cidade}" required="true" requiredMessage="Cidade #{msg.required}."/>                      
+                <h:outputText value="CEP:"/>
+                <p:inputMask mask="#{msg.postalCodeMask}" value="#{gobObraBean.bean.cep}" required="true" requiredMessage="CEP #{msg.required}."/>                     
+                <h:outputText value="UF:"/>
+                <p:inputText value="#{gobObraBean.bean.uf}" required="true" requiredMessage="UF #{msg.required}."/>                                         
+                <h:outputText value="Unidades:"/>
+                <p:inputText value="#{gobObraBean.bean.unidades}" required="true" requiredMessage="Unidades #{msg.required}."/>    
+                <h:outputText value="Tipo Imóvel:"/>
+                <p:selectOneMenu value="#{gobObraBean.bean.tipoObra}" required="true" requiredMessage="Tipo Obra #{msg.required}." style="width:100%;">
+                    <f:selectItem itemLabel="Apartamento" itemValue="Apartamento"/>
+                    <f:selectItem itemLabel="Casa" itemValue="Casa"/>
+                    <f:selectItem itemLabel="Comercial" itemValue="Comercial"/>
+                </p:selectOneMenu>                   
+            </h:panelGrid>
+            <p:commandButton value="Gravar"  rendered="#{gobObraBean.notReadOnly}"  action="#{gobObraBean.doBeanSave()}" update="@form"></p:commandButton>
+            <p:commandButton value="Gravar e Exibir Unidades" action="#{gobObraBean.doBeanSaveAndShowChildren()}" update="@form"></p:commandButton>
+        </p:panel>
+    
+</html>

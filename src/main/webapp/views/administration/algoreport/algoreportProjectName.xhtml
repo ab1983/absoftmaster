@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:panel id="projectProperty" styleClass="projectProperty" toggleable="false" header="#{msg['projectProperty']}" style="height: 430px;">
+            <table  style="font-size: 10px; ">
+                <tr><td>#{msg['projectName']}:</td><td><p:inputText value="#{algoRep.bean.reportRequirementName}"/> </td></tr>
+                <tr><td>#{msg['serviceName']}:</td><td><p:inputText value="#{algoRep.bean.service.name}"/> </td></tr>
+                <tr><td>#{msg['description']}:</td><td><p:inputTextarea cols="27" value="#{algoRep.bean.service.description}"/> </td></tr>
+                <!--tr><td></td><td><p:inplace editor="true" styleClass="ui-algo-element"><p:inputText value="Inplace" label="text"/></p:inplace></td></tr-->
+            </table>                        
+        <div id="projectPropertyDiv">
+        </div>
+    </p:panel>                    
+</html>

@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:panel id="projectProperty" styleClass="projectProperty" toggleable="false" header="#{msg['projectProperty']}" style="height: 430px;">
+        <div  style="font-size: 10px; ">
+
+            <h:outputText style="font-size: 14px;color:red;" value="#{msg.serviceNameHelp}"/><br/>
+            <p:inputText widgetVar="serviceNameWv" style="width: 450px;"  placeholder="#{msg.serviceNameExample}" value="#{admAlgodevBean.bean.service.name}"/> <br/>
+            <br/>      
+            <h:outputText style="font-size: 14px;color:red;" value="#{msg.serviceDescriptionHelp}"/><br/>
+            <div style="width: 500px;"><ui:include src="algodevDataTypePanel.xhtml"/></div><br/>          
+            <p:inputTextarea widgetVar="serviceDescriptionWv" style="width: 450px;height: 50px;" cols="30"  placeholder="#{msg.serviceDescriptionExample}" value="#{admAlgodevBean.bean.service.description}"/><p:commandButton icon="ui-icon-search" onclick="serviceDescriptionGenerateWv.show()"/> <br/>
+            <br/>    
+            <h:outputText style="font-size: 14px;color:red;" value="#{msg['applicationType']}"/><br/>
+            <p:selectOneMenu widgetVar="appTypeWv" styleClass="appType" value="#{admAlgodevBean.bean.interfaceType}" style="width: 455px !important;" panelStyle="width:450px !important;" >
+                <f:selectItem itemLabel="LISTAGEM E FORMULÁRIO" itemValue="listForm"/>
+                <f:selectItem itemLabel="LISTAGEM EDITÁVEL E FORMULÁRIO" itemValue="listEditForm"/>
+                <f:selectItem itemLabel="SUMÁRIO" itemValue="summary"/>                            
+            </p:selectOneMenu>
+            
+            <!--tr><td></td><td><p:inplace editor="true" styleClass="ui-algo-element"><p:inputText value="Inplace" label="text"/></p:inplace></td></tr-->
+        </div>                        
+        <div id="projectPropertyDiv">
+        </div>
+    </p:panel>
+    <p:dialog widgetVar="serviceDescriptionGenerateWv">
+    	<p:inputText value="#{admAlgodevBean.entity.canonicalClassName}" styleClass="no-upper"></p:inputText>
+    	<p:commandButton icon="ui-icon-circle-check" actionListener="#{admAlgodevBean.generateClassDescriptionByClassName()}"  update="@(.tabViewConfig)" oncomplete="updateEntity();"></p:commandButton>
+    </p:dialog>   
+    <style>
+        .appType .ui-selectonemenu-label{
+            width: 450px !important;    
+        }  
+    </style>
+</html>

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"> 
+    <p:panel style="height: 200px;">
+        <h:panelGrid columns="4" columnClasses="label, value" styleClass="grid">  
+            <h:outputText value="Obra:"/>
+            <p:selectOneMenu id="obraId" value="#{gobAquisicaoImovelBean.obra}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Obra #{msg.required}." converter="#{baseBean.getConverter(gobObraBean.beanList, null, 'obraId')}">
+                <f:selectItem itemLabel="Selecione"/>
+                <f:selectItems  value="#{gobObraBean.beanList}" var="item" itemLabel="#{item.nomeObra}" itemValue="#{item}"/>
+                <p:ajax update="listaPanelUnidadeObra obraId"/>
+            </p:selectOneMenu>
+            <h:outputText value="Unidade:"/>
+            <h:outputText value="#{gobAquisicaoImovelBean.bean.unidadeObra.sequencia}" style="font-weight:bold;"/>
+        </h:panelGrid>
+        <p:panel header="Lista Unidades Obra: #{gobAquisicaoImovelBean.obra.nomeObra}" id="listaPanelUnidadeObra" widgetVar="listaPanelUnidadeObraWv">
+            <h:outputText value="Status Cronograma: A - Andamento / C - Concluído"/> <br/>  
+            <ui:repeat value="#{gobAquisicaoImovelBean.obra.unidadeObraList}" var="item">
+                <div style="border: solid 1px;width: 60px;display: inline-table;margin: 2px;">
+                    <p:commandLink  immediate="true" update="@form" >
+                        <h:outputText value="#{item.sequencia}" />                           
+                        <f:setPropertyActionListener target="#{gobAquisicaoImovelBean.bean.unidadeObra}" value="#{item}"/>
+                    </p:commandLink>                      
+                    <span style="float:right;border-left: solid 1px;">
+                        <h:outputText value="P" rendered='#{item.status == "Pendente"}'/>
+                        <h:outputText value="A" rendered='#{item.status == "Andamento"}'/>
+                        <h:outputText value="C" rendered='#{item.status == "Concluido"}'/>
+                    </span>
+                </div>
+            </ui:repeat>
+        </p:panel>
+    </p:panel>
+    
+</html>

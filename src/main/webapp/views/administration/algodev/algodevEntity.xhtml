@@ -1,0 +1,262 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:remoteCommand immediate="true" name="removeEntityNode" action="#{admAlgodevBean.removeEntityNode()}" /> 
+    <p:outputPanel id="configPanel" styleClass="configPanel">
+        <p:outputPanel styleClass="entityDlg">
+            <p:dialog rendered="#{admAlgodevBean.entity=='null' || (admAlgodevBean.entityPropertyDescriptor.propertyType!=null and 'ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.contains(admAlgodevBean.entityPropertyDescriptor.propertyType))}" widgetVar="entityClassListDlg" styleClass="configDlg" header="#{msg['selectClass']}" resizable="false" dynamic="false" width="400" height="300" closable="false" visible="true">
+                <p:dataTable rowKey="#{entity.entityClassId}" value="#{admAlgodevBean.entityClassList}" var="entity" selectionMode="single" selection="#{admAlgodevBean.entityNodeSelected}" style="width: 300px;"  scrollable="true"  scrollWidth="300px" scrollHeight="200">
+                    <p:column filterBy="#{entity.label!=null?entity.label:entity.name}" filterMatchMode="contains">  
+                        <f:facet name="header">  
+                            <h:outputText value="#{msg.description}" />  
+                        </f:facet>  
+                        <h:outputText value="#{entity.label!=null?entity.label:entity.name}" title="#{entity.entityPropertyDescriptorList}" />  
+                    </p:column>                  
+                </p:dataTable>
+                <p:commandButton widgetVar="buttonApplyEntityProp" styleClass="elementPropertyApply entityPanel" style="display: none;" value="#{msg['apply']}" action="#{admAlgodevBean.startEditItem(createProjectForm.id)}" process="@(.configPanel)" update="@(.itemPanel)" oncomplete="entityClassListDlg.hide();('ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.indexOf(propertyType.getSelectedValue())!=-1)?propertyType.setLabel(propertyType.getSelectedLabel()+'('+propertyTypeLabel+')'):'';">
+                    <f:setPropertyActionListener target="#{admAlgodevBean.entityPropertyDescriptor.propertyLabel}" value="#{admAlgodevBean.entityNodeSelected.label}"/>
+                    <f:setPropertyActionListener target="#{admAlgodevBean.entityPropertyDescriptor.propertyClass}" value="#{admAlgodevBean.entityNodeSelected}"/>
+                </p:commandButton>          
+                <p:commandButton immediate="false" widgetVar="buttonApplyEntityClas" process="@(.configPanel)" update="@(.entityDlg)" styleClass="elementPropertyApply entityPanel" value="#{msg['open']}" oncomplete="entityClassListDlg.hide();">
+                   <f:actionListener binding="#{(admAlgodevBean.removeEntityNode())}"/>
+                   <f:actionListener binding="#{(admAlgodevBean.resetForm(createProjectForm.clientId.concat(':tabViewConfig:').concat(entityDlg.id)))}"/>
+                    <!--f:event listener="#{admAlgodevBean.removeEntityNode()}" type="postValidate"/-->
+                    <f:setPropertyActionListener target="#{admAlgodevBean.entity}" value="#{admAlgodevBean.entityNodeSelected}"/>
+                    <!--f:event listener="#{admAlgodevBean.resetForm(createProjectForm.clientId.concat(':tabViewConfig:').concat(entityDlg.id))}" type="postValidate"></f:event-->
+                    <!--f:actionListener binding="#{admAlgodevBean.resetForm(createProjectForm.clientId.concat(':tabViewConfig:').concat(entityDlg.id))}"/-->
+                </p:commandButton>                
+                <p:commandButton styleClass="elementPropertyApply entityPanel" value="#{msg['cancel']}" update="itemPanelAlgodev" oncomplete="entityClassListDlg.hide();"/>                
+                <p:commandButton action ="#{admAlgodevBean.addEntityNode()}" value="#{msg['create']}" icon="ui-icon-newwin" update="@(.entityDlg)" oncomplete="entityClassListDlg.hide();" style="float:right;"/> 
+            </p:dialog>            
+        </p:outputPanel>
+        <p:dialog rendered="#{admAlgodevBean.entityPropertyDescriptor!=null and admAlgodevBean.entityPropertyDescriptor.propertyType!=null and 'STRING'.contains(admAlgodevBean.entityPropertyDescriptor.propertyType)}" widgetVar="stringDlg" styleClass="stringDlg configDlg entityDlg" header="#{msg['configuration']}" resizable="false" dynamic="false" width="350" height="300" closable="true" visible="false">
+            <p:outputPanel styleClass="configGrid" autoUpdate="false">
+                <p:panelGrid columns="2" styleClass="configGridx">
+                    <p:outputLabel value="Máscara"/>
+                    <p:selectOneMenu binding="#{maskStr}" editable="true" value="#{(admAlgodevBean.idxEntityPropertyDescriptorConfig('mask','')).configValue}">
+                        <f:selectItem itemLabel=""/>
+                        <f:selectItem itemLabel="#{msg.individualRegistrationMask}" itemValue="#{msg.individualRegistrationMask}"/>
+                        <f:selectItem itemLabel="#{msg.corporateRegistrationMask}" itemValue="#{msg.corporateRegistrationMask}"/>
+                        <f:selectItem itemLabel="#{msg.postalCodeMask}" itemValue="#{msg.postalCodeMask}"/>
+                    </p:selectOneMenu>
+                    <p:outputLabel value="Tamanho do Texto"/>
+                    <p:selectOneRadio immediate="true"  value="#{(admAlgodevBean.idxEntityPropertyDescriptorConfig('length','short')).configValue}">  
+                        <f:selectItem itemLabel="Curto" itemValue="short" />  
+                        <f:selectItem itemLabel="Longo" itemValue="long" />  
+                    </p:selectOneRadio>                     
+                    <p:outputLabel value="Lista de Texto"/>
+                    <p:inputTextarea style="max-width: 150px;min-width: 150px;max-height: 100px;min-height: 100px;" rows="5" autoResize="false"  scrollHeight="100" cols="30" value="#{(admAlgodevBean.idxEntityPropertyDescriptorConfig('list','')).configValue}"/>
+                    <p:outputLabel value="Html/Xml"/>
+                    <p:selectBooleanCheckbox immediate="false" value="#{(admAlgodevBean.idxEntityPropertyDescriptorConfig('xhtml','false')).configValue}"/>
+                </p:panelGrid>
+            </p:outputPanel>
+            <p:commandButton icon="ui-icon-check" title="#{msg.include}" action="#{admAlgodevBean.addPropertyDescritor()}"  update="@(.itemPanel)" oncomplete="propertyNameWv.jq.focus();stringDlg.hide();" >
+            </p:commandButton>            
+        </p:dialog>   
+        <p:dialog rendered="#{admAlgodevBean.entityPropertyDescriptor!=null and admAlgodevBean.entityPropertyDescriptor.propertyType!=null and 'FLOAT'.contains(admAlgodevBean.entityPropertyDescriptor.propertyType)}" widgetVar="floatDlg" styleClass="floatDlg configDlg" header="#{msg['configuration']}" resizable="false" dynamic="true" width="300" height="150" closable="true" visible="false">
+            <p:panelGrid columns="2">
+                <p:outputLabel value="Precisão Decimal"/>
+                <p:selectOneMenu value="#{(admAlgodevBean.idxEntityPropertyDescriptorConfig('precision',true)).configValue}">
+                    <f:selectItem itemLabel=""/>
+                    <f:selectItem itemLabel="1" itemValue="1"/>
+                    <f:selectItem itemLabel="2" itemValue="2"/>
+                    <f:selectItem itemLabel="3" itemValue="3"/>
+                    <f:selectItem itemLabel="4" itemValue="4"/>
+                    <f:selectItem itemLabel="5" itemValue="5"/>
+                    <f:selectItem itemLabel="6" itemValue="6"/>
+                </p:selectOneMenu>
+            </p:panelGrid>
+            <p:commandButton icon="ui-icon-check" title="#{msg.include}" action="#{admAlgodevBean.addPropertyDescritor()}"  update="@(.itemPanel)" oncomplete="propertyNameWv.jq.focus();floatDlg.hide();" >
+            </p:commandButton>            
+        </p:dialog>  
+        <p:tooltip showEffect="clip" hideEffect="explode" for="helpEnt">            
+            <h:outputText value="1) Informe no formulário 'Classe de Entidade', no campo 'Nome', qual será o nome da tabela onde serão armazenados os dados." escape="false" /><br />        
+            <h:outputText value="Exemplo:" escape="false" /><br />
+            <h:outputText value="Veículo" escape="false" /><br />
+            <br />
+            <h:outputText value="2) Em seguida informe abaixo no formulário 'Propriedade' os campos que poderão ser preenchidos." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" /><br />
+            <h:outputText value="Modelo" escape="false" /><br />
+            <h:outputText value="Fabricante" escape="false" /><br />
+            <h:outputText value="Cor" escape="false" /><br />
+            <h:outputText value="Portas" escape="false" /><br />
+            <h:outputText value="Preço" escape="false" /><br />
+            <br />
+            <h:outputText value="3) Para cada campo da 'Propriedade' marque a opção 'Identificador' se esse campo será usado para nomear o registro." escape="false" /><br />        
+            <h:outputText value="Exemplo:" escape="false" /><br />
+            <h:outputText value="Na tabela Veículo poderiam ser os campos Placa e Modelo. Assim já seria possível identificar o registro em uma listagem." escape="false" /><br />
+        </p:tooltip>                   
+        <p:tooltip showEffect="clip" hideEffect="explode" for="helpProp" style="position: absolute;top: 0px;">            
+            <h:outputText value="O campo 'Classe' é utilizado para definir o tipo de valor que será armazenado." escape="false" /><br />  <br />      
+            <h:outputText value="1)Texto - É o tipo padrão utilizado em campos que podem ser inseridos qualquer valor." escape="false" /><br />        
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Modelo -> XR5-S" escape="false" />
+            <br />
+            <h:outputText value="2) Data - Valor deve seguir o formato de data válida." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Data Fabricação -> 03/10/2012" escape="false" />
+            <br />
+            <h:outputText value="3) Número Decimal - Valor fracionado com casas decimais." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Preço -> 66.598,50" escape="false" />
+            <br />
+            <h:outputText value="4) Número Inteiro - Valor redondo sem casas decimais." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Portas -> 5" escape="false" />              
+            <br />
+            <h:outputText value="5) Booleano - Pode assumir somente dois valores." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Indisponível -> Não" escape="false" />
+            <br />
+            <h:outputText value="6) Um Objeto Externo - Um valor originado de um cadastro externo." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Fabricante -> General Motors" escape="false" />
+            <br />
+            <h:outputText value="7) Muitos Objetos Externos - Vários valores originados de um cadastro externo no mesmo campo." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Passageiros -> José, Maria, João" escape="false" />
+            <br />
+            <h:outputText value="8) Muitos Objetos Internos - Vários valores originados de um cadastro interno no mesmo campo." escape="false" /><br />
+            <h:outputText value="Exemplo:" escape="false" />
+            <h:outputText value="Revisões -> Revisão 10000Km, Revisão 20000Km, Revisão 30000Km" escape="false" /><br />
+        </p:tooltip>                               
+
+    </p:outputPanel>         
+    <p:panel binding="#{entityDlg}" styleClass="entityDlg" visible="true" widgetVar="entityDlg" closable="false" style="height: 430px;">
+        <f:facet name="header">
+            <h:panelGroup > <h:outputText value="#{msg['entityClass']}"/><span class="ui-state-highlight" style="float:right;"><h:commandLink id="helpEnt" style="float:right;" styleClass="ui-icon ui-icon-help" ></h:commandLink></span></h:panelGroup>
+        </f:facet>     
+        <p:focus for="entityLabel"/>       
+        <p:remoteCommand  name="configEntity" action="#{admAlgodevBean.editEntityNode()}" update="@(.entityDlg)"/>
+        <p:remoteCommand  name="selectConfigEntity" process="@(.itemPanel)" update="@(.configPanel)" oncomplete="entityClassListDlg.show();buttonApplyEntityProp.jq.show();buttonApplyEntityClas.jq.hide();"/>        
+        <div id="entityDlgDiv">
+            <p:outputPanel styleClass="entityPanel" binding="#{entityPanel}">
+                <p:dialog rendered="#{admAlgodevBean.actualConstructorTabIndex == 1}"  widgetVar="entityClassConfigDlg" styleClass="entityConfigPanel" header="#{msg['configuration']}" resizable="false" dynamic="true" width="300" height="150" closable="true" visible="false">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="Requer autenticação"/>
+                        <p:selectBooleanCheckbox immediate="false" value="#{(admAlgodevBean.idxEntityClassConfig(0,true)).configValue}"/>
+                    </p:panelGrid>
+                    <p:commandButton icon="ui-icon-check" title="#{msg.include}" oncomplete="propertyNameWv.jq.focus();entityClassConfigDlg.hide();" >
+                        <f:setPropertyActionListener target="#{(admAlgodevBean.idxEntityClassConfig(0,false)).configName}" value="loginAuth" />      
+                        <f:actionListener binding="#{(admAlgodevBean.addEntityClassConfig())}"/>     
+                    </p:commandButton>            
+                </p:dialog> 
+                <p:panelGrid columns="3">
+                    <h:outputText value="#{msg['name']} do Local:"/>
+                    <p:inputText id="entityLabel" styleClass="entityDlg" size="30" value="#{admAlgodevBean.entity.label}"><p:ajax event="blur" process="@this"/> </p:inputText>
+                    <p:commandButton icon="ui-icon-gear" title="#{msg.configuration}" actionListener="#{(admAlgodevBean.idxEntityClassConfig(0,true))}" immediate="true" oncomplete="entityClassConfigDlg.show();"></p:commandButton>  
+                </p:panelGrid>
+                <p:fieldset legend="#{msg['property']}" style="margin-top: 5px;">
+                    <p:panelGrid id="itemPanelAlgodev" columns="7" styleClass="itemPanel entityPanel">
+                        <h:panelGroup> 
+                            <h:outputText value="#{msg['type']}"/>
+                            <span class="ui-state-highlight" style="float:right;"><h:commandLink id="helpProp" style="float:right;" styleClass="ui-icon ui-icon-help" ></h:commandLink></span>
+                        </h:panelGroup>
+                        <h:outputText value="#{msg['name']}"/>
+                        <h:outputText value="#{msg['identifier']}"/>
+                        <h:outputText value="#{msg['required']}"/>
+                        <h:outputText value=""/>
+                        <h:outputText value=""/>       
+                        <h:outputText value=""/>
+                        <h:panelGroup>
+                            <p:selectOneMenu widgetVar="propertyType" onchange="('ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.indexOf(propertyType.getSelectedValue()) !== -1 ? new function() {
+                                        selectConfigEntity();
+                                    } : '')" value="#{admAlgodevBean.entityPropertyDescriptor.propertyType}" filter="true" filterMatchMode="contains">
+                                <f:selectItem itemLabel="#{msg.STRING}" itemValue="STRING"/>
+                                <f:selectItem itemLabel="#{msg.DATE}" itemValue="DATE"/>
+                                <f:selectItem itemLabel="#{msg.FLOAT}" itemValue="FLOAT"/>
+                                <f:selectItem itemLabel="#{msg.INTEGER}" itemValue="INTEGER"/>
+                                <f:selectItem itemLabel="#{msg.BOOLEAN}" itemValue="BOOLEAN"/>
+                                <f:selectItem itemLabel="#{msg.FILE}" itemValue="FILE"/>
+                                <f:selectItem itemLabel="#{msg.ONEEXTERNALOBJECT}" itemValue="ENTITYCLASS"/>                                
+                                <f:selectItem itemLabel="#{msg.MANYEXTERNALOBJECT}" itemValue="MANYEXTERNALOBJECT"/>
+                                <f:selectItem itemLabel="#{msg.ONEINTERNALOBJECT}" itemValue="ONEINTERNALOBJECT"/>                                
+                                <f:selectItem itemLabel="#{msg.MANYINTERNALOBJECT}" itemValue="ENTITYCHILDREN"/>
+                            </p:selectOneMenu>                                
+                            <script>var propertyTypeLabel = '#{admAlgodevBean.entityNodeSelected.name}';</script>
+                        </h:panelGroup>                   
+                        <p:inputText id="propertyName" widgetVar="propertyNameWv" styleClass="propertyName" value="#{admAlgodevBean.entityPropertyDescriptor.propertyLabel}"/> 
+                        <h:panelGroup layout="block" style="text-align: center;display: block;">
+                            <p:selectBooleanCheckbox id="propertyIdentifier" value="#{admAlgodevBean.entityPropertyDescriptor.propertyIdentifier}"/>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block" style="text-align: center;display: block;">
+                            <p:selectBooleanCheckbox id="propertyRequired" value="#{admAlgodevBean.entityPropertyDescriptor.propertyRequired}"/>
+                        </h:panelGroup>
+                        <p:commandButton icon="ui-icon-check" title="#{msg.include}" action="#{admAlgodevBean.addPropertyDescritor()}"  update="@(.itemPanel)" oncomplete="window.setTimeout(function() {$(propertyNameWv.jq.get()).focus();},500)" ></p:commandButton>
+                        <p:commandButton icon="ui-icon-close" title="#{msg.cancel}" action="#{admAlgodevBean.cancelEditItem()}" update="@(.itemPanel)"></p:commandButton>  
+                        <p:commandButton icon="ui-icon-gear" title="#{msg.configuration}" partialSubmit="true" immediate="true" action="#{admAlgodevBean.configItem()}" actionListener="#{admAlgodevBean.resetForm('tabView:'.concat(createProjectForm.id).concat(':tabViewConfig:configPanel'))}" oncomplete="initConfig();"></p:commandButton>  
+                    </p:panelGrid>
+                    <p:outputPanel id="books" binding="#{books}" autoUpdate="false"  styleClass="itemPanel">  
+                        <p:dataTable id="booksTable" emptyMessage="#{msg.emptyMessage}" value="#{admAlgodevBean.entity.entityPropertyDescriptorList}" var="property" style="width: 760px;"  scrollable="true" scrollHeight="150">  
+                            <p:column>  
+                                <f:facet name="header">  
+                                    <h:outputText value="#{msg['name']}" />  
+                                </f:facet>  
+                                <h:outputText value="#{property.propertyLabel}" />  
+                            </p:column>  
+                            <p:column>  
+                                <f:facet name="header">  
+                                    <h:outputText value="#{msg['type']}" />  
+                                </f:facet>  
+                                <h:panelGroup layout="block" style="text-align: center;display: block;">
+                                    <h:outputText value="#{msg[property.propertyType]}" style="text-align: center;display: inline-table;" />                                      
+                                </h:panelGroup>
+                            </p:column>          
+                            <p:column style="text-align: center;">  
+                                <f:facet name="header">  
+                                    <h:outputText value="#{msg['identifier']}" />  
+                                </f:facet>  
+                                <h:panelGroup layout="block" style="text-align: center;display: block;">
+                                    <h:outputText value="#{property.propertyIdentifier}" style="text-align: center;display: inline-table;" styleClass="#{(property.propertyIdentifier?' ui-icon ui-icon-check ':' ui-icon ui-icon-cancel ')}"/>                                      
+                                </h:panelGroup>                                    
+                            </p:column>     
+                            <p:column style="text-align: center;">  
+                                <f:facet name="header">  
+                                    <h:outputText value="#{msg['required']}" />  
+                                </f:facet>  
+                                <h:panelGroup layout="block" style="text-align: center;display: block;">
+                                    <h:outputText value="#{property.propertyRequired}" style="text-align: center;display: inline-table;" styleClass="#{(property.propertyRequired?' ui-icon ui-icon-check ':' ui-icon ui-icon-cancel ')}"/>                                      
+                                </h:panelGroup>
+                            </p:column>                            
+                            <p:column headerText="#{msg['action']}" style="text-align: center;">  
+                                <p:commandLink action="#{admAlgodevBean.startEditItem(createProjectForm.id)}" value="#{msg['edit']}" immediate="true" update="@(.itemPanel)">
+                                    <f:setPropertyActionListener target="#{admAlgodevBean.entityPropertyDescriptor}" value="#{property}"/>
+                                </p:commandLink> |
+                                <p:commandLink action="#{admAlgodevBean.removePropertyDescritor()}" value="#{msg['exclude']}" immediate="true" update="@(.itemPanel)">
+                                    <f:setPropertyActionListener target="#{admAlgodevBean.entityPropertyDescriptor}" value="#{property}"/>
+                                </p:commandLink>  
+                            </p:column>                     
+                        </p:dataTable>  
+                    </p:outputPanel>
+                </p:fieldset>
+                <p:commandButton styleClass="elementPropertyApply entityPanel" rendered="#{admAlgodevBean.entityClassNodeList.size()>1}" value="#{msg['apply']}" action="#{admAlgodevBean.applyEntityNode()}" update="@(.entityDlg)" oncomplete="(#{admAlgodevBean.entityClassNodeList.size()}==1?updateProjectProperty():'')"/>
+                <p:commandButton styleClass="elementPropertyApply entityPanel" rendered="#{admAlgodevBean.entity.entityClassId!=null}" value="#{msg['exclude']}" action="#{admAlgodevBean.doEntityRemove(admAlgodevBean.entity)}" update="@(.entityDlg)"/>
+                <p:commandButton styleClass="elementPropertyApply entityPanel" widgetVar="cancelEntityBtn" value="#{msg['cancel']}" action="#{admAlgodevBean.removeEntityNode()}" update="@(.entityDlg)"/>
+                <p:remoteCommand name="updateEntity" update="@(.entityDlg)"/>
+                <p:remoteCommand name="updateConfigPanel" update="@(.configGrid)" immediate="true" actionListener="#{admAlgodevBean.resetForm('tabView:'.concat(createProjectForm.id).concat(':tabViewConfig:configPanel'))}"/>
+            </p:outputPanel>
+        </div>                
+    </p:panel>      
+    <script type="text/javascript">
+        /* <![CDATA[ */
+        function initConfig() {
+            if (propertyType.getSelectedValue() === 'STRING') {
+                //alert('oi');
+                updateConfigPanel();
+                stringDlg.show();
+            }
+            if (propertyType.getSelectedValue() === 'FLOAT') {
+                //alert('oi');
+                floatDlg.show();
+            }
+            if ('ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.indexOf(propertyType.getSelectedValue()) !== -1) {
+                configEntity();
+            }
+
+        }
+        /* ]]> */
+    </script>   
+</html>

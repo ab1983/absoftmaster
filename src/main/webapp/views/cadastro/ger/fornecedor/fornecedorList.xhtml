@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <h:form>
+        <h:panelGroup  layout="block">
+            <h:panelGroup  layout="block" rendered="#{gerFornecedorBean.formRendered}">
+                <ui:include src="#{gerFornecedorBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup  layout="block" rendered="#{!gerFornecedorBean.formRendered}">
+                <p:commandButton value="Incluir" action ="#{gerFornecedorBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton value="Excluir" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="Lista Fornecedor" style="width: 500px;">
+                    <h:dataTable var="item" value="#{gerFornecedorBean.beanList}">
+                        <h:column>
+                            <f:facet name="header">
+                                CPF/CNPJ
+                            </f:facet>
+                            #{item.cpfCnpj}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                Razão Social
+                            </f:facet>
+                            #{item.razaoSocial}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                Ação
+                            </f:facet>
+                            <p:commandLink action="#{gerFornecedorBean.doBeanForm()}" value="Editar" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{gerFornecedorBean.bean}" value="#{item}"/>
+                            </p:commandLink> |
+                            <p:commandLink action="#{gerFornecedorBean.doBeanRemove()}" value="Excluir" immediate="true"   rendered="#{gerFornecedorBean.notReadOnly}"  update="@form">
+                                <f:setPropertyActionListener target="#{gerFornecedorBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </h:column>                    
+                    </h:dataTable>
+                </p:panel>
+                
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+
+</html>

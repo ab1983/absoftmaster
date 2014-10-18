@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       template="#{request.contextPath}/../base.xhtml"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{cpgTipoDespesaBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Cadastro Tipo Despesa" style="width: 500px;">
+        <h:panelGrid columns="2">
+            <h:outputText value="Código"/>
+            <p:inputText value="#{cpgTipoDespesaBean.bean.seqnum}" required="true" readonly="true" requiredMessage="Código #{msg.required}."/>
+            <h:outputText value="Descrição"/>
+            <p:inputText value="#{cpgTipoDespesaBean.bean.descricao}" required="true" requiredMessage="Descrição #{msg.required}."/>
+            <h:outputText value="Classificador"/>
+            <p:inputMask mask="#{msg.classifierExpenseTypeMask}" value="#{cpgTipoDespesaBean.bean.classificador}" required="true" requiredMessage="Classificador #{msg.required}."/>                
+        </h:panelGrid>
+        <p:commandButton value="Gravar"   action="#{cpgTipoDespesaBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+    
+</html>

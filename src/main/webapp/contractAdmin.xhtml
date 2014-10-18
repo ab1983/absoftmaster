@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <span style="color: red;font-size: 14px;font-weight: bold;">Cadastre-se gratuitamente e conheça.</span>    
+    <br/><br/>
+    <h:panelGrid columns="2">
+        <h:panelGroup>
+            <h:outputText value="#{msg.name}"/>:<font color="red">*</font> 
+        </h:panelGroup>
+        <p:inputText value="#{admContractBean.user.name}"  autocomplete="off" style="width: 250px !important;" required="true" requiredMessage="#{msg.name} #{msg.required}." widgetVar="contractUserName"/>
+        <h:panelGroup>
+            <h:outputText value="E-mail"/>:<font color="red">*</font>
+        </h:panelGroup>
+        <p:inputText binding="#{emailBind}" autocomplete="off" value="#{admContractBean.user.email}" style="width: 250px;" required="true" requiredMessage="E-mail #{msg.required}." validatorMessage="E-mail inválido.">
+            <f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$"/>
+        </p:inputText>
+        <h:panelGroup rendered="false">
+            <h:outputText value="E-mail 2"/>:<font color="red">*</font>
+        </h:panelGroup>
+        <p:inputText rendered="false" value="#{admContractBean.user.emailAgain}" style="width: 250px;" required="true" requiredMessage="E-mail Novamente #{msg.required}." validatorMessage="E-mail inválido.">
+        </p:inputText>        
+        <h:panelGroup>
+            <h:outputText value="#{msg.password}"/>:<font color="red">*</font> 
+        </h:panelGroup>
+        <p:password value="#{admContractBean.user.password}" autocomplete="off" style="width: 250px !important;" required="true" requiredMessage="#{msg.password} #{msg.required}." redisplay="true" />  
+    </h:panelGrid>
+</html>

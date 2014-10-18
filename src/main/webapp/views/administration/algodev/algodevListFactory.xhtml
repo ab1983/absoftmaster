@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:panel widgetVar="preparePropertyListDlg" visible="true" header="Itens para Exibir na Listagem" closable="false" styleClass="propertyDlg entityDlg" style="height: 430px;">
+        <p:panelGrid columns="1" styleClass="panelGridEntityProperty">       
+            <p:dataTable rowKey="#{propList.propertyName}" styleClass="admAlgodevBeanProperty2" id="admAlgodevBeanProperty2" var="propList" value="#{admAlgodevBean.entity.entityPropertyDescriptorList}"  
+                         selection="#{admAlgodevBean.propertySelectedListCollection}" style="width: 200px;height: 380px;"  scrollable="true"  scrollWidth="200px" scrollHeight="320">  
+                <f:facet name="header">  
+                    Propriedades 
+                </f:facet> 
+                <p:ajax event="rowSelectCheckbox" immediate="true" process="@(.admAlgodevBeanProperty2)"/>                    
+                <p:ajax event="rowUnselectCheckbox" immediate="true" process="@(.admAlgodevBeanProperty2)"/>     
+                <p:column selectionMode="multiple" style="width:20px" />  
+                <p:column headerText="Nome">  
+                    #{propList.propertyLabel}
+                </p:column>  
+            </p:dataTable>   
+        </p:panelGrid>
+    </p:panel>                       
+</html>

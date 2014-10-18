@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:form>
+        Bem-vindo(a) ao <h:outputText value="#{baseBean.title}"/>!
+        <h:panelGroup rendered="#{!gerLoginBean.mainActionMap.isEmpty()}">
+            <br/><br/>
+            <h:outputText style="font-size: 14px;" value="O que você quer fazer agora?"/>
+        </h:panelGroup>
+        <table style="display: block;" cellpadding="20">
+            <tr>
+                <td style="vertical-align: top;">
+                    <h:panelGroup>  
+                        <h:panelGroup>            
+                            <p:commandButton style="width: 500px;" icon="ui-icon ui-icon-plusthick" value="Abrir Menu" update=":basePanel" actionListener="#{baseBean.newWindow()}"/>        
+                            <br/><br/>
+                        </h:panelGroup>                          
+                        <h:panelGroup rendered="#{gerLoginBean.mainActionMap.containsKey('AlgoDev')}">
+                            <p:commandButton style="width: 500px;" icon="ui-icon ui-icon-wrench" value="Criar Meus Sistemas" onclick="algoDevExpressDlg.show();"/>
+                            <br/><br/>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{gerLoginBean.mainActionMap.containsKey('AlgoRep')}">
+                            <p:commandButton style="width: 500px;" icon="ui-icon ui-icon-document" value="Criar Meus Relatórios e Gráficos" update=":basePanel" action="#{algoRep.indexBean(gerLoginBean.mainActionMap.get('AlgoRep'))}"/>
+                            <br/><br/>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{gerLoginBean.mainActionMap.containsKey('Configuração>Usuário')}">
+                            <p:commandButton style="width: 500px;" icon="ui-icon ui-icon-person" value="Criar Novos Usuários" update=":basePanel" action="#{secUserBean.indexBean(gerLoginBean.mainActionMap.get('Configuração>Usuário'))}"/>
+                            <br/><br/>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{gerLoginBean.mainActionMap.containsKey('Configuração>Autorização Usuário')}">
+                            <p:commandButton style="width: 500px;" icon="ui-icon ui-icon-unlocked" value="Criar Autorização de Usuários" update=":basePanel" action="#{secUserAuthorizationBean.indexBean(gerLoginBean.mainActionMap.get('Configuração>Autorização Usuário'))}"/>
+                            <br/><br/>
+                        </h:panelGroup>                      
+                        <h:panelGroup>            
+                            <p:commandButton style="width: 500px;" icon="ui-icon ui-icon-info" value="Enviar Dúvidas ou Sugestões" oncomplete="questionsOrSuggestionsDlg.show();"/>        
+                            <br/><br/>
+                        </h:panelGroup>
+                        <h:panelGroup>            
+                            <p:commandButton style="width: 500px;" icon="ui-icon ui-icon-cart" value="Contratar Licenças e Consultoria" oncomplete="contractPaymentWv.show();"/>        
+                            <br/><br/>
+                        </h:panelGroup>                        
+                    </h:panelGroup>
+
+                </td>
+                <td>
+                    <h:panelGroup rendered="true">
+                        <iframe width="420" height="315" src="//www.youtube.com/embed/OzmK4KqcFSY" frameborder="0" allowfullscreen="true"></iframe>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="false">
+                        <iframe width="420" height="315" src="//www.algoboss.com" frameborder="0" allowfullscreen="true"></iframe>
+                    </h:panelGroup>
+                </td>
+            </tr>
+        </table>
+    </h:form>
+    <p:dialog header="Planos AlgoBoss" resizable="false" draggable="false" widgetVar="contractPaymentWv">
+        <ui:include src="views/administration/contract/contractPayment.xhtml"/>
+    </p:dialog>        
+    <h:form style="height: 0px;position: absolute;top:0px;">
+        <p:dialog header="Dúvidas ou Sugestões" styleClass="questionsOrSuggestionsDlg" widgetVar="questionsOrSuggestionsDlg" resizable="false" width="500px">
+            <h:outputText style="font-size: 14px;color:red;" value="Descreva abaixo seu problema para lhe ajudarmos com a solução ideal."/><br/>
+            <a href="mailto://atendimento@algoboss.com" onclick="questionsOrSuggestionsDlg.hide();">Ou clique aqui para enviar usando seu próprio e-mail.</a>
+            <br/><br/>            
+            <p:inputTextarea value="#{gerLoginBean.questionsOrSuggestions}" style="width: 450px;height: 150px;" required="true" requiredMessage="Texto Obrigatório. Favor informar sua mensagem!"/>
+            <br/><br/>            
+            <p:commandButton value="Enviar" action="#{gerLoginBean.doSendQuestionsOrSuggestions()}" update="@(.questionsOrSuggestionsDlg)" oncomplete="questionsOrSuggestionsDlg.hide();"/>
+            <p:commandButton immediate="true" value="Consultoria Personalizada" oncomplete="questionsOrSuggestionsDlg.hide();contractPaymentWv.show();"/>  
+        </p:dialog>            
+    </h:form>
+    <h:form style="height: 0px;position: absolute;top:0px;">
+        <p:panel binding="#{algoContainerBindMain}" style="width: 960px;height: 450px;" styleClass="ui-algo-container" visible="false">
+
+        </p:panel>
+        <p:panel binding="#{algoPaletteBindMain}" styleClass="elementPanel" toggleable="true" visible="false" header="#{msg['elementPallete']}" collapsed="true">
+            <ui:include src="views/administration/algodev/algodevElementPanel.xhtml"/>
+        </p:panel>           
+    </h:form>    
+    <h:form style="height: 0px;position: absolute;top:0px;" rendered="#{gerLoginBean.mainActionMap.containsKey('AlgoDev')}">
+        <p:dialog widgetVar="algoDevExpressDlg" resizable="false" width="520px" closable="false">
+            <f:facet name="header">
+                <h:outputLabel value="Vamos criar seu sistema com o AlgoDev Express?" style="font-size: 14px;"/>
+            </f:facet>
+            <p:outputPanel styleClass="algoDevExpressDlg" >
+                <h:outputText style="font-size: 14px;color:red;" value="#{msg.serviceNameHelp}"/><p:commandButton rendered="true" onmouseover="configMenuWv.show()" onmouseout="configMenuWv.hide()" styleClass="ui-state-highlight" icon="ui-icon ui-icon-home" style="right: 0px;position: absolute;padding: 0px;margin: 0px;margin-right: 15px;top:0;margin-top: 0px;padding-top: 5px;height: 30px;"/>
+                <br/><br/>            
+                <p:inputText  placeholder="#{msg.serviceNameExample}" value="#{admAlgodevBean.bean.service.name}" style="width: 450px;" required="true" requiredMessage="Serviço Obrigatório. Favor informar o caminho do menu!"  widgetVar="serviceNameWv"/>
+                <br/><br/>                        
+                <h:outputText style="font-size: 14px;color:red;" value="#{msg.serviceDescriptionHelp}"/>
+                <ui:include src="views/administration/algodev/algodevDataTypePanel.xhtml"/>
+                <br/><br/>            
+                <p:inputTextarea placeholder="#{msg.serviceDescriptionExample}" value="#{admAlgodevBean.bean.service.description}" style="width: 450px;height: 150px;" required="true" requiredMessage="Texto Obrigatório. Favor informar sua mensagem!" widgetVar="serviceDescriptionWv"/>
+                <br/> 
+                <input name="ckbAlgodevExp" type="radio" value="appMode" checked="true" id="ckbAppMode"/>                 
+                <h:outputText value="Abrir serviço criado" />
+                <input name="ckbAlgodevExp" type="radio" value="advancedMode" id="ckbAdvancedMode"/> 
+                <h:outputText value="Abrir em modo avançado" />
+                <input name="ckbAlgodevExp" type="radio" value="continue" id="ckbContinue"/> 
+                <h:outputText value="Continuar Criando" />
+                <br/> <br/>     
+                <p:commandButton value="Criar" style="width: 100px;" styleClass="ui-state-highlight" widgetVar="buttonCreate" action="#{admAlgodevBean.createByConstructor()}" onstart="javascript: return fieldValidation(buttonCreate);" update="@(.algoDevExpressDlg)"  onsuccess="requiredCheck();"/>            
+                <p:commandButton immediate="true" value="Agora Não" oncomplete="algoDevExpressDlg.hide();questionsOrSuggestionsDlg.show();"/>            
+                <p:commandButton immediate="true" value="Limpar" oncomplete="clearAlgodevForm();" style="float: right;"/>            
+            </p:outputPanel>
+        </p:dialog> 
+        <p:remoteCommand name="algodevExpOpen" actionListener="#{app.indexBeanNewWin(admAlgodevBean.autorizationUserIdTemp)}" immediate="true" update=":basePanel"/>                 
+        <p:remoteCommand name="algodevAdvOpen" actionListener="#{admAlgodevBean.indexBeanForm(gerLoginBean.mainActionMap.get('AlgoDev'))}" immediate="true" update=":basePanel"/>                 
+        <p:remoteCommand name="algodevNew" action="#{admAlgodevBean.doBeanNew()}" immediate="true"/>         
+        <p:remoteCommand name="updateAlgoDevExpressDlg" immediate="false" update="@(.algoDevExpressDlg)"/>
+        <f:event rendered="true" type="preRenderComponent" listener="#{(admAlgodevBean.setAlgoContainer(algoContainerBindMain))}"/>        
+        <f:event rendered="true" type="preRenderComponent" listener="#{(admAlgodevBean.setAlgoPalette(algoPaletteBindMain))}"/>        
+        <p:remoteCommand name="updateMenu" immediate="true" actionListener="#{gerLoginBean.setModel(null)}" update="@(.startMenu)"/>
+        <script>/* <![CDATA[ */
+            #{gerLoginBean.newUser?'window.setTimeout(\'algoDevExpressDlg.show()\',2000)':''};
+                                function prepareUpdateMenu() {
+                                    window.setTimeout(function() {
+                                        updateMenu();
+                                    }, 3000);
+                                }
+                                function requiredCheck() {
+                                    if (serviceDescriptionWv.jq.val() !== '' && serviceNameWv.jq.val() !== '') {
+                                        var ckbAlgodevExp = $('input[name=ckbAlgodevExp]:checked').val();
+                                        if (ckbAlgodevExp === 'continue') {
+                                            window.setTimeout(function() {
+                                                clearAlgodevForm();
+                                            }, 5000);
+                                        } else if (ckbAlgodevExp === 'appMode') {
+                                            window.setTimeout(function() {
+                                                //clearAlgodevForm();
+                                                algodevExpOpen();
+                                            }, 5000);
+                                        } else if (ckbAlgodevExp === 'advancedMode') {
+                                            window.setTimeout(function() {
+                                                //clearAlgodevForm();
+                                                algodevAdvOpen();
+                                            }, 5000);
+                                        }
+                                        prepareUpdateMenu();
+                                        //prepareUpdateMenu();
+                                    }
+                                }
+                                function clearAlgodevForm() {
+                                    algodevNew();
+                                    serviceNameWv.jq.val('');
+                                    serviceDescriptionWv.jq.val('');
+                                    serviceNameWv.jq.focus();
+                                }
+                                var fieldValidationSkip = false;
+                                function fieldValidation(src) {
+                                    var buttonCreateSrc = null;
+                                    if (serviceDescriptionWv.jq.val().indexOf(',') !== -1 || fieldValidationSkip) {
+                                        fieldValidationSkip = false;
+                                        return true;
+                                    } else {
+                                        buttonCreateSrc = src;
+                                        showConfirm('Não foi localizado vírgula(,) como separador entre os campos. Deseja continuar?', 'Separador de Campos', function(bool) {
+                                            if (bool) {
+                                                fieldValidationSkip = true;
+                                                $(buttonCreateSrc.jq).click();
+                                            }
+                                        });
+                                        //confirm();
+                                        //alert(retBool);
+                                        return false;
+                                    }
+                                }
+
+                                function sleep(milliseconds) {
+                                    var start = new Date().getTime();
+                                    setTimeout()
+                                }
+                                /* ]]> */</script> 
+        <div id="div_msg" style="z-index: 10000;"/>
+        <style>
+            .no-close{
+                z-index: 10000;
+            }
+        </style>
+    </h:form>
+
+</html>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="icon" type="image/png" href="#{request.contextPath}/resources/images/favicon.png" />            
+        <link href="#{request.contextPath}/resources/css/default.css" rel="stylesheet" type="text/css" />
+        <link href="#{request.contextPath}/resources/css/cssLayout.css" rel="stylesheet" type="text/css" />
+        <!--script type="text/javascript" src="#{request.contextPath}/resources/js/jquery/jquery.maskedinput-1.3.js"></script-->
+        <!--script type="text/javascript" src="#{request.contextPath}/resources/js/jquery/jquery.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/jquery/jquery-plugins.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/primefaces.js"></script>
+        <h:outputScript library="primefaces" name="jquery/jquery.js" target="head" /-->
+        <title><h:outputText value="#{baseBean.title}"/></title>
+    </h:head>
+
+    <h:body>
+        <h:form>
+        <div class="highlighted errorMessage">
+            <h:outputText escape="false" 
+                          value="#{msg['errorPage.content']}"/>
+        </div>
+        <br/><br/>
+        <h:panelGroup rendered="#{gerLoginBean.user.boss}" styleClass="errorDetails">
+            #{msg['errorPage.detail']}: <br/>
+            #{flash.keep.errorDetails}
+        </h:panelGroup>
+        <p:commandButton value="Voltar" ajax="false" update=":basePanel" action="#{gerLoginBean.doLogout()}" />
+        </h:form>
+    </h:body>
+</html>

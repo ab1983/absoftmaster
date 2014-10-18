@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:commandButton  value="#{msg['list']}" icon="ui-icon-search" action="#{stkSupplyItemBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="#{msg['registration']} #{msg['product']}" style="width: 500px;">
+        <p:focus for="stkProductDescription"/>
+        <h:panelGrid columns="2">
+            <h:outputText value="#{msg['code']}:"/>
+            <p:inputText value="#{stkSupplyItemBean.bean.code}" required="true" requiredMessage="#{msg['code']} #{msg['required']}." readonly="true">
+                <p:ajax process="@this"/>
+            </p:inputText>
+            <h:outputText value="#{msg['description']}:"/>
+            <p:inputText id="stkProductDescription" value="#{stkSupplyItemBean.bean.description}" required="true" requiredMessage="#{msg['description']} #{msg['required']}."> 
+                <p:ajax event="blur" process="@this"/>
+            </p:inputText>
+            <h:outputText value="#{msg['category']}"/>
+            <h:panelGroup>
+                <p:selectOneMenu id="teste2" value="#{stkSupplyItemBean.bean.supplyCategory}" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{msg['productCategory']} #{msg['required']}." converter="#{stkSupplyItemBean.supplyCategoryConverter}">
+                    <f:selectItem itemLabel="#{msg['select']}"/>
+                    <f:selectItems  value="#{stkSupplyCategoryBean.beanList}" var="item" itemLabel="#{item.code}-#{item.description}" itemValue="#{item}"/>
+                    <p:ajax process="@this"/>
+                </p:selectOneMenu>      
+                <p:commandButton action ="#{stkSupplyCategoryBean.indexBeanNewWin(!stkSupplyItemBean.notReadOnly)}" icon="ui-icon-newwin" immediate="true" update=":basePanel" style="float:right;"/> 
+            </h:panelGroup>
+            <h:outputText value="#{msg['brand']}"/>
+            <h:panelGroup>
+                <p:selectOneMenu value="#{stkSupplyItemBean.bean.brand}" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{msg['brand']} #{msg['required']}." converter="#{stkSupplyItemBean.brandConverter}">
+                    <f:selectItem itemLabel="#{msg['select']}"/>
+                    <f:selectItems  value="#{stkBrandBean.beanList}" var="item" itemLabel="#{item.code}-#{item.description}" itemValue="#{item}"/>
+                    <p:ajax process="@this"/>
+                </p:selectOneMenu> 
+                <p:commandButton action ="#{stkBrandBean.indexBeanNewWin(!stkSupplyItemBean.notReadOnly)}" icon="ui-icon-newwin" immediate="true" update=":basePanel" process="@form" style="float:right;"/> 
+            </h:panelGroup>
+            <h:outputText value="#{msg['unitOfMeasure']}"/>
+            <h:panelGroup>
+                <p:selectOneMenu value="#{stkSupplyItemBean.bean.unitOfMeasure}" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{msg['unitOfMeasure']} #{msg['required']}." converter="#{stkSupplyItemBean.unitOfMeasureConverter}">
+                    <f:selectItem itemLabel="#{msg['select']}"/>
+                    <f:selectItems  value="#{stkUnitOfMeasureBean.beanList}" var="item" itemLabel="#{item.abbreviation}-#{item.description}" itemValue="#{item}"/>
+                    <p:ajax process="@this"/>
+                </p:selectOneMenu>  
+                <p:commandButton action ="#{stkUnitOfMeasureBean.indexBeanNewWin(!stkSupplyItemBean.notReadOnly)}" icon="ui-icon-newwin" immediate="true" update=":basePanel" process="@form" style="float:right;"/>             
+            </h:panelGroup>
+            <h:outputText value="#{msg['expenseType']}"/>
+            <p:selectOneMenu value="#{stkSupplyItemBean.bean.tipoDespesa}" filter="true" filterMatchMode="contains" required="true" requiredMessage="#{msg['expenseType']} #{msg['required']}." converter="#{stkSupplyItemBean.tipoDespesaConverter}">
+                <f:selectItem itemLabel="#{msg['select']}"/>
+                <f:selectItems  value="#{cpgTipoDespesaBean.beanList}" var="item" itemLabel="#{item.codigo}-#{item.descricao}" itemValue="#{item}"/>
+                <p:ajax process="@this"/>
+            </p:selectOneMenu>      
+            <h:outputText value="#{msg['minimumStock']}:"/>
+            <p:inputText value="#{stkSupplyItemBean.bean.movement.minimumStock}" required="true" requiredMessage="#{msg['minimumStock']} #{msg['required']}."><p:ajax process="@this"/></p:inputText> 
+            <h:outputText value="#{msg['inactive']}:"/>
+            <p:selectBooleanCheckbox value="#{stkSupplyItemBean.bean.inactive}" required="true" requiredMessage="#{msg['inactive']} #{msg['required']}."><p:ajax process="@this"/></p:selectBooleanCheckbox> 
+
+        </h:panelGrid>
+        <p:commandButton value="#{msg['save']}" action="#{stkSupplyItemBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+</html>

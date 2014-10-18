@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:tab titleStyle="opacity:1" disabled="true" id="nameProjWiz" title="Informar Identificação">
+        <ui:include src="algodevProjectName.xhtml"></ui:include>
+        <p:commandButton value="Próximo" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(admAlgodevBean.actualConstructorTabIndex+1)}" update="@(.tabViewConfig)" oncomplete="updateEntity();"/>        
+    </p:tab>
+
+    <p:tab  titleStyle="opacity:1" disabled="true" id="tableWiz" title="Informar Tabela">
+        <ui:include src="algodevEntity.xhtml"></ui:include>
+        <p:commandButton value="Anterior" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(admAlgodevBean.actualConstructorTabIndex-1)}"  update="@(.tabViewConfig)"/>
+        <p:commandButton widgetVar="doneBtn1Wv" value="Concluir" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}" action="#{admAlgodevBean.setEntitySelected(admAlgodevBean.entity)}" update="@(.tabViewConfig)" onstart="updateCurrentConteiner();" oncomplete="constructorDone();"/>
+        <p:commandButton widgetVar="doneBtn2Wv" style="display: none;" value="Concluir" action="#{admAlgodevBean.setEntitySelected(admAlgodevBean.entity)}" update="@(.tabViewConfig)" oncomplete="constructorDoneConfig();"/>
+        <p:remoteCommand immediate="true" name="updateOpenProjectDlg" update="@(.openProjectDlg)"/>
+        <p:remoteCommand immediate="false" name="updateTabViewConfig" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}" update="@(.tabViewConfig)"/>
+        <div style="float: right;"><input type="checkbox" value="constructorDoneConfig" class="constructorDoneConfig" onchange="if($(this).is(':checked')){doneBtn1Wv.jq.hide();doneBtn2Wv.jq.show();}else{doneBtn1Wv.jq.show();doneBtn2Wv.jq.hide();};"/>Selecionar campos para exibição.</div>
+		
+        <p:dialog widgetVar="gridWizWv">
+            <h:panelGrid columns="1" >                
+                <ui:include src="algodevGridFactory.xhtml"></ui:include>
+            </h:panelGrid>
+            <p:commandButton value="Gerar" update="@(.tabViewConfig)" onstart="clearContainerPage();updateCurrentConteiner();" oncomplete="updateCurrentForm();dropByWizDataForm();"/>
+        </p:dialog>
+        <script>
+            function constructorDoneConfig() {
+                if (appTypeWv.getSelectedValue() === 'listForm') {
+                    updateElementPropertyField();
+                    listFormWizWv.show();
+                }
+                if (appTypeWv.getSelectedValue() === 'summary') {
+                    gridWizWv.show();
+                }
+            }
+            function constructorDone() {
+                createByConstructor();
+                updateCurrentConteiner();
+                updateCurrentForm();
+            }
+        </script>
+    </p:tab>  
+
+</html>

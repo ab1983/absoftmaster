@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <p:focus for="admContractSystemName"/>
+    <p:fieldset style="">
+        <h:panelGrid columns="3">
+            <h:outputText value="#{msg['systemName']}:"/>
+            <p:inputText value="#{admContractBean.bean.systemName}" id="admContractSystemName" required="true" requiredMessage="#{msg['systemName']} #{msg.required}."/>
+            <h:outputText value="Título que será usado para nomear o sistema." style="color: red;"/>
+            <h:outputText value="#{msg['systemTheme']}:"/> 
+            <p:selectOneMenu panelStyle="width:250px"  
+                             effect="fade" var="p" style="width:160px"  filter="true" filterMatchMode="startsWith" value="#{admContractBean.bean.systemTheme}" required="true" requiredMessage="#{msg['systemTheme']} #{msg.required}.">      
+                <f:selectItem itemLabel="#{msg['choose_theme']}" itemValue="" />  
+                <f:selectItems value="#{themeSwitcherBean.themeList}" var="theme"/>  
+
+                <p:column>  
+                    <p:graphicImage url="resources/images/themes/#{p.image}.png" width="40" height="50"/>  
+                </p:column>  
+
+                <p:column>  
+                    #{p.name}  
+                </p:column>  
+                <!--f:ajax render="@all" /-->
+            </p:selectOneMenu > 
+            <h:outputText value="Estilo que será usado para o visual do sistema." style="color: red;"/>
+            <h:outputText rendered="false" value="#{msg['systemLogo']}:"/>
+            <p:inputText rendered="false" value="#{admContractBean.bean.systemLogo}" id="admContractSystemLogo" required="false" requiredMessage="#{msg['systemLogo']} #{msg.required}."/>                            
+            <h:outputText rendered="false" value="Imagem de logomarca que aparecerá no sistema." style="color: red;"/>
+            <h:outputText rendered="false" value="#{msg['corporateName']}:"/>
+            <p:inputText rendered="false" value="#{admContractBean.company.corporateName}" required="true" requiredMessage="#{msg['corporateName']} #{msg.required}."/>
+            <h:outputText rendered="false" value="#{msg['registrationNumber']}:"/>
+            <p:inputMask rendered="false" mask="#{msg.corporateRegistrationMask}" value="#{admContractBean.company.registrationNumber}"  required="true" requiredMessage="#{msg['registrationNumber']} #{msg.required}."/>            
+        </h:panelGrid>
+    </p:fieldset>
+</html>

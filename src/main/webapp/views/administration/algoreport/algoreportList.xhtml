@@ -1,0 +1,743 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"
+       xmlns:c="http://java.sun.com/jsp/jstl/core"> 
+    <style>
+        .elementPropertyValueFactoryTab{
+            width: 400px;
+            display: block;
+        }
+    </style>
+    <script>
+        var nodeExp;
+        var tabExp;
+        var typeExp = "form";
+        var teste669 = null;
+    </script>
+    <f:view contentType="text/html" >
+        <h:form binding="#{admAlgorepContainerForm}"  styleClass="ui-algo-container" prependId="false" onsubmit="javascript:return false">
+
+            <p:panel style="width: 960px;">
+                <h:panelGrid columns="2">
+                    <h:panelGroup>
+                        Período de:
+                        <p:outputLabel value="#{algoRep.startDate}">
+                            <f:convertDateTime pattern="#{msg['calendar.pattern']}"/>
+                        </p:outputLabel>-
+                        <p:outputLabel value="#{algoRep.endDate}">
+                            <f:convertDateTime pattern="#{msg['calendar.pattern']}"/>
+                        </p:outputLabel><p:commandButton id="dateSelectBtn" icon="ui-icon-search"/>
+                    </h:panelGroup>
+                    <p:panel rendered="true" binding="#{algoRepContainerBind}" style="#{(algoRep.algoContainer==null or algoRep.algoContainer.getChildren().isEmpty())?'display:none':''}" styleClass="ui-algo-container" id="algoRepContainer">
+                        <h:outputText value="Sem Filtro"/>
+                    </p:panel>
+                </h:panelGrid>
+            </p:panel>
+            <p:overlayPanel for="dateSelectBtn" dismissable="false" style="height: 250px;">
+                Customizado: <p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" value="#{algoRep.startDate}" />à<p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" value="#{algoRep.endDate}"/>
+                <br/>
+                <p:commandButton rendered="#{algoRep.bean.reportFile==null or algoRep.formRendered}" actionListener="#{algoRep.updateEntityObject()}" oncomplete="updateCurrentForm();updateElementProperty()"  icon="ui-icon-circle-check"/>
+                <h:commandLink rendered="#{algoRep.bean.reportFile!=null and !algoRep.formRendered}" target="_blank" actionListener="#{algoRep.doPdfReport}">
+                    <p:button widgetVar="downloadBtnWv1" value="#{msg.list}"  
+                              icon="ui-icon-search">  
+                    </p:button>                                    
+                </h:commandLink>                      
+            </p:overlayPanel>
+            <p:scrollPanel  rendered="#{algoRep.bean.reportFile==null or algoRep.formRendered}" style="width: 960px;height: 400px;" styleClass="ui-algo-container" id="algoRepContainer2">
+                <h:outputText escape="false" value="#{algoRep.html}"/>
+                <div><script type="text/javascript">
+        /* <![CDATA[ */
+        $(function() {
+            //setupResizableCol();
+        });
+        /* ]]> */
+                    </script>
+                </div>
+            </p:scrollPanel>  
+            <br/>
+            <p:droppable id="algoContainerDrop1" rendered="false" scope="ui-algo" activeStyleClass="ui-state-active" hoverStyleClass="ui-state-highlight" for="algoRepContainer" tolerance="fit" accept=".ui-panel-content .ui-algo-element" binding="#{algoContainerDropBind}" onDrop="(function(event, ui) {
+                handleDrop(event, ui);
+            })"></p:droppable>      
+            <f:event type="preRenderComponent" rendered="true" listener="#{(algoRep.setAlgoContainer(algoRepContainerBind))}"/>
+            <f:event type="preRenderComponent" rendered="true" listener="#{(algoRep.setAlgoPalette(algoRepPaletteBind))}"/>
+            <p:remoteCommand  rendered="false" name="updateCurrentConteiner" immediate="true" update="@(.containerPage)">
+                <f:setPropertyActionListener value="#{algoRepContainerBind}" target="#{algoRep.algoContainer}" />                            
+                <f:setPropertyActionListener value="#{algoRepPaletteBind}" target="#{algoRep.algoPalette}" />      
+            </p:remoteCommand>
+            <p:remoteCommand name="updateCurrentForm" immediate="true" update="@form" oncomplete="updateElementProperty()"/>
+            <p:remoteCommand  rendered="false" name="removeComponent" actionListener="#{algoRep.removeComponent()}"  onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();" immediate="true"/>
+            <p:remoteCommand name="onDropComponent" immediate="true"  update="@form" actionListener="#{algoRep.onDrop()}">
+                <f:setPropertyActionListener value="#{algoRepContainerBind}" target="#{algoRep.algoContainer}" />  
+                <f:setPropertyActionListener value="#{algoRepPaletteBind}" target="#{algoRep.algoPalette}" />  
+            </p:remoteCommand>   
+            <p:remoteCommand name="updateMenu" immediate="true" update="@(.startMenu)"/>
+            <script type="text/javascript">
+        /* <![CDATA[ */
+        var currentElModel = null;
+        var timeoutID;
+        var propertyOk = true;
+        var dropCallbackFunc = null;
+        var dropCallbackParam = null;
+        function setupResizableCol() {
+            $(function() {
+                $(".resizable th").css('position', 'relative');
+                //$(".resizable .ui-icon-gripsmall-diagonal-se").css("background-image", "url(someImage.png)");
+                $(".resizable th div").resizable({
+                    autoHide: true,
+                    handles: "e",
+                    // set correct COL element and original size
+                    start: function(event, ui) {
+                        //var colIndex = ui.helper.index() + 1;
+                        //colElement = table.find("colgroup > col:nth-child(" +  colIndex + ")");
+
+                        // get col width (faster than .width() on IE)
+                        //colWidth = parseInt(colElement.get(0).style.width, 10);
+                        //originalSize = ui.size.width;
+                    },
+                    // set COL width
+                    resize: function(event, ui) {
+                        //var resizeDelta = ui.size.width - originalSize;
+                        //alert(ui.helper.parent().css('max-width'));
+                        if (ui.size.width < parseFloat(ui.helper.parent().css('min-width').replace('px', ''))) {
+                            ui.size.width = ui.helper.parent().css('min-width').replace('px', '');
+                        }
+                        ui.helper.parent().css('max-width', ui.size.width + 'px');
+                        //var newColWidth = colWidth + resizeDelta;
+                        //colElement.width(newColWidth);
+
+                        // height must be set in order to prevent IE9 to set wrong height
+                        $(this).css("height", "auto");
+                    }
+                });/*
+                 $( ".resizable th" ).resizable({
+                 maxHeight: 250,
+                 maxWidth: 350,
+                 minHeight: 150,
+                 minWidth: 200
+                 });*/
+            });
+        }
+        setupResizableCol();
+        function handleDrop(event, ui) {
+            //alert(ui.offset['left']);
+            var elSource = $(event.target);
+            teste23 = elSource;
+            //alert(event.offsetX+"-"+teste23.offset().top);
+            var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - elSource.offset().top + 45) + 'px;left:' + parseInt(ui.offset['left'] - elSource.offset().left + 20) + 'px;';
+            //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+            //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top']) + 'px;left:' + parseInt(ui.offset['left']) + 'px;';
+            //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+            //alert(ui.position['top']+":"+ui.position['left']);
+            //alert(ui.offset['top']+":"+ui.offset['left']);
+            timeoutID = window.setTimeout(function(ui, elSource, styleStr) {
+                prepareDrop(ui, elSource, styleStr, 0);
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+            }, 1000, ui, elSource, styleStr);
+
+        }
+        function positionChange(dir, pos) {
+            if (currentEl !== null) {
+                window.clearTimeout(timeoutID);
+                //alert($(currentEl).attr('id'));
+                //alert($(currentEl).offset()[dir]);
+                //alert(parseFloat($(currentEl).offset()[dir])+parseFloat(pos));
+                //var posObj = {top:$(currentEl).offset()['top'],left:$(currentEl).offset()['left']}
+                //alert(currentEl);
+                var currentElObj = $(esc(currentEl));
+                //alert(currentElObj);
+                var posObj = $(currentElObj).offset();
+                posObj[dir] = $(currentElObj).offset()[dir] + parseInt(pos);
+                $(currentElObj).offset(posObj);
+                //$(currentEl).offset({ dir: (parseFloat($(currentEl).offset()[dir])+parseFloat(pos))});
+                //alert($(currentEl).offset()[dir]);
+                //$(currentEl).css(dir,parseInt($(currentEl).css(dir))+parseInt(pos));  
+                //updateElementAux(currentEl);
+                var param_id = {name: 'param_id', value: $(currentElObj).attr('id')};
+                var style = {name: 'style', value: $(currentElObj).attr('style')};
+                var tabindex = {name: 'tabindex', value: createTabindex(currentElObj)};
+                var prop = [param_id, style, tabindex];
+                timeoutID = window.setTimeout(function(prop) {
+                    updateElementAux(prop)
+                }, 2000, prop);
+            } else {
+                alert('Nenhum Elemento selecionado!');
+            }
+        }
+        function updateElementAux(property) {
+            currentEl = null;
+            for (var i in property) {
+                if (property[i].name === 'param_id' && property[i].value !== null && property[i].value.indexOf('algoRepContainer') === -1) {
+                    currentEl = property[i].value;
+                    break;
+                }
+            }
+            if (currentEl !== null) {
+                updateElementJs(property);
+            } else {
+                alert('Nenhum elemento selecionado.');
+            }
+        }
+        function init() {
+            //updateCurrentConteiner();
+            registerHotkeys('#{algoRepContainerBind.id}');
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').resizable();
+            $('.elementPanel .ui-panel-content .ui-algo-element').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                helper: "clone",
+                revert: false
+            });
+            $('.elementPanel .ui-panel-content .ui-algo-element-container').draggable({
+                scope: 'ui-algo', //
+                cursor: "crosshair",
+                cancel: "",
+                helper: "clone",
+                revert: false
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                grid: [10, 10]
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                grid: [10, 10]
+            });
+
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').droppable({
+                activeClass: 'ui-state-active',
+                hoverClass: 'ui-state-highlight',
+                tolerance: 'touch',
+                scope: 'ui-algo',
+                drop: function(event, ui) {
+                    window.clearTimeout(timeoutID);
+                    var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+                    //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+                    //alert(ui.position['top']+":"+ui.position['left']);
+                    //alert(ui.offset['top']+":"+ui.offset['left']); 
+                    var timeCount = $(this).find('.ui-algo-element-container').length + 1 * 1000;
+
+                    prepareDrop(ui, this, styleStr, timeCount);
+
+
+                    //exibirConfirm("Informe os parâmetros.", "Vincular Dados", callbackFunc);
+                }
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').dblclick(function(event) {
+                event.preventDefault();
+                if (window.showPropertyValue !== undefined) {
+                    showPropertyValue();
+                }
+                //updateElementAux(this,{name:'style',value:$(this).attr('style')});
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').mouseup(function(event) {
+                event.preventDefault();
+                if (propertyOk) {
+                    propertyOk = false;
+                    var prop = [{name: 'param_id', value: this.id}, {name: 'style', value: $(this).attr('style')}, {name: 'tabindex', value: createTabindex(this)}];
+                    updateElementAux(prop);
+                    window.setTimeout(function() {
+                        propertyOk = true;
+                    }, 1000);
+                }
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').each(function() {
+                //var aClick = $(this).attr('onClick');
+                //if(aClick===undefined){
+                //alert(aClick);                        
+                //aClick = function(){};
+                //}
+                $(this).prop("onclick", null);
+                //$(this).attr('onClick',null);
+                //$(this).off("click", aClick);
+                //$(this).unbind("click", aClick);   
+                //$(this).click(function(event){ 
+                //  return false;
+                //});   
+                //$(this).on("click", aClick);
+
+            });
+            $('.elementPanel .ui-panel-content .ui-algo-element').click(function(event) {
+                event.preventDefault();
+                currentElModel = this;
+            });
+            //$('.elementPanel .ui-panel-content .ui-algo-element').attr('onclick',aClick);
+            /*
+             $( ".ui-algo-container" ).droppable({
+             accept: ".ui-algo-element", 
+             drop: function(event, ui) {
+             $(this).append($(ui.draggable).clone().each(function() {$(this).attr("id",$(this).attr("id")+1)}));
+             $(".ui-algo-container .ui-algo-element").addClass("item");
+             $(".item").removeClass("ui-draggable ui-algo-element");
+             $(".item").draggable({
+             containment: 'parent',
+             grid: [10,10],
+             helper:"original",
+             cancel:"",
+             cursor: "crosshair"
+             });    
+             }
+             });*/
+        }
+        function prepareDrop(ui, el, styleStr, timeCount) {
+            dropCallbackParam = {timeCount: timeCount, ui: ui, styleStr: styleStr, el: el};
+            dropCallbackFunc = function(p, value, dataList) {
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                timeoutID = window.setTimeout(function(ui, styleStr, el) {
+                    //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+                    onDropComponent([{name: 'value', value: value}, {name: 'datalist', value: dataList}, {name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                }, p.timeCount, p.ui, p.styleStr, p.el, value, dataList);
+            };
+            //elementPropertyApplyWv.jq.click(dropCallbackFunc);
+            if (ui.draggable.parents('.ui-algo-container,.ui-algo-element-container').attr('id') !== $(el).attr('id')) {
+                if (ui.draggable.is('.elementPanel .ui-panel-content .ui-algo-element')) {
+                    $('.prepareElementPropertyValue').val('');
+                    if (ui.draggable.is('.data-list')) {
+                        dataListChkBox.check();
+                        dataListChkBox.jq._show();
+                        $('.panelGridEntityProperty').show();
+                    } else {
+                        dataListChkBox.uncheck();
+                        dataListChkBox.jq._hide();
+                        $('.panelGridEntityProperty').hide();
+                    }
+                    preparePropertyDlg.show();
+                } else {
+                    onDropComponent([{name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                }
+            }
+        }
+        function createTabindex(el) {
+            return $(el).offset().top / 10 * 100 + $(el).offset().left / 10;
+        }
+        function registerHotkeys(containerId) {
+
+            var key = 'keydown.moveElem_' + containerId;
+
+            $(document).off(key).on(key, function(e) {
+                var keyCode = $.ui.keyCode;
+                //var active = parseInt(dlgWidget.jq.css('z-index')) === PrimeFaces.zindex;
+
+                //if (dlgWidget.jq.hasClass('ui-overlay-visible') && active) {
+                if (e.which === keyCode.ESCAPE) {
+                    //dlgWidget.hide();
+                } else if (e.which === keyCode.ENTER || e.which === keyCode.NUMPAD_ENTER) {
+                    //dlgWidget.jq.find('button:submit:first').click();
+                    //e.preventDefault();
+                } else if (e.ctrlKey && e.which === keyCode.LEFT) {
+                    positionChange('left', -2);
+                } else if (e.ctrlKey && e.which === keyCode.RIGHT) {
+                    positionChange('left', +2);
+                } else if (e.ctrlKey && e.which === keyCode.UP) {
+                    positionChange('top', -2);
+                } else if (e.ctrlKey && e.which === keyCode.DOWN) {
+                    positionChange('top', +2);
+                } else if (e.which === keyCode.DELETE) {
+                    if (currentEl !== null && currentEl !== undefined) {
+                        removeComponent();
+                    }
+                }
+                // }
+            });
+        }
+        function showPropertyItem(property) {
+            //alert(property.type);
+            if (property.type === 'boolean') {
+                propertyBoolDlg.show();
+                if (property.value === 'true') {
+                    elementPropertyValueBoolWv.check();
+                } else {
+                    elementPropertyValueBoolWv.uncheck();
+                }
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+            } else {
+                propertyDlg.show();
+                $(".elementPropertyValue").val(property.value);
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+            }
+            //$(".elementPropertyApply").click();
+        }
+        //init();
+        /* ]]> */
+            </script>
+
+        </h:form>
+        <p:tooltip showEffect="clip" hideEffect="explode"/>    
+        <h:form binding="#{algoRepForm}"  prependId="false" styleClass="openProjectDlg">
+            <h:panelGroup  binding="#{repRequirementName}" layout="block">
+                <h:panelGroup  layout="block" rendered="#{algoRep.formRendered}">                
+                    <div style="display:inline-table;vertical-align: middle;right: 450px;">
+                        <h:panelGrid columns="2" rendered="false">
+                            <p:outputLabel value="Página:"> 
+                            </p:outputLabel>
+                            <p:selectOneMenu value="#{algoRep.containerPage}" styleClass="containerPage"> 
+                                <f:selectItems value="#{algoRep.doElementsConatainerList()}"/>
+                                <p:ajax onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();"/>
+                            </p:selectOneMenu>
+                        </h:panelGrid>
+                    </div>
+                    <p:commandButton  value="#{msg['list']}" icon="ui-icon-search" action="#{algoRep.doBeanList()}" immediate="true" onstart="" oncomplete="openProjectDlg.show();updateCurrentForm();"/> 
+                    <p:commandButton value="#{msg['save']}" process="@form" update="@(.openProjectDlg)" action ="#{algoRep.doBeanSave()}" icon="ui-icon-document" oncomplete="prepareUpdateMenu();">
+                        <f:setPropertyActionListener value="#{algoRepContainerBind}" target="#{algoRep.algoContainer}" />   
+                    </p:commandButton>    
+                    <p:commandButton value="#{msg['build']}" icon="ui-icon-newwin" onclick="prepareConfigDlg.show();" immediate="true"/>                 
+                    <p:commandButton value="#{msg['exclude']}" rendered="#{algoRep.bean.reportRequirementId!=null}" icon="ui-icon-trash" update="@(.openProjectDlg)" immediate="true" action="#{algoRep.doBeanRemove()}" onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();updateMenu();"/>                 
+                    <p:commandButton value="#{msg['run']}" rendered="#{algoRep.bean.reportRequirementId!=null}" action ="#{app.indexBeanNewWin(algoRep.autorizationUserIdTemp)}" icon="ui-icon-newwin" immediate="true" update=":basePanel"/>                 
+                    <p:panel binding="#{algoRepPaletteBind}" style="display: none;" id="repElementPanel" styleClass="elementPanel" toggleable="true" header="#{msg['elementPallete']}" collapsed="true">
+                        <ui:include src="../algodev/algodevElementPanel.xhtml"/>
+                    </p:panel>
+
+                    <br/><br/>
+                </h:panelGroup>
+            </h:panelGroup>          
+            <p:remoteCommand name="updateReportConfig" immediate="true" update="@(.customListRep)"/>
+            <p:remoteCommand name="updateReportOptionField" actionListener="#{algoRep.updateFieldConfig()}" immediate="true" update="@(.ui-algo-container)" oncomplete="updateElementProperty();"/>
+            <p:remoteCommand name="updateReportStatusField" actionListener="#{algoRep.updateFieldShow()}" immediate="false" update="@(.ui-algo-container)" oncomplete="updateElementProperty();"/>
+            <p:remoteCommand name="updateReport" actionListener="#{algoRep.updateReport()}" immediate="false" update="@(.ui-algo-container)"/>            
+            <p:remoteCommand name="updateElementProperty" immediate="true" update="@(.elementProperty)"/>
+            <p:remoteCommand name="updateProjectProperty" immediate="true" update="@(.projectProperty)"/>
+            <p:remoteCommand name="updateElementJs" actionListener="#{algoRep.updateElement()}" immediate="true" update="@(.elementProperty)" oncomplete="updateElementProperty();">
+            </p:remoteCommand>
+
+            <!--p:hotkey bind="ctrl+shift+right" oncomplete="positionChange('left',-2)"/>  
+            <p:hotkey bind="ctrl+shift+top" oncomplete="positionChange('top',+2)"/>  
+            <p:hotkey bind="ctrl+shift+botton" oncomplete="positionChange('top',-2)"/-->  
+            <script type="text/javascript"> /* <![CDATA[ */
+        var currentEl = null;
+        var currentChild = null;
+        var fieldShowAllBool = true;
+        function createEventOrderListRep() {
+
+            var func = 'mouseup.eventOrderListRep';
+            $('.customListRep').off(func).on(func, function(event) {
+                //event.preventDefault();
+                window.setTimeout(function() {
+                    processConfigReport();
+                }, 1000);
+            });
+        }
+        function prepareUpdateMenu() {
+            window.setTimeout(function() {
+                updateMenu();
+            }, 5000);
+        }
+        /* ]]> */
+            </script>
+            <!--p:hotkey bind="r" onsuccess="positionChange('left',+2);"/-->  
+            <p:dialog dynamic="true" widgetVar="prepareConfigDlg" visible="false" header="#{msg['projectConfiguration']}" closable="true" style="height: 883px;max-height: 883px;min-height: 483px;  width: 888px;max-width: 888px;" resizable="false">         
+                <p:tabView id="tabViewConfigRep" widgetVar="prepareConfigTabView" style="width: 750px;max-width: 750px;min-width: 750px;">
+                    <ui:include src="algoreportProject.xhtml"></ui:include>      
+                </p:tabView>
+            </p:dialog>
+            <p:remoteCommand name="cleanUpApp" immediate="true" actionListener="#{algoRep.cleanUpApp()}" oncomplete="updateCurrentForm();"/>                 
+            <p:remoteCommand name="clearContainerPage" immediate="true" actionListener="#{algoRep.clearContainerPage()}" oncomplete="updateCurrentForm();"/>                         
+        </h:form>
+        <h:form>
+            <p:remoteCommand name="processConfigReport" immediate="false" process="@form" oncomplete="updateReport()"/>
+            <div style="width: 300px;position: absolute;top: 0;right: 0;z-index: 100;">
+
+                <p:panel styleClass="elementProperty"  toggleable="true" header="#{msg['property']}" rendered="#{algoRep.formRendered}">
+
+                    <h:panelGroup>
+
+                        <div onmousedown="createEventOrderListRep();">
+                            <table class="customListRep" style="vertical-align: top;display: inline-block;">
+                                <tr><td style="vertical-align:top;">
+                                        <p:orderList  immediate="true" styleClass="ui-report-config customListRep ui-report-config-field" converter="ObjectConverter" value="#{algoRep.fieldOptionsAll}" var="fo"  
+                                                      itemValue="#{fo}" controlsLocation="bottom" id="customListRep">  
+                                            <f:facet name="caption"> Campos</f:facet>  
+
+                                            <p:column> 
+                                                <div style="display: inline-table;width:100%; vertical-align: middle;">
+                                                    <span class="ui-icon ui-icon-arrow-2-n-s" style="display: inline-block;">
+                                                    </span>
+                                                    <div class="ui-report-field" style="display: inline-block;overflow: hidden; width: 65%;max-height:25px;white-space:nowrap;width:65%; #{fo.get('used')?'font-weight:bold;':''}#{!fo.get('visible')?'text-decoration: line-through;':''}">
+                                                        <input type="hidden" class="ui-report-field-object" value="#{fo.get('property')}"/>
+                                                        #{fo.get('head')}
+                                                    </div>
+                                                    <p:commandLink immediate="true" onclick="fieldObject = '#{fo.get('property')}';
+            showConfigFieldDlg(this, '#{fo.get('visible')}');"  styleClass="ui-icon ui-icon-gear" style="display: inline-block;">
+                                                    </p:commandLink>
+                                                </div>
+                                            </p:column>    
+                                        </p:orderList>
+                                    </td><td>
+                                        <h:panelGroup>
+                                            <p:orderList  immediate="true" converter="ObjectConverter" value="#{algoRep.fieldOptionsFil}" var="fo"  
+                                                          itemValue="#{fo}" controlsLocation="bottom" id="customListRep2" styleClass="ui-report-config ui-report-config-fil customListRep customListRepOpt">  
+                                                <f:facet name="caption">Filtro</f:facet>  
+
+                                                <p:column>  
+                                                    <span style="display: inline-table;width:100%;">
+                                                        <span class="ui-icon ui-icon-arrow-2-n-s" style="display: inline-block;">
+                                                        </span>
+                                                        <div class="ui-report-field" style="display: inline-block;overflow: hidden; width: 65%;max-height:25px;white-space:nowrap; #{fo.get('used')?'font-weight:bold':''}">
+
+                                                            <input type="hidden" class="ui-report-field-object" value="#{fo.get('property')}"/>
+                                                            #{fo.get('head')}
+                                                        </div>
+                                                        <p:commandLink immediate="true" onclick="fieldObject = '#{fo.get('property')}';
+            showConfigFieldDlg(this, '#{fo.get('visible')}', 'fil');"  styleClass="ui-icon ui-icon-gear" style="display: inline-block;">
+                                                        </p:commandLink>                                                                
+                                                    </span>
+                                                </p:column>    
+                                            </p:orderList>    
+                                            <p:orderList  immediate="true" converter="ObjectConverter" value="#{algoRep.fieldOptionsRow}" var="fo"  
+                                                          itemValue="#{fo}" controlsLocation="bottom" id="customListRep3" styleClass="ui-report-config ui-report-config-row customListRep customListRepOpt">  
+                                                <f:facet name="caption">Linhas</f:facet>  
+
+                                                <p:column>   
+                                                    <span style="display: inline-table;width:100%;">
+                                                        <span class="ui-icon ui-icon-arrow-2-n-s" style="display: inline-block;">
+                                                        </span>
+                                                        <div class="ui-report-field" style="display: inline-block;overflow: hidden; width: 65%;max-height:25px;white-space:nowrap; #{fo.get('used')?'font-weight:bold':''}">                                                            
+                                                            <input type="hidden" class="ui-report-field-object" value="#{fo.get('property')}"/>
+                                                            #{fo.get('head')}
+                                                        </div>
+                                                        <p:commandLink immediate="true" onclick="fieldObject = '#{fo.get('property')}';
+            showConfigFieldDlg(this, '#{fo.get('visible')}', 'row');"  styleClass="ui-icon ui-icon-gear" style="display: inline-block;">
+                                                        </p:commandLink>                                                                
+                                                    </span>
+                                                </p:column>    
+                                            </p:orderList>  
+                                            <p:orderList  immediate="true" converter="ObjectConverter" value="#{algoRep.fieldOptionsCol}" var="fo"  
+                                                          itemValue="#{fo}" controlsLocation="bottom" id="customListRep4" styleClass="ui-report-config ui-report-config-col customListRep customListRepOpt">  
+                                                <f:facet name="caption">Colunas</f:facet>  
+
+                                                <p:column>      
+                                                    <span style="display: inline-table;width:100%;">
+                                                        <span class="ui-icon ui-icon-arrow-2-n-s" style="display: inline-block;">
+                                                        </span>
+                                                        <div class="ui-report-field" style="display: inline-block;overflow: hidden; width: 65%;max-height:25px;white-space:nowrap; #{fo.get('used')?'font-weight:bold':''}">                                                            
+                                                            <input type="hidden" class="ui-report-field-object" value="#{fo.get('property')}"/>
+                                                            #{fo.get('head')}
+                                                        </div>
+                                                        <p:commandLink immediate="true" onclick="fieldObject = '#{fo.get('property')}';
+            showConfigFieldDlg(this, '#{fo.get('visible')}', 'col');"  styleClass="ui-icon ui-icon-gear" style="display: inline-block;">
+                                                        </p:commandLink>                                                                
+                                                    </span>
+                                                </p:column>    
+                                            </p:orderList>     
+                                            <p:orderList immediate="true" converter="ObjectConverter" value="#{algoRep.fieldOptionsVal}" var="fo"  
+                                                         itemValue="#{fo}" controlsLocation="bottom"  id="customListRep5" styleClass="ui-report-config ui-report-config-val customListRep customListRepOpt">  
+                                                <f:facet name="caption">Valores</f:facet>  
+
+                                                <p:column>      
+                                                    <span style="display: inline-table;width:100%;">
+                                                        <span class="ui-icon ui-icon-arrow-2-n-s" style="display: inline-block;">
+                                                        </span>
+                                                        <div class="ui-report-field" style="display: inline-block;overflow: hidden; width: 65%;max-height:25px;white-space:nowrap; #{fo.get('used')?'font-weight:bold':''}">                                                            
+                                                            <input type="hidden" class="ui-report-field-object" value="#{fo.get('property')}"/>
+                                                            #{fo.get('head')}
+                                                        </div>
+                                                        <p:commandLink immediate="true" onclick="fieldObject = '#{fo.get('property')}';
+            showConfigFieldDlg(this, '#{fo.get('visible')}', 'val');"  styleClass="ui-icon ui-icon-gear" style="display: inline-block;">
+                                                        </p:commandLink>                                                                
+                                                    </span>
+                                                </p:column>    
+                                            </p:orderList>
+                                        </h:panelGroup>
+                                    </td></tr><tr><td><input type="checkbox" class="fieldShowAll" onchange="showAllFields();"/>Exibir Todos   </td></tr>
+                            </table>
+                        </div>
+
+                    </h:panelGroup>
+
+                    <p:dialog header="Configurar Campo" resizable="false" widgetVar="ConfigFieldWv" onHide="prepareUpdateReport()">
+                        <h:panelGrid columns="2" styleClass="ConfigField">
+                            <h:outputLabel value="Visível"/>
+                            <h:selectBooleanCheckbox styleClass="fieldShow" immediate="true">
+                            </h:selectBooleanCheckbox>  
+                        </h:panelGrid>
+                        <h:panelGrid columns="2" styleClass="ConfigFieldVal">
+                            <h:outputLabel value="Soma"/>
+                            <h:selectBooleanCheckbox styleClass="sumShow" immediate="true">
+                            </h:selectBooleanCheckbox>  
+                            <h:outputLabel value="Média"/>
+                            <h:selectBooleanCheckbox styleClass="averageShow" immediate="true">
+                            </h:selectBooleanCheckbox> 
+                            <h:outputLabel value="Contagem"/>
+                            <h:selectBooleanCheckbox styleClass="countShow" immediate="true">
+                            </h:selectBooleanCheckbox>                                        
+                        </h:panelGrid>                                
+                    </p:dialog> 
+                    <script>
+        var dragObj1;
+        var dragObj2;
+        var fieldObject;
+        var fieldSrc;
+        function showConfigFieldDlg(elSource, checkStatus, src) {
+            $('.ConfigField').hide();
+            $('.ConfigFieldVal').hide();
+            fieldSrc = src;
+            if (src === 'val') {
+                $('.ConfigFieldVal').show();
+            } else if (src === 'row') {
+
+            } else if (src === 'col') {
+
+            } else if (src === 'fil') {
+
+            } else {
+                $('.ConfigField').show();
+                $('.fieldShow').attr('checked', checkStatus === 'true');
+                //ConfigFieldWv.jq.css({left:$(elSource).offset().left,top:$(elSource).offset().top});
+            }
+            ConfigFieldWv.show();
+            ConfigFieldWv.jq.css('left', ($(elSource).offset().left - 200) + 'px');
+            ConfigFieldWv.jq.css('top', $(elSource).offset().top + 'px');
+
+        }
+        function showAllFields() {
+            fieldShowAllBool = !!$('.fieldShowAll').is(':checked');
+            updateReportStatusField([{name: 'fieldShowAll', value: fieldShowAllBool}]);
+        }
+        function prepareUpdateReport() {
+            //alert(!!$('.fieldShow').is(':checked'));
+            if (fieldSrc !== undefined) {
+                if (fieldSrc === 'val') {
+                    //updateReportStatusField([{name: 'fieldObject', value: fieldObject}, {name: 'fieldShow', value: !!$('.fieldShow').is(':checked')}])
+                } else if (fieldSrc === 'row') {
+
+                } else if (fieldSrc === 'col') {
+
+                } else if (fieldSrc === 'fil') {
+
+                }
+            } else {
+                updateReportStatusField([{name: 'fieldObject', value: fieldObject}, {name: 'fieldShow', value: !!$('.fieldShow').is(':checked')}]);
+            }
+        }
+        function createDragAndDrop() {
+            /*
+             $(".ui-sortable").sortable({
+             receive: function(event, ui) {
+             dragObj1 = ui.item.attr('data-item-value');
+             //dragObj2 = ui.item;
+             },
+             update: function(event, ui) {
+             //dragObj1 = this;
+             dragObj2 = ui.item.index();
+             }
+             });
+             $( "ul, li" ).disableSelection();
+             */
+            $('.ui-report-field').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                helper: "clone",
+                zIndex: 100,
+                scroll: false,
+                revert: "invalid"
+            });
+            $('.ui-report-config').droppable({
+                activeClass: 'ui-state-active',
+                hoverClass: 'ui-state-highlight',
+                tolerance: 'pointer',
+                scope: 'ui-algo',
+                drop: function(event, ui) {
+                    var destin = "";
+                    if ($(this).is('.ui-report-config-field')) {
+                        destin = '';
+                    } else if ($(this).is('.ui-report-config-fil')) {
+                        destin = 'fil';
+                    } else if ($(this).is('.ui-report-config-row')) {
+                        destin = 'row';
+                    } else if ($(this).is('.ui-report-config-col')) {
+                        destin = 'col';
+                    } else if ($(this).is('.ui-report-config-val')) {
+                        destin = 'val';
+                    }
+
+                    var object = $(ui.draggable).find('.ui-report-field-object').val();
+                    updateReportOptionField([{name: 'fieldObject', value: object}, {name: 'fieldDestin', value: destin}]);
+                    //window.clearTimeout(timeoutID);
+                    //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+                    //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+                    //alert(ui.position['top']+":"+ui.position['left']);
+                    //alert(ui.offset['top']+":"+ui.offset['left']); 
+                    //var timeCount = $(this).find('.ui-algo-element-container').length + 1 * 1000;
+
+                    //prepareDrop(ui, this, styleStr, timeCount);
+
+
+                    //exibirConfirm("Informe os parâmetros.", "Vincular Dados", callbackFunc);
+                }
+            });
+            $(".ui-sortable").sortable("option", "scroll", false);
+            $(".ui-sortable").sortable("option", "axis", "y");
+            //$(".ui-sortable").sortable("option", "revert", true);
+            //$(".ui-sortable").sortable("refresh");
+            //$( ".ui-sortable" ).sortable( "option", "connectWith", "#shopping-cart" );
+        }
+        createDragAndDrop();
+        $('.fieldShowAll').attr('checked', fieldShowAllBool);
+                    </script>
+                </p:panel>  
+            </div>
+        </h:form>
+        <h:form binding="#{repSelectBeanForm}">
+            <p:dialog widgetVar="openProjectDlg" styleClass="openProjectDlg" header="#{msg['selectProject']}" modal="true" dynamic="true" closable="false" style="height: 283px;max-height: 283px;min-height: 283px;  width: 258px;max-width: 258px;min-width: 258px;" resizable="false">
+                <p:dataTable value="#{algoRep.beanList}" var="item" selection="#{algoRep.bean}" selectionMode="single" rowKey="#{item.reportRequirementId}" scrollable="true" scrollHeight="150" scrollWidth="240">
+                    <p:column>  
+                        <f:facet name="header">  
+                            <h:outputText value="#{msg['name']}" />  
+                        </f:facet>  
+                        <h:outputText value="#{item.reportRequirementName}" />  
+                    </p:column>  
+                </p:dataTable>            
+                <p:commandButton value="#{msg['open']}" action="#{algoRep.doBeanForm()}" update="@(.openProjectDlg)" onstart="" oncomplete="openProjectDlg.hide();updateCurrentForm();$('#projectPropertyDiv').html('');updateProjectProperty();"/>         
+                <p:commandButton value="#{msg['new']}" action="#{algoRep.doBeanNew()}" update="@(.openProjectDlg)" onstart="$('#selectProjectDiv').html('');" oncomplete="openProjectDlg.hide();updateCurrentForm();"/>         
+            </p:dialog>       
+        </h:form>   
+        <style>
+            .customListRep tbody tr td{
+                width: 130px !important;
+                font-size: 10px !important;
+                padding: 0px !important;
+                border-width:0px !important;
+                padding:0px !important;
+                border: none !important;    
+            }     
+            .customListRep tbody tr td ul{
+                width: 130px !important;  
+                height: 400px !important;
+                /*overflow: hidden !important;*/
+            }
+            .customListRepOpt tbody tr td ul{
+                height: 78px !important; 
+                /*overflow: hidden !important;*/
+            }
+        </style>
+        <script type="text/javascript">
+            /* <![CDATA[ */
+            //cleanUpApp(); 
+            #{algoRep.bean.reportRequirementId!=null?'':'openProjectDlg.show()'};
+
+            function nextPrepareConfigTab() {
+                prepareConfigTabView.select(prepareConfigTabView.getActiveIndex() + 1);
+            }
+            function prevPrepareConfigTab() {
+                prepareConfigTabView.select(prepareConfigTabView.getActiveIndex() - 1);
+            }
+            function dropByWizDataList() {
+                onDropComponent([{name: 'datalist', value: true}, {name: 'elementModelId', value: '#{dataTableElement.getClientId()}'}, {name: 'elementContainerId', value: '#{algoRepContainerBind.getClientId()}'}]);
+            }
+            function dropByWizDataForm() {
+                onDropComponent([{name: 'dataform', value: true}, {name: 'elementModelId', value: '#{fieldsetElement.getClientId()}'}, {name: 'elementContainerId', value: '#{algoRepContainerBind.getClientId()}'}]);
+            }
+            /* ]]> */
+        </script>
+    </f:view>
+</html>

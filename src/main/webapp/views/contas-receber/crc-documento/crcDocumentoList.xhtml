@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">  
+    <h:form binding="#{crcDocumento}" prependId="false">
+        <h:panelGroup  layout="block">
+            <h:panelGroup  layout="block" rendered="#{crcDocumentoBean.formRendered}">
+                <ui:include src="#{crcDocumentoBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup  layout="block" rendered="#{!crcDocumentoBean.formRendered}">
+                <p:commandButton value="Incluir" action ="#{crcDocumentoBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton value="Excluir" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="Lista Documento CRC" style="width: 800px;">
+                    <p:dataTable var="item" value="#{crcDocumentoBean.beanList}" emptyMessage="#{msg.emptyMessage}">
+                        <p:column>
+                            <f:facet name="header">
+                                Número Documento
+                            </f:facet>
+                            #{item.numeroDocto}
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                Cliente
+                            </f:facet>
+                            #{item.cliente.nome}
+                        </p:column>                        
+                        <p:column>
+                            <f:facet name="header">
+                                Data Emissão
+                            </f:facet>
+                            <h:outputText value="#{item.dataEmissao}">  
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                            </h:outputText> 
+                        </p:column>                             
+                        <p:column>
+                            <f:facet name="header">
+                                Data Vencimento
+                            </f:facet>
+                            <h:outputText value="#{item.dataVencimento}">  
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                            </h:outputText>                                  
+                        </p:column>
+                        <p:column style="text-align: center;">
+                            <f:facet name="header">
+                                Ação
+                            </f:facet>
+                            <p:commandLink action="#{crcDocumentoBean.doBeanForm()}" value="Editar" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{crcDocumentoBean.bean}" value="#{item}"/>
+                            </p:commandLink> |
+                            <p:commandLink action="#{crcDocumentoBean.doBeanRemove()}" value="Excluir" immediate="true"    update="@form">
+                                <f:setPropertyActionListener target="#{crcDocumentoBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </p:column>                    
+                    </p:dataTable>
+                </p:panel>
+                
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+</html>

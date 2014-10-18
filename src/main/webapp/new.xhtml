@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:f="http://java.sun.com/jsf/core"
+
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+    Bem-vindo(a) ao <h:outputText value="#{baseBean.title}"/>!
+    <h:form  >
+        <p:panelGrid columns="5"> 
+            <c:forEach items="#{gerLoginBean.menuModelList}" var="mModel">
+                <h:panelGroup> <p:panelMenu model="#{mModel}" style="width:200px"/> </h:panelGroup>
+            </c:forEach>
+        </p:panelGrid>
+        <p:panelGrid rendered="false" columns="5">          
+            <p:menu >            
+                <p:submenu label="Cadastro" style="font-size: 14px;font-style: italic;" styleClass="ui-state-default">  
+                    <p:separator />  
+                    <p:menuitem value="Usuário" action="#{secUserBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />  
+                    <!--p:menuitem value="Departamento" action="#{secUserBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />                  
+                    <p:menuitem value="Funcionário" action="#{funcionarioBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator /-->  
+                    <p:menuitem value="Cliente" action="#{gerClienteBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />  
+                    <p:menuitem value="Fornecedor" action="#{gerFornecedorBean.indexBean()}"  update=":basePanel"/>   
+                    <p:separator />                  
+                    <p:menuitem value="Tipo de Documento" action="#{gerTipoDocumentoBean.indexBean()}"  update=":basePanel"/>                    
+                    <p:separator />                  
+                    <p:menuitem value="Centro de Custo" action="#{centroCustoBean.indexBean()}"  update=":basePanel"/>                   
+                    <p:separator />  
+                    <p:menuitem value="CPG - Tipo de Despesa" action="#{tipoDespesaBean.indexBean()}"  update=":basePanel"/>                   
+                    <p:separator />
+                    <p:menuitem value="CRC - Tipo de Receita" action="#{crcTipoReceitaBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />
+                    <p:menuitem value="Obras" action="#{gobObraBean.indexBean()}"  update=":basePanel"/>   
+                    <p:separator />             
+                </p:submenu>
+            </p:menu>
+            <p:menu>
+                <p:submenu label="Financeiro" style="font-size: 14px;font-style: italic;" styleClass="ui-state-default">  
+                    <p:separator />  
+                    <p:submenu label="Contas a pagar">  
+                        <p:menuitem value="Lançamento Docto" action="#{cpgDocumentoBean.indexBean()}"  update=":basePanel"/>                      
+                    </p:submenu>
+                    <p:separator />  
+                    <p:submenu label="Contas a receber">  
+                        <p:menuitem value="Lançamento Docto" action="#{crcDocumentoBean.indexBean()}"  update=":basePanel"/>                      
+                    </p:submenu>                
+                    <!--p:separator /> 
+                    <p:submenu label="Caixas e Bancos">  
+                        <p:menuitem value="Planej. Orçamentário" action="#{cbcPlanejamentoOrcamentarioBean.indexBean()}"  update=":basePanel"/>                      
+                    </p:submenu-->                 
+                </p:submenu>      
+            </p:menu>
+            <!--p:menu>
+                <p:submenu label="Materiais" style="font-size: 14px;font-style: italic;" styleClass="ui-state-default">  
+                    <p:separator />  
+                    <p:menuitem value="Estoque" action=""/>  
+                    <p:separator />  
+                    <p:menuitem value="Compras" action=""/>    
+                </p:submenu> 
+            </p:menu-->
+            <p:menu>
+                <p:submenu label="Operacional" style="font-size: 14px;font-style: italic;" styleClass="ui-state-default">  
+                    <p:menuitem value="Cronograma de Obras" action="#{grtCronogramaBean.indexBean()}"  update=":basePanel"/>  
+                    <p:separator />  
+                    <p:menuitem value="Aquisição Imovel" action="#{gobAquisicaoImovelBean.indexBean()}"  update=":basePanel"/>                      
+                </p:submenu>     
+            </p:menu>
+            <p:menu>
+                <p:submenu label="Relatório" style="font-size: 14px;font-style: italic;" styleClass="ui-state-default">  
+                    <p:separator />  
+                    <p:menuitem value="Usuário" action="#{secUserBean.indexBean()}"/>  
+                    <p:separator />  
+                    <p:menuitem value="Funcionário" action="#{secUserBean.indexBean()}"/>  
+                    <p:separator />  
+                    <p:menuitem value="Cliente" action="#{secUserBean.indexBean()}"/>  
+                    <p:separator />  
+                    <p:menuitem value="Obras" action="#{secUserBean.indexBean()}"/>   
+                </p:submenu>                       
+            </p:menu>
+
+
+        </p:panelGrid>
+
+    </h:form>
+</html>

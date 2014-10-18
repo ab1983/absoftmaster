@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{secUserBean.doBeanList()}"  immediate="true" update="@form"> 
+    </p:commandButton>
+    <p:panel header="Cadastro Usuário" style="width: 500px;" id="cadastroUsuarioPanel" widgetVar="cadastroUsuarioPanel">
+        <h:panelGrid columns="2">
+            <h:outputText value="Nome:"/>
+            <p:inputText value="#{secUserBean.bean.name}" autocomplete="off" required="true" requiredMessage="Nome #{msg.required}."/>
+            <h:outputText value="E-mail:"/>
+            <p:inputText value="#{secUserBean.bean.email}" autocomplete="off" required="true" requiredMessage="E-mail #{msg.required}." validatorMessage="E-mail inválido.">
+                <f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$"/>
+            </p:inputText>
+            <h:outputText value="Password:"/>
+            <p:password value="#{secUserBean.bean.password}" autocomplete="off" redisplay="true" required="true" requiredMessage="Password #{msg.required}."/>
+            <h:outputText value="Administrador:"/>
+            <p:selectBooleanCheckbox value="#{secUserBean.bean.administrator}" />
+        </h:panelGrid>
+        <p:commandButton value="Gravar"   action="#{secUserBean.doBeanSave()}" update="@form"></p:commandButton>
+    </p:panel>
+    <!--/ui:define-->
+</html>

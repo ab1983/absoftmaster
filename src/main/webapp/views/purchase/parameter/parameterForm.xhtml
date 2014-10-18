@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:focus for="emailForStockSolicitation"/>
+    <p:panel header="#{msg['registration']} #{msg['parameter']}" style="width: 700px;">
+        <h:panelGrid columns="2">
+            <h:outputText id="emailForStockSolicitation" value="#{msg['emailForStockSolicitation']}:"/>
+            <p:inputText style="width:250px" value="#{purParameterBean.bean.emailForStockSolicitation}" required="true" requiredMessage="#{msg['emailForStockSolicitation']} #{msg.required}."/>
+            <h:outputText id="emailForPurchaseSolicitation" value="#{msg['emailForPurchaseSolicitation']}:"/>
+            <p:inputText style="width:250px" value="#{purParameterBean.bean.emailForPurchaseSolicitation}" required="true" requiredMessage="#{msg['emailForPurchaseSolicitation']} #{msg.required}."/>            
+            <h:outputText value="#{msg['stockSolicitationApproveRequired']}:"/>
+            <p:selectBooleanCheckbox value="#{purParameterBean.bean.stockSolicitationApproveRequired}"/>   
+            <h:outputText value="#{msg['purchaseSolicitationApproveRequired']}:"/>
+            <p:selectBooleanCheckbox value="#{purParameterBean.bean.purchaseSolicitationApproveRequired}"/>               
+            <h:outputText value="#{msg['orderApproveRequired']}:"/>
+            <p:selectBooleanCheckbox value="#{purParameterBean.bean.orderApproveRequired}"/>  
+            <h:outputText value="#{msg['orderVariationAppoveRequired']}:"/>
+            <p:selectBooleanCheckbox value="#{purParameterBean.bean.orderVariationAppoveRequired}"/>              
+        </h:panelGrid>
+        <p:commandButton value="#{msg['save']}" action="#{purParameterBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+</html>

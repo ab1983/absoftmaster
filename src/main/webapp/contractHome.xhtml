@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">     
+    <p:panel header="Etapas do #{msg['registration']}" style="" id="panelContractHome">   
+        <p:tabView widgetVar="tabViewContractHome" id="tabViewContractHome" activeIndex="#{admContractBean.contractTabIndex}"> 
+            <p:tab titleStyle="opacity:1" disabled="true" title="Usuário Administrador">
+                <span style="font-size: 16px;font-weight: bold;">Faça parte da plataforma AlgoBoss e organize suas informações.</span>   
+                <br/><br/>
+                <h:panelGrid columns="2" style="height:200px;">
+                    <h:panelGroup>
+                        <ui:include rendered="#{admContractBean.contractTabIndex == 0}" src="contractAdmin.xhtml"/>  
+                        <br/>
+                        <p:commandButton style="width: 100%;" value="#{msg.create} cadastro agora!" styleClass="ui-state-highlight" action="#{admContractBean.setContractTabIndex(admContractBean.contractTabIndex+1)}" update="@form"/>
+                    </h:panelGroup>
+                    <p:imageSwitch effect="wipe" widgetVar="switcher" slideshowAuto="false" slideshowSpeed="30000">                      
+                        <p:graphicImage value="/resources/images/Man-laptop-e1304908579391.png" alt="Image Description for " title="Liberte seu negócio" style="margin-left: 10px;margin-right: 10px;" height="200" width="355"/>  
+                        <p:graphicImage value="/resources/images/Business-Man-Sitting-at-Desk-with-Laptop.png" alt="Image Description for " title="Sistematize as informações" style="margin-left: 10px;margin-right: 10px;" height="200" width="355"/>  
+                    </p:imageSwitch>
+                </h:panelGrid>
+            </p:tab>
+            <p:tab titleStyle="opacity:1" disabled="true" title="Dados Perfil" rendered="#{admContractBean.user.email!=null}">
+                <h:panelGroup rendered="#{admContractBean.contractTabIndex > 0}" style="height: 200px;" layout="block">
+                    <ui:include src="contractBase.xhtml"/>
+                    <p:commandButton value="#{msg.prev}" style="position:absolute;bottom: 0px;" update="@form" styleClass="ui-state-highlight" action="#{admContractBean.setContractTabIndex(admContractBean.contractTabIndex-1)}"/>
+                    <p:commandButton value="#{msg.next}" style="position:absolute;bottom: 0px;left:150px;" update="@form" styleClass="ui-state-highlight" action="#{admContractBean.setContractTabIndex(admContractBean.contractTabIndex+1)}"/>
+                </h:panelGroup>
+            </p:tab>
+            <p:tab titleStyle="opacity:1" disabled="true" title="Localização" rendered="#{admContractBean.user.email!=null}">
+                <h:panelGroup rendered="#{admContractBean.contractTabIndex > 1}" style="height: 200px;" layout="block">
+                    <ui:include src="contractLocalization.xhtml"/>
+                    <p:commandButton value="#{msg.prev}" style="position:absolute;bottom: 0px;" update="@form" styleClass="ui-state-highlight" action="#{admContractBean.setContractTabIndex(admContractBean.contractTabIndex-1)}"/>
+                    <p:commandButton value="#{msg.next}" style="position:absolute;bottom: 0px;left:150px;" update="@form" styleClass="ui-state-highlight" action="#{admContractBean.setContractTabIndex(admContractBean.contractTabIndex+1)}"/>                
+                </h:panelGroup>
+            </p:tab>
+            <p:tab titleStyle="opacity:1" disabled="true" title="Serviços" rendered="#{admContractBean.user.email!=null}">
+                <h:panelGroup rendered="#{admContractBean.contractTabIndex > 2}" style="height: 200px;" layout="block">
+                    <ui:include src="contractService.xhtml"/>
+                    <p:commandButton value="Finalizar cadastro" style="position:absolute;bottom: 0px;" styleClass="ui-state-highlight" action="#{admContractBean.doBeanSaveHome()}" onclick="tabViewContractHome.select(0)"  update="@form"></p:commandButton>
+                    <span style="font-size: 12px;font-weight: bold;display: none;">Após finalizar o cadastro, faça o login no topo da página.</span>   
+                </h:panelGroup>
+            </p:tab>
+        </p:tabView>   
+        <span style="font-size: 10px;"><font color="red">*</font>Campos Obrigatórios</span>
+         <a href="javascript:void(0);" onclick="$('.contractPaymentContent').show();contractPaymentWv.show();" style="font-size: 12px;float: right;">Quanto Custa?</a>
+    </p:panel>
+
+</html>

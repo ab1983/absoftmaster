@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <h:form >
+        <h:panelGroup  layout="block">
+            <h:panelGroup  layout="block" rendered="#{funcionarioBean.formRendered}">
+                <ui:include src="#{funcionarioBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup  layout="block" rendered="#{!funcionarioBean.formRendered}">    
+                <p:commandButton value="Incluir" action="#{funcionarioBean.doBeanForm()}" icon="ui-icon-document"  update="@form"/>       
+                <p:commandButton value="Excluir" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="Lista Funcionário" style="width: 600px;" id="listaPanel" widgetVar="listaPanel">
+                    <h:dataTable var="item" value="#{funcionarioBean.beanList}">
+                        <h:column>
+                            <f:facet name="header">
+                                Nome
+                            </f:facet>
+                            #{item.nome}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                Ação
+                            </f:facet>
+                            <h:commandLink actionListener="#{funcionarioBean.doBeanForm()}" value="Editar" immediate="true">
+                                <f:setPropertyActionListener target="#{funcionarioBean.bean}" value="#{item}"/>
+                            </h:commandLink> |
+                            <h:commandLink actionListener="#{funcionarioBean.doBeanRemove()}" value="Excluir" immediate="true">
+                                <f:setPropertyActionListener target="#{funcionarioBean.bean}" value="#{item}"/>
+                            </h:commandLink>                        
+                        </h:column>                    
+                    </h:dataTable>
+                </p:panel>
+                
+            </h:panelGroup>
+        </h:panelGroup>
+    </h:form>
+</html>

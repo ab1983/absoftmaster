@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:commandButton  value="#{msg['list']}" icon="ui-icon-search" action="#{stkSupplyCategoryBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:focus for="stkSupplyCategoryBeanDescription"/>
+    <p:panel header="#{msg['registration']} #{msg['productCategory']}" style="width: 500px;">
+        <h:panelGrid columns="2">
+            <h:outputText value="#{msg['code']}:"/>
+            <p:inputText value="#{stkSupplyCategoryBean.bean.code}" required="true" requiredMessage="#{msg['code']} #{msg.required}." readonly="true"/>
+            <h:outputText value="#{msg['description']}:"/>
+            <p:inputText id="stkSupplyCategoryBeanDescription" value="#{stkSupplyCategoryBean.bean.description}" required="true" requiredMessage="#{msg['description']} #{msg.required}."/>               
+        </h:panelGrid>
+        <p:commandButton value="#{msg['save']}" action="#{stkSupplyCategoryBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+</html>

@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      >  
+    <p:dialog id="dialog" header="Lançamento" widgetVar="dlg" modal="true" onShow="applyMaskMoney();">   
+        <h:panelGrid columns="2" cellpadding="5">  
+            <h:outputLabel value="Centro Custo:" />  
+            <h:outputText value="#{cbcPlanejamentoOrcamentarioBean.bean.centroCusto.descricao}"/>
+            <h:outputLabel value="Tipo Despesa:" />  
+            <h:outputText value="#{cbcPlanejamentoOrcamentarioBean.bean.tipoDespesa.descricao}"/>
+            <h:outputLabel value="Vigência:" />  
+            <h:outputText value="#{cbcPlanejamentoOrcamentarioBean.bean.periodoVigencia}">
+                <f:convertDateTime pattern="MM/yyyy"/>  
+            </h:outputText>              
+            <h:outputLabel value="Valor Atual: R$" />  
+            <h:outputText value="#{cbcPlanejamentoOrcamentarioBean.bean.valor}">
+                R$<f:convertNumber type="currency" pattern="#,##0.00" currencySymbol="R$"/>  
+            </h:outputText>                    
+            <h:outputLabel for="valor" value="Valor Novo: R$" />  
+            <p:inputText value="#{cbcPlanejamentoOrcamentarioBean.bean.valor}"   
+                         id="valor" label="valor" styleClass="maskMoney" onfocus="this.value=''">
+                <f:convertNumber type="number" pattern="#,##0.00"/>  
+            </p:inputText>  
+            <h:outputLabel for="repeteAteId" value="Repetir até: " />  
+            <p:selectOneMenu id="repeteAteId" value="#{cbcPlanejamentoOrcamentarioBean.repetirAte}" filter="true" filterMatchMode="contains">
+                <f:selectItem itemLabel="Nenhum"/>
+                <f:selectItems  value="#{cbcPlanejamentoOrcamentarioBean.columns}" var="item" itemLabel="#{baseBean.dateFormat(item.getTime(), 'MM/yyyy')}" itemValue="#{baseBean.dateFormat(item, 'dd/MM/yyyy')}">                    
+                </f:selectItems>
+            </p:selectOneMenu>                   
+            <f:facet name="footer">  
+                <p:commandButton value="Gravar"   action="#{cbcPlanejamentoOrcamentarioBean.doBeanSave()}" update="@form">
+                </p:commandButton>
+            </f:facet>  
+        </h:panelGrid>  
+    </p:dialog>             
+    <h:messages style="color:red;" errorClass="error"/>
+    <p:growl id="messages"/>
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        function applyMaskMoney(obj){
+            var id = "";
+            if(obj !== undefined){
+                id = obj;
+            }else{
+                id = ".maskMoney";
+            }
+            $(id).maskMoney({
+                thousands:'.',
+                decimal:',',
+                precision:2
+            });                        
+        }
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');   
+            //applyMaskMoney();
+        });                               
+    </script>
+</html>

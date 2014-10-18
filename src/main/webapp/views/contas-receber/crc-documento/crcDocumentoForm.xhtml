@@ -1,0 +1,133 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      > 
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{crcDocumentoBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Lançamento Contas Receber" style="width: 900px;">
+            <p:focus for="clienteId" rendered="#{crcDocumentoBean.bean.cliente.clienteId == null}"/>                
+            <p:focus for="tipoReceita" rendered="#{crcDocumentoBean.bean.cliente.clienteId != null}"/>   
+            <h:panelGrid columns="4" >
+                <h:outputText value="Cliente"/>
+                <p:selectOneMenu id="clienteId" value="#{crcDocumentoBean.bean.cliente}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Cliente #{msg.required}." converter="#{baseBean.getConverter(gerClienteBean.beanList,null,'clienteId')}">
+                    <f:selectItem itemLabel="Selecione"/>
+                    <f:selectItems  value="#{gerClienteBean.beanList}" var="item" itemLabel="#{item.nome}-#{item.cpfCnpj}" itemValue="#{item}"/>
+                    <p:ajax process="@this"/>
+                </p:selectOneMenu>                        
+                <h:outputText value="Série"/>
+                <p:inputText value="#{crcDocumentoBean.bean.serie}" required="true" requiredMessage="Série #{msg.required}.">
+                    <p:ajax process="@this"/>
+                </p:inputText>
+                <h:outputText value="Parcela"/>
+                <p:inputText value="#{crcDocumentoBean.bean.parcela}" required="true" requiredMessage="Parcela #{msg.required}.">
+                    <p:ajax process="@this"/>
+                </p:inputText>
+                <h:outputText value="N. Documento"/>
+                <p:inputText value="#{crcDocumentoBean.bean.numeroDocto}" required="true" requiredMessage="N. Documento #{msg.required}.">
+                    <p:ajax process="@this"/>
+                </p:inputText>
+                <h:outputText value="Tipo Docto"/>
+                <p:selectOneMenu value="#{crcDocumentoBean.bean.gerTipoDocumento}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Tipo Docto #{msg.required}." converter="#{baseBean.getConverter(gerTipoDocumentoBean.beanList,null,'tipoDocumentoId')}">
+                    <f:selectItem itemLabel="Selecione"/>
+                    <f:selectItems  value="#{gerTipoDocumentoBean.beanList}" var="item" itemLabel="#{item.codigo}-#{item.descricao}" itemValue="#{item}"/>
+                    <p:ajax process="@this"/>
+                </p:selectOneMenu>                 
+                <h:outputText value="Data Emissão"/>     
+                <p:calendar locale="br" value="#{crcDocumentoBean.bean.dataEmissao}"  pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Emissão #{msg.required}." >
+                    <p:ajax process="@this"/>
+                    <p:ajax event="dateSelect" process="@this"/>
+                </p:calendar>                 
+                <h:outputText value="Data Entrada"/>               
+                <p:calendar locale="br" value="#{crcDocumentoBean.bean.dataEntrada}" pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Entrada #{msg.required}.">
+                    <p:ajax process="@this"/>
+                    <p:ajax event="dateSelect" process="@this"/>
+                </p:calendar>
+                <h:outputText value="Data Vencimento"/>      
+                <p:calendar locale="br" value="#{crcDocumentoBean.bean.dataVencimento}" pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Vencimento #{msg.required}.">
+                    <p:ajax process="@this"/>
+                    <p:ajax event="dateSelect" process="@this"/>
+                </p:calendar>
+            </h:panelGrid>
+            <p:fieldset style="width: 95%;">
+                <f:facet name="legend">
+                    Detalhes - Total: R$
+                    <h:outputText value="#{crcDocumentoBean.totalItem}">  
+                        <f:convertNumber type="number" pattern="#,##0.00"/>  
+                    </h:outputText> 
+                </f:facet>
+
+                <h:panelGrid columns="6" id="itemPanelCrc" styleClass="itemPanel">
+                    <h:outputText value="Tipo Receita"/>
+                    <h:outputText value="Valor (R$)"/>
+                    <h:outputText value="Centro Custo"/>
+                    <h:outputText value="Observação"/>
+                    <h:outputText value=""/>
+                    <h:outputText value=""/>
+                    <p:selectOneMenu  id="tipoReceita" widgetVar="tipoReceita" value="#{crcDocumentoBean.crcItemDocumento.crcTipoReceita}" filter="true" filterMatchMode="contains" style="width: 150px;" converter="#{baseBean.getConverter(crcTipoReceitaBean.beanList,null,'tipoReceitaId')}">
+                        <f:selectItem itemLabel="Selecione"/>
+                        <f:selectItems  value="#{crcTipoReceitaBean.beanList}" var="tipoReceita" itemLabel="#{tipoReceita.descricao}" itemValue="#{tipoReceita}"/>
+                        <p:ajax process="@this"/>
+                    </p:selectOneMenu>                        
+                    <p:inputText id="valorItem" widgetVar="valorItem" styleClass="maskMoney" value="#{crcDocumentoBean.crcItemDocumento.valor}">
+                        <f:convertNumber type="number" pattern="#,##0.00"/>  
+                        <p:ajax process="@this"/>
+                    </p:inputText>
+                    <p:selectOneMenu value="#{crcDocumentoBean.crcItemDocumento.centroCusto}" filter="true" filterMatchMode="contains" converter="#{baseBean.getConverter(centroCustoBean.beanList,null,'centroCustoId')}">
+                        <f:selectItem itemLabel="Selecione"/>
+                        <f:selectItems  value="#{centroCustoBean.beanList}" var="centroCusto" itemLabel="#{centroCusto.descricao}" itemValue="#{centroCusto}"/>
+                        <p:ajax process="@this"/>
+                    </p:selectOneMenu> 
+                    <p:inputText id="observacao"  value="#{crcDocumentoBean.crcItemDocumento.observacao}"> 
+                    </p:inputText>                
+                    <p:commandButton icon="ui-icon-check" action="#{crcDocumentoBean.addItem()}"  update="@form" oncomplete="tipoReceita.focus()"></p:commandButton><p:commandButton icon="ui-icon-close" action="#{crcDocumentoBean.cancelEditItem()}" update="@(.itemPanel)"></p:commandButton>
+                </h:panelGrid>
+                <p:dataTable  emptyMessage="#{msg.emptyMessage}" var="itemDoc" value="#{crcDocumentoBean.bean.crcItemDocumentoList}" scrollable="true" scrollHeight="60"  sortBy="#{itemDoc.centroCusto.centroCustoId}" sortOrder="descending">
+                    <p:column headerText="Tipo Receita" sortBy="#{itemDoc.crcTipoReceita.descricao}">  
+                        #{itemDoc.crcTipoReceita.descricao}  
+                    </p:column>  
+                    <p:column headerText="Centro Custo" sortBy="#{itemDoc.centroCusto.decricao}">  
+                        #{itemDoc.centroCusto.descricao} 
+                    </p:column>  
+                    <p:column headerText="Observação">  
+                        #{itemDoc.observacao} 
+                    </p:column>                 
+                    <p:column headerText="Valor (R$)">  
+                        <h:outputText value="#{itemDoc.valor}">  
+                            <f:convertNumber type="currency" pattern="#,##0.00" currencySymbol="R$"/>  
+                        </h:outputText>                                                
+                    </p:column>  
+                    <p:column headerText="Ação">  
+                        <p:commandLink action="#{crcDocumentoBean.startEditItem(crcDocumento.id)}"  value="Editar" immediate="true" update="@(.itemPanel)">
+                            <f:setPropertyActionListener target="#{crcDocumentoBean.crcItemDocumento}" value="#{itemDoc}"/> 
+                            <!--pe:resetInput for=":formMain:itemPanel" /--> 
+                            <!--p:resetInput target=":formMain:itemPanel"/-->
+                        </p:commandLink> |
+                        <p:commandLink action="#{crcDocumentoBean.removeItem()}" value="Excluir" immediate="true"  update="@form">
+                            <f:setPropertyActionListener target="#{crcDocumentoBean.crcItemDocumento}" value="#{itemDoc}"/>
+                        </p:commandLink>  
+                    </p:column>                     
+                </p:dataTable>
+            </p:fieldset>
+            <p:commandButton value="Gravar"   action="#{crcDocumentoBean.doBeanSave()}" update="@form">
+            </p:commandButton>
+    </p:panel>
+    <h:messages style="color:red;" errorClass="error"/>
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');     
+            $(".maskMoney").maskMoney({
+                thousands:'.',
+                decimal:',',
+                precision:2
+            });            
+        });                    
+            
+    </script>
+</html>

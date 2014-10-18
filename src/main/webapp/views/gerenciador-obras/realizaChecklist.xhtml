@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:c="http://java.sun.com/jsp/jstl/core"       
+       xmlns:p="http://primefaces.org/ui"> 
+    <p:panel style="height: 200px;">
+        <h:panelGrid columns="4" columnClasses="label, value" styleClass="grid">  
+
+            <h:outputText value="Cadastro: " />  
+            <h:panelGroup>
+                <c:forEach items="#{gobAquisicaoImovelBean.bean.checklistDocumentacaoAquisicaoList}" var="item">
+                    <c:if test="#{item.itemPadraoChecklistDocumentacaoAquisicao.categoria == 'CADASTRO'}">
+                        <p:selectBooleanCheckbox value="#{item.entregue}">  
+                            <p:ajax listener="#{gobAquisicaoImovelBean.checklistUpdate()}"/>
+                        </p:selectBooleanCheckbox>                        
+                        <h:outputText value="#{item.itemPadraoChecklistDocumentacaoAquisicao.descricao}" />  <br/>
+                    </c:if>
+                </c:forEach>
+            </h:panelGroup>
+            <h:outputText value="Proposta: " />  
+            <h:panelGroup>
+                <c:forEach items="#{gobAquisicaoImovelBean.bean.checklistDocumentacaoAquisicaoList}" var="item">
+                    <c:if test="#{item.itemPadraoChecklistDocumentacaoAquisicao.categoria == 'PROPOSTA'}">
+                        <p:selectBooleanCheckbox value="#{item.entregue}">
+                            <p:ajax listener="#{gobAquisicaoImovelBean.checklistUpdate()}"/>
+                        </p:selectBooleanCheckbox>
+                        <h:outputText value="#{item.itemPadraoChecklistDocumentacaoAquisicao.descricao}" /><br/>  
+                    </c:if>
+                </c:forEach>       
+            </h:panelGroup>    
+        </h:panelGrid>
+    </p:panel>
+    
+</html>

@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"> 
+    <p:panel style="height: 200px;">
+        <h:panelGrid columns="3" columnClasses="label, value" styleClass="grid">  
+            <h:outputText value="Cliente:"/>
+            <p:selectOneMenu id="clienteId" value="#{gobAquisicaoImovelBean.clienteId}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Cliente #{msg.required}.">
+                <f:selectItem itemLabel="Selecione"/>
+                <f:selectItems  value="#{gobAquisicaoImovelBean.clienteBean.beanList}" var="item" itemLabel="#{item.nome}" itemValue="#{item.clienteId}"/>
+                <p:ajax update="listaPanelClienteAquisicao" listener="#{gobAquisicaoImovelBean.clienteUpdate()}"/>
+            </p:selectOneMenu>
+            <p:commandButton value="Cadastro Cliente" action ="#{gerClienteBean.indexBeanNewWin()}" icon="ui-icon-newwin" immediate="true" update=":basePanel"/> 
+        </h:panelGrid>
+        <p:panel header="Dados Cliente: #{gobAquisicaoImovelBean.obra.nomeObra}" id="listaPanelClienteAquisicao" widgetVar="listaPanelClienteAquisicaoWv">
+            <h:panelGrid columns="2" columnClasses="label, value" styleClass="grid">
+                <h:outputText value="CPF/CNPJ:" style="font-weight: bolder;"/>
+                <h:outputText value="#{gobAquisicaoImovelBean.bean.cliente.cpfCnpj}"/>
+                <h:outputText value="ENDEREÇO:" style="font-weight: bolder;"/>
+                <h:outputText value="#{gobAquisicaoImovelBean.bean.cliente.endereco}"/>               
+                <h:outputText value="CIDADE:" style="font-weight: bolder;"/>
+                <h:outputText value="#{gobAquisicaoImovelBean.bean.cliente.cidade}"/>        
+                <h:outputText value="UF:" style="font-weight: bolder;"/>
+                <h:outputText value="#{gobAquisicaoImovelBean.bean.cliente.uf}"/>       
+            </h:panelGrid>
+        </p:panel>    
+    </p:panel>
+
+</html>

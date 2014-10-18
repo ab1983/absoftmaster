@@ -1,0 +1,298 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      > 
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{purQuotationBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <h:panelGrid columns="4">
+        <h:outputText value="Número:"/>
+        <p:inputText value="#{purQuotationBean.bean.number}" required="true" requiredMessage="Número #{msg.required}."/>
+        <h:outputText value="Data:"/>
+        <p:inputText id="purQuotationDateRegistration" value="#{purQuotationBean.bean.dateRegistration}" required="true" requiredMessage="Data #{msg.required}." readonly="true">
+            <f:convertDateTime pattern="dd/MM/yyyy"/>              
+        </p:inputText>        
+    </h:panelGrid>
+    <p:panel header="Etapas Cotação">            
+        <p:wizard  id="purQuotationBeanWiz" widgetVar="wiz" step="#{purQuotationBean.bean.status == 'closed'?'winnersWiz':'solicitationWiz'}"  showNavBar="#{purQuotationBean.bean.status == 'opened'}"
+                  flowListener="#{purQuotationBean.onFlowProcess}" backLabel="Anterior" nextLabel="Próximo" style="width: 1100px;" binding="#{purQuotationBeanWiz}">
+            <p:tab id="solicitationWiz" title="Selecionar Solicitações">
+                <p:panel  style="width: 900px;height: 280px;"  header="Solicitações Disponíveis">
+                    <!--p:focus for="purQuotationDateRegistration" rendered="#{purQuotationBean.bean.observation == null}"/-->                
+                    <!--p:focus for="supplyItemIdSel" rendered="#{purQuotationBean.bean.observation != null}"/-->   
+                    <!--p:remoteCommand name="atualizarCronograma"  actionListener="#{grtCronogramaBean.atualizar()}" process="@form" update="schedule" immediate="true"/-->
+                    <p:dataTable emptyMessage="#{msg.emptyMessage}" var="solicitation"  rowKey="#{solicitation.solicitationId}" id="cronProjFiltro" value="#{purQuotationBean.solicitationList}" selection="#{purQuotationBean.solicitationFilterArray}" style="width: 600px;">  
+                        <p:column selectionMode="multiple" style="width:1%; text-align: center;" /> 
+                        <p:column headerText="Número" style="width:25%" filterBy="#{solicitation.number}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                            #{solicitation.number}  
+                        </p:column>  
+                        <p:column headerText="Data" style="width:25%" filterBy="#{solicitation.dateRegistration}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                            <h:outputText value="#{solicitation.dateRegistration}">  
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                            </h:outputText>                         
+                        </p:column>                
+                    </p:dataTable>   
+                </p:panel>
+
+            </p:tab>
+
+            <p:tab id="solicitationItemWiz" title="Selecionar Itens" disabled="#{purQuotationBean.bean.status=='closed'}">
+                <p:panel  style="width: 900px;height: 280px;"  header="Itens Disponiveis">
+                    <p:dataTable emptyMessage="#{msg.emptyMessage}" var="solicitacaoItem"  rowKey="#{solicitacaoItem.solicitationItemId}" id="solicitacaoItemFiltro" value="#{purQuotationBean.solicitationItemList}" selection="#{purQuotationBean.solicitationItemFilterArray}" style="width: 600px;">  
+                        <p:column selectionMode="multiple" style="width:1%; text-align: center;" /> 
+                        <p:column headerText="Código" style="width:25%" filterBy="#{solicitacaoItem.supplyItem.code}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                            #{solicitacaoItem.supplyItem.code}
+                        </p:column>  
+                        <p:column headerText="Descrição" style="width:25%" filterBy="#{solicitacaoItem.supplyItem.description}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                            <h:outputText value="#{solicitacaoItem.supplyItem.description}">  
+                            </h:outputText>                         
+                        </p:column>   
+                        <p:column headerText="Marca" style="width:25%" filterBy="#{solicitacaoItem.supplyItem.brand.description}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                            <h:outputText value="#{solicitacaoItem.supplyItem.brand.description}">  
+                            </h:outputText>                         
+                        </p:column> 
+                        <p:column headerText="Quantidade" style="width:25%" filterBy="#{solicitacaoItem.amount}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                            <h:outputText value="#{solicitacaoItem.amount}">  
+                                <f:convertNumber type="number" pattern="#,##0.00"/>  
+                            </h:outputText>                         
+                        </p:column>     
+                        <p:column headerText="Observação" style="width:25%" filterBy="#{solicitacaoItem.observation}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                            <h:outputText value="#{solicitacaoItem.observation}">  
+                            </h:outputText>                         
+                        </p:column>                     
+                    </p:dataTable>                  
+                    <!--ui:include src="selecaoCliente.xhtml"></ui:include-->
+                </p:panel>
+            </p:tab>
+
+            <p:tab id="solicitacaoItemGroupWiz" title="Selecionar Fornecedor" disabled="#{purQuotationBean.bean.status=='closed'}">
+                <p:panel style="height: 280px;" styleClass="solicitacaoItemGroupWizPanel">
+                    <p:panel  style="width: 450px;float: left;height: 250px;"  header="Selecionar o Item para Cotação">
+                        <p:dataTable emptyMessage="#{msg.emptyMessage}" widgetVar="solicitacaoItemGroupFiltroWv"  var="solicitacaoItemGroup"  rowKey="#{solicitacaoItemGroup.supplyItem.supplyItemId}" id="solicitacaoItemGroupFiltro" value="#{purQuotationBean.solicitationItemGroupList}" selection="#{purQuotationBean.solicitationItemSelected}" tableStyle="width: 400px;float: left;"  >                          
+                            <p:ajax event="rowSelectRadio" listener="#{purQuotationBean.updateFornecedorList}" update="@(.solicitacaoItemGroupWizPanel)"/>                   
+                            <p:column selectionMode="single" style="width:1%; text-align: center;" /> 
+                            <p:column headerText="Código" style="width:50px;">  
+                                #{solicitacaoItemGroup.supplyItem.code}
+                            </p:column>  
+                            <p:column headerText="Descrição" style="width:100px" filterBy="#{solicitacaoItemGroup.supplyItem.description}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                                <h:outputText value="#{solicitacaoItemGroup.supplyItem.description}">  
+                                </h:outputText>                         
+                            </p:column>   
+                            <p:column headerText="Marca" style="width:60px" filterBy="#{solicitacaoItemGroup.supplyItem.brand.description}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                                <h:outputText value="#{solicitacaoItemGroup.supplyItem.brand.description}">  
+                                </h:outputText>                         
+                            </p:column> 
+                            <p:column headerText="Quantidade" style="width:50px">  
+                                <h:outputText value="#{solicitacaoItemGroup.amount}">  
+                                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                </h:outputText>                         
+                            </p:column>                          
+                        </p:dataTable>    
+                    </p:panel>
+                    <p:panel  style="float:right;height: 250px;"  header="Selecionar Fornecedor do Item">
+                        <p:pickList id="pojoPickList" value="#{purQuotationBean.fornecedorFilter}" var="forn" effect="scale" 
+                                    itemValue="#{forn}" itemLabel="#{forn.razaoSocial}"                                
+                                    showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains" converter="#{purQuotationBean.fornecedorConverter}"  style="height: 200px;min-height:200px;max-height: 200px; "  >  
+
+                            <f:facet name="sourceCaption">Disponível</f:facet>  
+                            <f:facet name="targetCaption">Selecionado</f:facet>  
+
+                            <p:ajax event="transfer" listener="#{purQuotationBean.onTransfer}" process="@this"/>   
+
+                        </p:pickList>                
+                    </p:panel>
+                    <!--ui:include src="realizaChecklist.xhtml"></ui:include-->
+                </p:panel>
+                <script>solicitacaoItemGroupFiltroWv.unselectAllRows();</script>
+            </p:tab>
+
+            <p:tab id="valoresCotacaoWiz" title="Informar Valores"  disabled="#{purQuotationBean.bean.status=='closed'}">   
+                <p:panel  style="width: 900px;height: 280px;"  header="Valores de Cotação - Itens por Fornecedor" id="quotationBySupplierPanel" styleClass="quotationBySupplierPanel">
+                    <p:scrollPanel style="width: 850px;height: 200px;padding-bottom: 10px;padding-right: 10px;">
+                        <ui:repeat value="#{purQuotationBean.bean.quotationBySupplierList}" var="quotationBySupplier">
+                            <p:dataTable  emptyMessage="#{msg.emptyMessage}" var="quotationBySupplierItem" value="#{quotationBySupplier.quotationBySupplierItemList}" style="width: 800px;" >  
+                                <!--p:ajax event="rowEditCancel"   listener="#{purQuotationBean.onEdit}"  update="@none"/-->                         
+                                <p:columnGroup type="header">  
+                                    <p:row>
+                                        <p:column headerText="Código" /> 
+                                        <p:column headerText="Descrição" /> 
+                                        <p:column headerText="Marca" />  
+                                        <p:column headerText="Quantidade Solicitada" style="width:90px;white-space: normal; "/>  
+                                        <p:column headerText="Preço Unitário"  style="width:90px;white-space: normal; "/>  
+                                        <p:column headerText="Saldo Disponível"  style="width:90px;white-space: normal;"/>  
+                                        <p:column headerText="Prazo Entrega"  style="width:90px;white-space: normal;"/>  
+                                    </p:row>  
+                                </p:columnGroup>                         
+                                <f:facet name="header">  
+                                    #{quotationBySupplier.fornecedor.razaoSocial}   
+                                </f:facet>  
+                                <p:column>  
+                                    #{quotationBySupplierItem.supplyItem.code}
+                                </p:column>  
+                                <p:column>  
+                                    <h:outputText value="#{quotationBySupplierItem.supplyItem.description}">  
+                                    </h:outputText>                         
+                                </p:column>   
+                                <p:column>  
+                                    <h:outputText value="#{quotationBySupplierItem.supplyItem.brand.description}">  
+                                    </h:outputText>                         
+                                </p:column> 
+                                <p:column>  
+                                    <h:outputText value="#{quotationBySupplierItem.amount}">  
+                                        <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                    </h:outputText>                         
+                                </p:column>  
+                                <p:column  style="height: 25px;"> 
+                                            <p:inputText value="#{quotationBySupplierItem.price}" style="width:85%;height: 15px;" styleClass="maskMoney">
+                                                <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                            </p:inputText>                                                         
+                                </p:column>                                 
+                                <p:column >  
+
+                                            <p:inputText value="#{quotationBySupplierItem.amountAvailable}" style="width:85%;height: 15px;" styleClass="maskMoney">
+                                                <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                            </p:inputText>                                  
+                                </p:column> 
+                                <p:column >  
+                                            <p:inputText value="#{quotationBySupplierItem.deliveryTimeInDays}" style="width:85%;height: 15px;"/>                                                           
+                                </p:column>  
+                                                    <!--p:column headerText="Observação" style="width:25%" filterBy="#{quotationBySupplierItem.observation}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                                                        <h:outputText value="#{quotationBySupplierItem.observation}">  
+                                                        </h:outputText>                         
+                                                    </p:column-->
+
+                            </p:dataTable>  
+                        </ui:repeat>
+                        <!--ui:include src="selecaoCliente.xhtml"></ui:include-->
+                    </p:scrollPanel>
+
+                </p:panel>                
+                <script>applyMask()</script>
+                <!--ui:include src="complementoCliente.xhtml"></ui:include-->
+            </p:tab>
+            <p:tab id="winnersWiz" title="Visualizar Vencedores">   
+                <p:panel  style="width: 900px;height: 280px;"  header="Fornecedores vencedores da cotação" id="winnersPanel">
+                    <p:scrollPanel style="width: 850px;height: 200px;padding-bottom: 10px;">
+                        <c:forEach items="#{purQuotationBean.bean.quotationBySupplierList}" var="quotationBySupplier">
+                            <p:panelGrid style="width: 800px;">  
+                                <!--p:ajax event="rowEditCancel"   listener="#{purQuotationBean.onEdit}"  update="@none"/-->                         
+                                <ui:param name="supplierInclude" value="true"/>
+                                <c:forEach  var="quotationBySupplierItem" items="#{quotationBySupplier.quotationBySupplierItemList}" >
+                                    <c:if test="#{quotationBySupplierItem.status=='VENCEDOR'}">
+                                        <c:if test="#{supplierInclude}">
+                                        <f:facet name="header">  
+                                            <p:row>
+                                                <p:column colspan="9">#{quotationBySupplier.fornecedor.razaoSocial}</p:column>
+                                            </p:row>                                       
+                                            <p:row>
+                                                <p:column styleClass="ui-state-default" style="width:50px;white-space: normal;">Código </p:column> 
+                                                <p:column styleClass="ui-state-default" style="white-space: normal;">Descrição</p:column> 
+                                                <p:column styleClass="ui-state-default" style="width:100px;white-space: normal;">   Marca </p:column> 
+                                                <p:column styleClass="ui-state-default"  style="width:80px;white-space: normal; ">Quantidade Solicitada</p:column>  
+                                                <p:column styleClass="ui-state-default" style="width:80px;white-space: normal; "> Preço Unitário </p:column>  
+                                                <p:column styleClass="ui-state-default" style="width:80px;white-space: normal;">Saldo Disponível</p:column>    
+                                                <p:column styleClass="ui-state-default" style="width:80px;white-space: normal;">Prazo Entrega  </p:column>  
+                                                <p:column styleClass="ui-state-default" style="width:80px;white-space: normal;">Preço Total  </p:column> 
+                                                <p:column styleClass="ui-state-default" style="width:40px;white-space: normal;"> Ação</p:column>  
+                                            </p:row>  
+                                        </f:facet> 
+                                        </c:if>
+                                        <ui:param name="supplierInclude" value="false"/>
+                                        <p:row>
+                                            <p:column>  
+                                                #{quotationBySupplierItem.supplyItem.code}
+                                            </p:column>  
+                                            <p:column>  
+                                                <h:outputText value="#{quotationBySupplierItem.supplyItem.description}">  
+                                                </h:outputText>                         
+                                            </p:column>   
+                                            <p:column>  
+                                                <h:outputText value="#{quotationBySupplierItem.supplyItem.brand.description}">  
+                                                </h:outputText>                         
+                                            </p:column> 
+                                            <p:column style="width:80px;white-space: normal; ">  
+                                                <h:outputText value="#{quotationBySupplierItem.amount}">  
+                                                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                                </h:outputText>                         
+                                            </p:column>  
+                                            <p:column > 
+                                                <h:outputText value="#{quotationBySupplierItem.price}">
+                                                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                                </h:outputText>                                                          
+                                            </p:column>                                 
+                                            <p:column >  
+                                                <h:outputText value="#{quotationBySupplierItem.amountAvailable}" >
+                                                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                                </h:outputText>                                  
+                                            </p:column> 
+                                            <p:column >  
+                                                <h:outputText value="#{quotationBySupplierItem.deliveryTimeInDays}" />                                                            
+                                            </p:column>  
+                                            <p:column >  
+                                                <h:outputText value="#{quotationBySupplierItem.amountAvailable*quotationBySupplierItem.price}" >
+                                                    <f:convertNumber type="number" pattern="#,##0.00"/>  
+                                                </h:outputText>                                  
+                                            </p:column>                                             
+                                                                <!--p:column headerText="Observação" style="width:25%" filterBy="#{quotationBySupplierItem.observation}" filterMatchMode="contains" filterStyleClass="ui-icon-search">  
+                                                                    <h:outputText value="#{quotationBySupplierItem.observation}">  
+                                                                    </h:outputText>                         
+                                                                </p:column-->
+                                            <p:column style="text-align: center;"> 
+                                                <p:commandLink action="#{purQuotationBean.doBeanRemove()}" value="Excluir" immediate="true"    update="@form">
+                                                    <f:setPropertyActionListener target="#{purQuotationBean.bean}" value="#{quotationBySupplierItem}"/>
+                                                </p:commandLink> 
+                                            </p:column>
+                                        </p:row>
+                                    </c:if>
+                                </c:forEach>
+                            </p:panelGrid>  
+                        </c:forEach>
+                        <!--ui:include src="selecaoCliente.xhtml"></ui:include-->
+                    </p:scrollPanel>
+
+                </p:panel>                
+                <!--ui:include src="complementoCliente.xhtml"></ui:include-->
+                <p:commandButton value="Gerar Pedidos" action="#{purQuotationBean.doBeanSave()}" update="@form"  style="float:right;" rendered="#{purQuotationBean.bean.status == 'opened'}">
+                </p:commandButton>
+            </p:tab>          
+        </p:wizard>
+
+    </p:panel>
+    <p:remoteCommand name="resetpurQuotationBeanWiz" update="purQuotationBeanWiz" actionListener="#{purQuotationBeanWiz.setStep(purQuotationBean.bean.status == 'closed'?'winnersWiz':'solicitationWiz')}"/>    
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');  
+            applyMask();
+            resetpurQuotationBeanWiz();            
+        }); 
+        function applyMask(){
+            $(document).ready(function() {
+                $(".maskMoney").maskMoney({
+                    thousands:'.',
+                    decimal:',',
+                    precision:2
+                });                        
+            });             
+        }  
+        function removeMask(el){
+            $(document).ready(function() {   
+                $(el).off('keydown');
+                $(el).unbind('keydown');
+                $(el).off('click');
+                $(el).unbind('click');     
+                $(el).off('keyup');
+                $(el).unbind('keyup');     
+                $(el).off('keypress');
+                $(el).unbind('keypress');   
+                $(el).off('focus');
+                $(el).unbind('focus');                     
+            });             
+        }
+    </script>      
+</html>

@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:form prependId="false">
+        <h:panelGroup layout="block">
+            <h:panelGroup layout="block">
+                <ui:include src="#{cbcPlanejamentoOrcamentarioBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup layout="block" rendered="#{!cbcPlanejamentoOrcamentarioBean.formRendered}">
+                <p:selectCheckboxMenu value="#{cbcPlanejamentoOrcamentarioBean.centroCustoIdFiltroList}" label="Filtro por Centro de Custo" filter="true" filterMatchMode="startsWith">  
+                    <f:selectItems value="#{cbcPlanejamentoOrcamentarioBean.centroCustoList}" var="item" itemValue="#{item.centroCustoId}" itemLabel="#{item.descricao}"/>  
+                    <p:ajax update="@form" listener="#{cbcPlanejamentoOrcamentarioBean.buscar()}"/>
+                </p:selectCheckboxMenu>         
+                <div style="margin-bottom: 0px;padding-bottom: 0px;">
+                    <h:outputText value="Data Vigência:"/>     
+                    <p:calendar locale="br" value="#{cbcPlanejamentoOrcamentarioBean.vigencia}"  pattern="dd/MM/yyyy" id="dataVigencia" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Emissão #{msg.required}." />                 
+                    <h:outputLabel for="minmax" value="Período:" />  
+                    <p:spinner id="minmax" value="#{cbcPlanejamentoOrcamentarioBean.meses}" min="0" max="100">                                    
+                    </p:spinner>                  
+                    <p:commandButton value="Buscar" actionListener ="#{cbcPlanejamentoOrcamentarioBean.buscar()}" icon="ui-icon-search" process="@parent" update="@form">
+                    </p:commandButton> 
+                    <span style="float:right;">
+                        <p:commandButton value="Centro de Custo" action ="#{centroCustoBean.indexBeanNewWin()}" icon="ui-icon-newwin" immediate="true" update=":basePanel"/> 
+                        <p:commandButton value="Contas Financeiras" action ="#{tipoDespesaBean.indexBeanNewWin()}" icon="ui-icon-newwin" immediate="true" update=":basePanel"/> 
+                        <p:commandButton value="Visualizar" action ="#{cbcPlanejamentoOrcamentarioBean.doBeanForm()}" icon="ui-icon-search" update="@form"/> 
+                        <p:commandButton value="Anterior" action ="#{cbcPlanejamentoOrcamentarioBean.doBeanForm()}" icon="ui-icon-seek-prev" update="@form"/>       
+                        <p:commandButton value="Próximo" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-seek-next" />
+                    </span>
+                </div>
+                <p:dataTable id="dataTable" var="item"  value="#{cbcPlanejamentoOrcamentarioBean.dynamicBeanList}" rowIndexVar="rowIndex" style="padding: 1px;margin: 1px;">
+                    <f:facet name="header">  
+                        Orçamento Previsto 
+                    </f:facet>  
+                    <p:column headerText="Centro Custo" width="80">
+                        <h:outputText value="#{item[0].centroCusto.descricao}" rendered="#{(rowIndex==0 || item[0].centroCusto.descricao!=cbcPlanejamentoOrcamentarioBean.dynamicBeanList.get(rowIndex-1)[0].centroCusto.descricao)}" />           
+                    </p:column>
+                    <p:column headerText="Tipo Despesa" width="80">
+                        <h:outputText value="#{item[0].tipoDespesa.descricao}" />
+                    </p:column>                        
+                    <p:columns value="#{cbcPlanejamentoOrcamentarioBean.columns}" var="column" columnIndexVar="colIndex" width="70">
+                        <f:facet name="header">
+                            <h:outputText value="#{column}">  
+                                <f:convertDateTime pattern="MM/yyyy"/>  
+                            </h:outputText>                                   
+                        </f:facet>             
+                        <p:commandLink  immediate="true" oncomplete="dlg.show()" update="@form" >
+                            <h:outputText value="#{item[colIndex].valor}">  
+                                <f:convertNumber type="currency" pattern="#,##0.00" currencySymbol="R$"/>  
+                            </h:outputText>                               
+                            <f:setPropertyActionListener target="#{cbcPlanejamentoOrcamentarioBean.bean}" value="#{item[colIndex]}"/>
+                        </p:commandLink>                            
+                        <!--h:outputText value="#{item[colIndex].valor}" /-->                             
+                    </p:columns>                                              
+                </p:dataTable>
+                
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+</html>

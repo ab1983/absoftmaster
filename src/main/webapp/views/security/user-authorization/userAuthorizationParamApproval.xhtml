@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      > 
+    <script>
+        //var allowedArray = new Array();
+        //allowedArray[10] = 'teste';
+    </script>
+    <p:panel style="width: 400px;">
+        <p:focus for="secUserAuthorizationBeanlimitorder"/>                 
+        <h:panelGrid columns="2" >
+            <h:outputText value="Limite Valor Solicitação:"/>
+            <p:inputText id="secUserAuthorizationBeanlimitorder" value="#{secUserAuthorizationBean.idxAuthorizationItem(0).parameterValue}"/>
+            <h:outputText value="Limite Valor Pedido:"/>
+            <p:inputText value="#{secUserAuthorizationBean.idxAuthorizationItem(1).parameterValue}"/>
+            <h:outputText value="Limite Variação Pedido(%):"/>
+            <p:inputText value="#{secUserAuthorizationBean.idxAuthorizationItem(2).parameterValue}"/>            
+        </h:panelGrid>
+        <p:commandButton value="Aplicar" update="@form">
+            <f:setPropertyActionListener target="#{secUserAuthorizationBean.idxAuthorizationItem(0).parameterKey}" value="limitSolicitation" />   
+            <f:setPropertyActionListener target="#{secUserAuthorizationBean.idxAuthorizationItem(1).parameterKey}" value="limitOrder" />            
+            <f:setPropertyActionListener target="#{secUserAuthorizationBean.idxAuthorizationItem(2).parameterKey}" value="limitOrderVariation" />   
+        </p:commandButton>
+    </p:panel>
+    
+    <script> 
+        function checkAll(){
+            $('.allowed').each(function(){
+                //var idArray = $( this ).attr('id').split(":");
+                //var id = idArray[idArray.length-1];
+                //var obj = jQuery.parseJSON($(id));
+                alert($( this ).attr('id'));
+                //$.each(id,function(key,value) {alert(key)});
+                //alert(obj.string);
+            });
+        }
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');     
+            $(".maskMoney").maskMoney({
+                thousands:'.',
+                decimal:',',
+                precision:2
+            });            
+        });                    
+            
+    </script>
+</html>

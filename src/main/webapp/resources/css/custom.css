@@ -1,0 +1,142 @@
+/* 
+    Document   : custon
+    Created on : 23/03/2013, 17:06:11
+    Author     : Agnaldo
+    Description:
+        Purpose of the stylesheet follows.
+*/
+.inputForm{ 
+    color: red;
+}
+.ui-inputfield{
+    text-transform: uppercase !important;
+}
+.no-upper{
+    text-transform: none !important;
+}
+.ui-inputfield{
+    width: 150px; 
+}
+.ui-inputtext{
+    width: 150px;
+}
+.ui-inputmask{
+    width: 150px;
+}
+.ui-inputtextarea{
+    width: 150px;  
+}
+.ui-password{
+    width: 150px !important;  
+}
+.ui-selectonemenu{
+    width: 190px !important;
+}
+.ui-selectonemenu-label{
+    width: 150px !important;    
+}
+.ui-selectonemenu-trigger{
+    width: 23px !important;  
+}
+.ui-selectonemenu-panel{
+    max-width: 800px;
+}
+.ui-selectonemenu label{
+
+}
+.ui-row-editor{
+	float: left !important;
+}
+.hasDatepicker{
+    width: 150px !important;
+}
+.ui-spinner{
+    width: 180px !important;    
+    margin-right: 5px !important;
+}
+.ui-spinner-input{
+    width: 135px !important;      
+}
+
+.ui-menuitem-link{
+    z-index: 100 !important;
+}
+.botaoMenu:first-child{
+    z-index: 100 !important;
+    position: absolute;
+}
+
+.ui-datatable thead th, .ui-datatable tbody td, .ui-datatable tfoot td {
+    padding: 2px 2px !important;
+}
+/*
+.fc-view table tbody td div{
+    min-height: 0px !important;
+}
+.fc-view-month table thead th{
+    min-width: 150px !important;
+}
+.fc-day-content div{    
+    min-height: 50px !important;
+}
+*/
+/*
+.fc-day-content div{
+    
+    min-height: 50px !important;
+    height: 45px !important;
+}
+.fc-content{
+    max-height: 400px;
+}
+*/
+.ui-resizable-column{
+    /*width: 70px;*/
+}
+.concluido .fc-event-skin{
+    background-color:lightgreen !important;
+    color: #000000 !important;
+}
+.atrasado .fc-event-skin{
+    background-color:lightsalmon !important;
+    color: #000000 !important;
+}
+.pendente .fc-event-skin{    
+    background-color: lightgoldenrodyellow !important;    
+    color: #000000 !important;
+}
+.text-ui{
+    border: 0px;
+    background: transparent; 
+    box-shadow:0 0px 0;    
+}
+.ui-picklist-list{
+    height: 150px !important;
+}
+.ui-tabs-nav li{
+    height: 25px !important;
+}
+.ui-wizard-step-title{
+    height: 20px !important;
+}
+#plusTab{
+    padding: 0px;
+    margin: 0px;
+}
+.ui-panelgrid-header .ui-widget-header{
+    padding: 0px!important;
+    margin: 0px!important;    
+}
+.item-form .ui-inputfield,.item-form{
+    width: 85px!important;
+}
+.panelLoginHome .ui-panel-content{
+    padding: 0px!important;
+}
+.pickList-contract tbody tr td ul{
+    width: 425px!important;
+    height: 425px!important;
+}
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}

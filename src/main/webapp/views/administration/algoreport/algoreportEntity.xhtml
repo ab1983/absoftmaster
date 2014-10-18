@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <p:dataTable rowKey="#{entity.entityClassId}" value="#{algoRep.entityClassList}" var="entity" selectionMode="single" selection="#{algoRep.entitySelected}" style="width: 300px;"  scrollable="true"  scrollWidth="300px" scrollHeight="200">
+        <p:column>  
+            <f:facet name="header">  
+                <h:outputText value="#{msg.description}" />  
+            </f:facet>  
+            <h:outputText value="#{entity.label!=null?entity.label:entity.name}" />  
+        </p:column>                  
+    </p:dataTable>                                           
+</html>

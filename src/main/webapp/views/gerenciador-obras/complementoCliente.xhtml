@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"> 
+    <p:tabView id="tabViewClienteAquisicao" style="height: 205px;">  
+
+        <p:tab title="Cliente">  
+            <h:panelGrid columns="6" columnClasses="label, value" styleClass="grid">  
+                <h:outputText value="Nome: " />  
+                <h:outputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.cliente.nome}"/>
+                <h:outputText value="CPF" />  
+                <h:outputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.cliente.cpfCnpj}"/>        
+                <h:outputText value="Data Nasc.:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.dataNascimento}"  pattern="dd/MM/yyyy" id="dataNascimento" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Nascimento #{msg.required}." />                                       
+                <h:outputText value="Tipo Documento:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.tipoDocumento}"/>              
+                <h:outputText value="Número Documento:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.numeroDocumento}"/>      
+                <h:outputText value="Órgão Emissor:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.orgaoEmissor}"/>      
+                <h:outputText value="Data Emissão:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.dataEmissao}"  pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Emissão #{msg.required}." />                                                       
+                <h:outputText value="Naturalidade:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.naturalidade}"/>
+                <h:outputText value="Pai:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.pai}"/>
+                <h:outputText value="Mãe:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.mae}"/>
+                <h:outputText value="Estado Civil:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.estadoCivil}"/>    
+                <h:outputText value="União Estável:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.uniaoEstavel}"/>     
+                <h:outputText value="Escolaridade:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.escolaridade}"/>         
+                <h:outputText value="Conclusão:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conclusao}"/>    
+                <h:outputText value="Início Residência:" />           
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.inicioResidencia}"  pattern="dd/MM/yyyy" id="inicioResidenciaCliente" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Início Residência #{msg.required}." />                                                                                   
+            </h:panelGrid>
+        </p:tab>  
+        <p:tab title="Profissão Cliente">  
+            <h:panelGrid columns="6" columnClasses="label, value" styleClass="grid">  
+                <h:outputText value="Profissão1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.profissao1}"/>     
+                <h:outputText value="Empresa1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.empresa1}"/>         
+                <h:outputText value="Cnpj1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.cnpj1}"/>
+                <h:outputText value="Data Início1:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.dataInicio1}"  pattern="dd/MM/yyyy" id="dataInicio1" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Início #{msg.required}." />                                               
+                <h:outputText value="Renda1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.renda1}"/>
+                <h:outputText value="Data Referência1" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.dataRef1}"  pattern="dd/MM/yyyy" id="dataRef1" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Referência #{msg.required}." />                                                               
+                <h:outputText value="Profissão1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.profissao1}"/>     
+                <h:outputText value="Empresa1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.empresa1}"/>         
+                <h:outputText value="Cnpj1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.cnpj1}"/>
+                <h:outputText value="Data Início1:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.dataInicio1}"  pattern="dd/MM/yyyy" id="dataInicio2" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Referência #{msg.required}." />                                                                               
+                <h:outputText value="Renda1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.renda1}"/>
+                <h:outputText value="Data Referência1" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.dataRef1}"  pattern="dd/MM/yyyy" id="dataRef2" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Referência #{msg.required}." />                                                                                       
+            </h:panelGrid>
+        </p:tab>          
+        <p:tab title="Conjugue">  
+            <h:panelGrid columns="6" columnClasses="label, value" styleClass="grid"> 
+                <h:outputText value="Nome: " />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.nome}"/>
+                <h:outputText value="CPF" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.cpf}"/>        
+                <h:outputText value="Data Nasc.:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.dataNascimento}"  pattern="dd/MM/yyyy" id="dataNascimentoConjugue" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Nascimento #{msg.required}." />                                       
+                <h:outputText value="Tipo Documento:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.tipoDocumento}"/>              
+                <h:outputText value="Número Documento:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.numeroDocumento}"/>      
+                <h:outputText value="Órgão Emissor:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.orgaoEmissor}"/>      
+                <h:outputText value="Data Emissão:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.dataEmissao}"  pattern="dd/MM/yyyy" id="dataEmissaoConjugue" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Emissão #{msg.required}." />                                                       
+                <h:outputText value="Naturalidade:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.naturalidade}"/>
+                <h:outputText value="Pai:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.pai}"/>
+                <h:outputText value="Mãe:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.mae}"/>
+                <h:outputText value="Escolaridade:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.escolaridade}"/>         
+                <h:outputText value="Conclusão:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.conclusao}"/>         
+            </h:panelGrid>
+        </p:tab>
+        <p:tab title="Endereço e Profissão Conjugue">  
+            <h:panelGrid columns="6" columnClasses="label, value" styleClass="grid"> 
+                <h:outputText value="Endereço:"/>
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.endereco}" required="true" requiredMessage="Endereço #{msg.required}."/> 
+                <h:outputText value="CEP:"/>
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.cep}" required="true" requiredMessage="CEP #{msg.required}."/> 
+                <h:outputText value="Cidade:"/>
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.cidade}" required="true" requiredMessage="Cidade #{msg.required}."/>                     
+                <h:outputText value="UF:"/>
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.uf}" required="true" requiredMessage="UF #{msg.required}."/>                     
+                <h:outputText value="E-mail:"/>
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.email}" required="true" requiredMessage="E-mail #{msg.required}."/>                 
+                <h:outputText value="Início Residência:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.inicioResidencia}"  pattern="dd/MM/yyyy" id="inicioResidenciaConjugue" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Início Residência #{msg.required}." />                                                               
+                <h:outputText value="Profissão1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.profissao1}"/>     
+                <h:outputText value="Empresa1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.empresa1}"/>         
+                <h:outputText value="Cnpj1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.cnpj1}"/>
+                <h:outputText value="Data Início1:" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.dataInicio1}"  pattern="dd/MM/yyyy" id="dataInicio1Conjugue" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Início #{msg.required}." />                                               
+                <h:outputText value="Renda1:" />  
+                <p:inputText value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.renda1}"/>
+                <h:outputText value="Data Referência1" />  
+                <p:calendar locale="br" value="#{gobAquisicaoImovelBean.complementacaoAquisicaoClientePf.conjugueAquisicao.dataRef1}"  pattern="dd/MM/yyyy" id="dataRef1Conjugue" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Referência #{msg.required}." />                                                                              
+            </h:panelGrid>
+        </p:tab>        
+    </p:tabView>
+    <!--h:messages style="color:red;"/-->
+</html>

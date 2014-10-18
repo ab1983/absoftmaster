@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">  
+    <h:form binding="#{reportForm}" prependId="false">
+        <h:panelGroup  layout="block">
+            <h:panelGroup  layout="block" rendered="#{finReportBean.formRendered}">
+                <!--ui:include src="#{finReportBean.urlForm}"></ui:include-->
+                <p:panel header="#{msg.listing} Report" style="width: 800px;">
+                    <h:panelGrid columns="4">
+                        <h:outputText value="Data Inicial:"/>
+                        <p:calendar value="#{finReportBean.startDate}" locale="br" navigator="true" styleClass="dateMask" showOn="button" pattern="dd/MM/yyyy" required="true" requiredMessage="Data #{msg.required}.">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>              
+                        </p:calendar>        
+                        <h:outputText value="Data Final:"/>
+                        <p:calendar value="#{finReportBean.endDate}" locale="br" navigator="true" styleClass="dateMask" showOn="button" pattern="dd/MM/yyyy" required="true" requiredMessage="Data #{msg.required}.">            
+                        </p:calendar>                            
+                    </h:panelGrid>
+                    <h:commandLink target="_blank" actionListener="#{finReportBean.doBeanList()}">
+                        <p:button widgetVar="downloadBtnWv1" value="#{msg.list}"  
+                                  icon="ui-icon-search">  
+                        </p:button>                                    
+                    </h:commandLink>                                
+                </p:panel>                
+            </h:panelGroup>
+            <h:panelGroup  layout="block" rendered="#{!finReportBean.formRendered}">
+                <p:panel header="#{msg.listing} Report" style="width: 800px;">
+                    <h:panelGrid columns="4">
+                        <h:outputText value="Data Inicial:"/>
+                        <p:calendar value="#{finReportBean.startDate}" locale="br" styleClass="dateMask" showOn="button" pattern="dd/MM/yyyy" required="true" requiredMessage="Data #{msg.required}.">
+                            <f:convertDateTime pattern="dd/MM/yyyy"/>              
+                        </p:calendar>        
+                        <h:outputText value="Data Final:"/>
+                        <p:calendar value="#{finReportBean.endDate}" locale="br" styleClass="dateMask" showOn="button" pattern="dd/MM/yyyy" required="true" requiredMessage="Data #{msg.required}.">            
+                        </p:calendar>                            
+                    </h:panelGrid>
+                    <h:commandLink target="_blank" onclick="PrimeFaces.monitorDownload(start, stop)" actionListener="#{finReportBean.doBeanList()}">
+                        <p:button widgetVar="downloadBtnWv2" value="#{msg.list}"  
+                                  icon="ui-icon-search">  
+                        </p:button>                                    
+                    </h:commandLink>                                       
+                </p:panel> 
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            $('.hasDatepicker').mask('99/99/9999');                
+        });                               
+    </script>    
+</html>

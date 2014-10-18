@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">   
+    <p:commandButton  value="Listar" icon="ui-icon-search" action="#{gerTipoDocumentoBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="CPG - Cadastro Tipo Documento" style="width: 500px;">
+        <h:panelGrid columns="2">
+            <h:outputText value="Código"/>
+            <p:inputText value="#{gerTipoDocumentoBean.bean.codigo}" autocomplete="off" required="true" requiredMessage="Código #{msg.required}." onchange="this.value = this.value.toUpperCase()"/>
+            <h:outputText value="Descrição"/>
+            <p:inputText value="#{gerTipoDocumentoBean.bean.descricao}" autocomplete="off" required="true" requiredMessage="Descrição #{msg.required}." onchange="this.value = this.value.toUpperCase()"/>
+            <h:outputText value="Substitui Documento"/>
+            <p:selectBooleanCheckbox value="#{gerTipoDocumentoBean.bean.substituiDocumento}"/>                
+            <h:outputText value="Exige Liberação"/>
+            <p:selectBooleanCheckbox value="#{gerTipoDocumentoBean.bean.exigeLiberacao}"/>                
+        </h:panelGrid>
+        <p:commandButton value="Gravar"  rendered="#{gerTipoDocumentoBean.notReadOnly}"  action="#{gerTipoDocumentoBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+    
+</html>

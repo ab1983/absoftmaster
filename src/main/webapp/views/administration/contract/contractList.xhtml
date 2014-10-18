@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <h:form binding="#{contractForm}" prependId="false">
+        <h:panelGroup  layout="block">
+            <h:panelGroup  layout="block" rendered="#{admContractBean.formRendered}">
+                <ui:include src="#{admContractBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup  layout="block" rendered="#{!admContractBean.formRendered}">
+                <p:commandButton value="#{msg['include']}" action ="#{admContractBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton rendered="true" value="#{msg['disable']}"  update="@form" oncomplete="updateMenu()" icon="ui-icon-trash">
+                    <f:setPropertyActionListener target="#{gerLoginBean.user.contract}" value="#{null}"/>
+                </p:commandButton>
+                <p:panel header="#{msg['listing']} #{msg['contract']}" style="width: 800px;">
+                    <p:dataTable var="item" value="#{admContractBean.beanList}" rowKey=" #{item.contractId}" emptyMessage="#{msg['emptyMessage']}" selection="#{gerLoginBean.user.contract}" paginator="true" rows="10">
+                        <p:ajax event="rowSelectRadio" listener="#{gerLoginBean.doInstatiatesSite()}" oncomplete="updateMenu()"/>
+                        <p:column>
+                            <f:facet name="header">
+                                #{msg['number']}
+                            </f:facet>
+                            #{item.contractId}
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                #{msg['systemName']}
+                            </f:facet>
+                            #{item.systemName}
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                #{msg['systemTheme']}
+                            </f:facet>
+                            #{item.systemTheme}
+                        </p:column>
+                        <p:column style="text-align: center;">
+                            <f:facet name="header">
+                                #{msg['action']}
+                            </f:facet>
+                            <p:commandLink action="#{admContractBean.doBeanForm()}" value="#{msg['edit']}" immediate="true"  update="@form">                                
+                                <f:setPropertyActionListener target="#{admContractBean.bean}" value="#{item}"/>
+                                <f:setPropertyActionListener target="#{gerLoginBean.user.contract}" value="#{item}"/>
+                            </p:commandLink> |
+                            <p:commandLink action="#{admContractBean.doBeanRemove()}" value="#{msg['exclude']}" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{admContractBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </p:column>         
+                        <p:column selectionMode="single" headerText="Padrão" style="width: 20px;text-align: center;"></p:column>                        
+                    </p:dataTable>
+                </p:panel>
+            </h:panelGroup>        
+        </h:panelGroup>
+        <p:remoteCommand name="updateMenu" immediate="true" actionListener="#{gerLoginBean.setModel(null)}" update="@(.startMenu)"/>
+    </h:form>
+</html>

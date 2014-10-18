@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"> 
+    <h:form prependId="false"> 
+        <h:panelGroup layout="block">
+            <h:panelGroup layout="block" rendered="#{gobAquisicaoImovelBean.formRendered}">
+                <ui:include src="#{gobAquisicaoImovelBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup layout="block" rendered="#{!gobAquisicaoImovelBean.formRendered}">
+                <p:commandButton value="Incluir" action ="#{gobAquisicaoImovelBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton value="Excluir" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="Lista Aquisição Imóvel" style="width: 800px;">
+                    <p:dataTable var="item" value="#{gobAquisicaoImovelBean.beanList}" emptyMessage="#{msg.emptyMessage}">
+                        <p:column>
+                            <f:facet name="header">
+                                Imóvel
+                            </f:facet>
+                            #{item.unidadeObra.sequencia}/ #{item.unidadeObra.obra.nomeObra}
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                Cliente
+                            </f:facet>
+                            #{item.cliente.nome}                               
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                Status
+                            </f:facet>
+                            #{item.statusAquisicao.descricao}                               
+                        </p:column>                        
+                        <p:column style="text-align: center;">
+                            <f:facet name="header">
+                                Ação
+                            </f:facet>
+                            <p:commandLink action="#{gobAquisicaoImovelBean.doBeanForm()}" value="Editar" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{gobAquisicaoImovelBean.bean}" value="#{item}"/>
+                            </p:commandLink> |
+                            <p:commandLink action="#{gobAquisicaoImovelBean.doBeanRemove()}" value="Excluir" immediate="true"    update="@form">
+                                <f:setPropertyActionListener target="#{gobAquisicaoImovelBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </p:column>                    
+                    </p:dataTable>
+                </p:panel>
+                
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+</html>

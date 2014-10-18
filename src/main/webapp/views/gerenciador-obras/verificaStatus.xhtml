@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui"> 
+    <p:panel style="height: 200px;">
+        <h:panelGrid columns="2" columnClasses="label, value" styleClass="grid" style="margin: auto;">  
+    <h:outputText value="OBRA:" style="font-weight: bolder;"/>
+    <h:outputText value="#{gobAquisicaoImovelBean.bean.unidadeObra.obra.nomeObra}"/>        
+    <h:outputText value="UNIDADE:" style="font-weight: bolder;"/>
+    <h:outputText value="#{gobAquisicaoImovelBean.bean.unidadeObra.sequencia}"/>        
+    <h:outputText value="NOME CLIENTE:" style="font-weight: bolder;"/>
+    <h:outputText value="#{gobAquisicaoImovelBean.bean.cliente.nome}"/>         
+    <h:outputText value="CPF/CNPJ:" style="font-weight: bolder;"/>
+    <h:outputText value="#{gobAquisicaoImovelBean.bean.cliente.cpfCnpj}"/>    
+    <h:outputText value="STATUS:" style="font-weight: bolder;"/>
+    <p:selectOneMenu id="statusAquisicaoImovelId" value="#{gobAquisicaoImovelBean.statusAquisicaoImovelId}" filter="true" filterMatchMode="contains" required="true" requiredMessage="Cliente #{msg.required}.">
+        <f:selectItem itemLabel="Selecione"/>
+        <f:selectItems  value="#{gobAquisicaoImovelBean.statusAquisicaoList}" var="item" itemLabel="#{item.descricao}" itemValue="#{item.statusAquisicaoImovelId}"/>
+        <p:ajax update="statusAquisicaoImovelId"/>
+    </p:selectOneMenu>
+    </h:panelGrid>
+        </p:panel>
+    <p:commandButton value="Concluir" style="float:right;" action="#{gobAquisicaoImovelBean.doBeanSave}" update="@form"/>
+    
+</html>

@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">  
+    <h:form binding="#{approvalForm}" prependId="false">
+        <h:panelGroup layout="block">
+            <h:panelGroup layout="block" rendered="#{!purApprovalBean.formRendered}">
+                <p:commandButton value="Aprovar" action ="#{purApprovalBean.doApproval()}" icon="ui-icon-check" update="@form"/>       
+                <p:accordionPanel>  
+                    <p:tab title="#{msg.listing} Solicitação (#{purApprovalBean.solicitationList.size()})">  
+                        <p:panel style="width: 800px;">
+                            <p:dataTable var="solicitationVar"  rowKey="#{solicitationVar.solicitationId}" id="solicitacaoFiltro" value="#{purApprovalBean.solicitationList}" selection="#{purApprovalBean.solicitationSelectedList}"  emptyMessage="#{msg.emptyMessage}" scrollable="true" scrollHeight="300">  
+                                <p:column selectionMode="multiple" style="width:20px; text-align: center;" />                     
+                                <p:column>
+                                    <f:facet name="header">
+                                        Número
+                                    </f:facet>
+                                    #{solicitationVar.number}
+                                </p:column>
+                                <p:column>
+                                    <f:facet name="header">
+                                        Observação
+                                    </f:facet>
+                                    #{solicitationVar.observation}
+                                </p:column>                        
+                                <p:column>
+                                    <f:facet name="header">
+                                        Data Registro
+                                    </f:facet>
+                                    <h:outputText value="#{solicitationVar.dateRegistration}">  
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                                    </h:outputText> 
+                                </p:column>                             
+                                <p:column>
+                                    <f:facet name="header">
+                                        Status
+                                    </f:facet>
+                                    <h:outputText value="#{msg[solicitationVar.status]}">  
+                                    </h:outputText>                                  
+                                </p:column>         
+                                <p:column style="text-align: center;">
+                                    <f:facet name="header">
+                                        Ação
+                                    </f:facet>
+                                    <p:commandLink action="#{purSolicitationBean.indexBeanNewWinForm(true)}" value="Visualizar" immediate="true"  update=":basePanel">
+                                        <f:setPropertyActionListener target="#{purSolicitationBean.bean}" value="#{solicitationVar}"/>
+                                    </p:commandLink>            
+                                </p:column>                              
+                            </p:dataTable>
+                        </p:panel> 
+                    </p:tab>  
+                    <p:tab title="#{msg.listing} #{msg.order} (#{purApprovalBean.orderList.size()})">  
+                        <p:panel style="width: 800px;">
+                            <p:dataTable var="orderVar"  rowKey="#{orderVar.orderId}" id="orderFilter" value="#{purApprovalBean.orderList}" selection="#{purApprovalBean.orderSelectedList}" emptyMessage="#{msg.emptyMessage}" scrollable="true" scrollHeight="300">  
+                                <p:column selectionMode="multiple" style="width:20px; text-align: center;" />                     
+                                <p:column>
+                                    <f:facet name="header">
+                                        Número
+                                    </f:facet>
+                                    #{orderVar.number}
+                                </p:column>
+                                <p:column>
+                                    <f:facet name="header">
+                                        Observação
+                                    </f:facet>
+                                    #{orderVar.observation}
+                                </p:column>                        
+                                <p:column>
+                                    <f:facet name="header">
+                                        Data Registro
+                                    </f:facet>
+                                    <h:outputText value="#{orderVar.dateRegistration}">  
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                                    </h:outputText> 
+                                </p:column>                             
+                                <p:column>
+                                    <f:facet name="header">
+                                        Status
+                                    </f:facet>
+                                    <h:outputText value="#{msg[orderVar.status]}">  
+                                    </h:outputText>                                  
+                                </p:column>   
+                                <p:column style="text-align: center;">
+                                    <f:facet name="header">
+                                        Ação
+                                    </f:facet>
+                                    <p:commandLink action="#{purOrderBean.indexBeanNewWinForm(true)}" value="Visualizar" immediate="true"  update=":basePanel">
+                                        <f:setPropertyActionListener target="#{purOrderBean.bean}" value="#{orderVar}"/>
+                                    </p:commandLink>                       
+                                </p:column>                         
+                            </p:dataTable>
+                        </p:panel>
+                    </p:tab>  
+                </p:accordionPanel>             
+
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+</html>

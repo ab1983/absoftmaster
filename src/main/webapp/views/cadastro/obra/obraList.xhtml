@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <h:form >
+        <h:panelGroup  layout="block">
+            <h:panelGroup id="formPanel2" layout="block" rendered="#{gobObraBean.showChildren}">
+                <ui:include src="#{gobObraBean.urlChildren}"></ui:include>
+            </h:panelGroup>            
+            <h:panelGroup  layout="block" rendered="#{!gobObraBean.showChildren and gobObraBean.formRendered}">
+                <ui:include src="#{gobObraBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup  layout="block" rendered="#{!gobObraBean.showChildren and !gobObraBean.formRendered}">        
+                <p:commandButton value="Incluir" action="#{gobObraBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton value="Excluir" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="Lista Obra" style="width: 600px;" id="listaPanel" widgetVar="listaPanel">
+                    <h:dataTable var="item" value="#{gobObraBean.beanList}">
+                        <h:column>
+                            <f:facet name="header">
+                                Nome Obra
+                            </f:facet>
+                            #{item.nomeObra}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                Ação
+                            </f:facet>
+                            <p:commandLink action="#{gobObraBean.doBeanForm()}" value="Editar" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{gobObraBean.bean}" value="#{item}"/>
+                            </p:commandLink> |
+                            <p:commandLink action="#{gobObraBean.doBeanRemove()}" value="Excluir" immediate="true"   rendered="#{gobObraBean.notReadOnly}"  update="@form">
+                                <f:setPropertyActionListener target="#{gobObraBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </h:column>                    
+                    </h:dataTable>
+                </p:panel>
+                
+            </h:panelGroup>
+        </h:panelGroup>
+    </h:form>
+</html>

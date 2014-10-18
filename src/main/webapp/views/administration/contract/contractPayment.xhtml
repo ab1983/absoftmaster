@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <span style="color: red;font-size: 14px;font-weight: bold;">Contrate um plano e aproveite nossos serviços para organizar suas informações.</span>    
+    <br/><br/>
+    <table class="contractPay" style="font-size: 16px;">
+        <tr style="font-weight: bold;">
+            <td>Serviços</td>
+            <td>Start</td>
+            <!--td>Micro</td-->
+            <td>Standard</td>            
+            <td>Enterprise</td>               
+            <td>Premium</td>    
+        </tr>
+        <tr>
+            <td style="margin-right: 15px;padding-right: 15px;">Licenças Simultâneas (Usuários)  </td>
+            <td>1</td>
+            <!--td>1</td-->
+            <td>5</td>            
+            <td>10</td>               
+            <td>Ilimitado</td>
+        </tr>        
+        <tr>
+            <td>Valor por Licença</td>
+            <td>Grátis</td>
+            <!--td>R$ 24,99</td-->
+            <td>R$ 19,99</td>            
+            <td>R$ 14,99</td>               
+            <td>R$ 0,00</td>               
+        </tr>   
+        <tr>
+            <td>Consultoria (Em minutos/mês)  </td>
+            <td>0</td>
+            <!--td>10</td-->
+            <td>40</td>            
+            <td>60</td>  
+            <td>640</td>  
+        </tr>  
+        <tr>
+            <td>Investimento Mensal</td>
+            <td>R$ 0,00</td>
+            <!--td>R$ 24,99</td-->
+            <td>R$ 99,95</td>            
+            <td>R$ 149,90</td>            
+            <td>R$ 399,00</td>   
+        </tr> 
+        <tr>
+            <td>Plano Escolhido</td>
+            <td><a href="javascript:void(0);" onclick="tabViewHome.select(4);$('.contractPay').parent().parent().hide();">Experimentar</a>
+            </td>            
+            <!--td>
+                <form target="pagseguro" action="https://pagseguro.uol.com.br/checkout/v2/payment.html" method="post">
+                    <input type="hidden" name="code" value="CCE286A3D1D127FCC41CFF914CC1ACD5" />
+                    <input type="image" src="https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/94x52-pagar-azul-assina.gif" name="submit" alt="Pague com PagSeguro - é rápido, grátis e seguro!" />
+                </form>
+            </td-->
+            <td>
+                <!-- INICIO FORMULARIO BOTAO PAGSEGURO -->
+                <form target="pagseguro" action="https://pagseguro.uol.com.br/checkout/v2/payment.html" method="post">
+                    <!-- NÃO EDITE OS COMANDOS DAS LINHAS ABAIXO -->
+                    <input type="hidden" name="code" value="487BAB290F0FA358841E4F84F09D233A" />
+                    <input type="image" src="https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/94x52-pagar-azul-assina.gif" name="submit" alt="Pague com PagSeguro - é rápido, grátis e seguro!" />
+                </form>
+                <!-- FINAL FORMULARIO BOTAO PAGSEGURO -->
+
+            </td>            
+            <td>
+                <!-- INICIO FORMULARIO BOTAO PAGSEGURO -->
+                <form target="pagseguro" action="https://pagseguro.uol.com.br/checkout/v2/payment.html" method="post">
+                    <!-- NÃO EDITE OS COMANDOS DAS LINHAS ABAIXO -->
+                    <input type="hidden" name="code" value="BD4A697478784C200404FFBB70611230" />
+                    <input type="image" src="https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/94x52-pagar-azul-assina.gif" name="submit" alt="Pague com PagSeguro - é rápido, grátis e seguro!" />
+                </form>
+                <!-- FINAL FORMULARIO BOTAO PAGSEGURO -->              
+            </td>   
+            <td>
+                <!-- INICIO FORMULARIO BOTAO PAGSEGURO -->
+                <form target="pagseguro" action="https://pagseguro.uol.com.br/checkout/v2/payment.html" method="post">
+                <!-- NÃO EDITE OS COMANDOS DAS LINHAS ABAIXO -->
+                <input type="hidden" name="code" value="DAE26FFBA8A83A4884982FA4486673C0" />
+                <input type="image" src="https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/94x52-pagar-assina.gif" name="submit" alt="Pague com PagSeguro - é rápido, grátis e seguro!" />
+                </form>
+                <!-- FINAL FORMULARIO BOTAO PAGSEGURO -->                
+            </td>
+        </tr>           
+    </table>
+</html>

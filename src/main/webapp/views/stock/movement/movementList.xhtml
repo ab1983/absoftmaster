@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">  
+    <h:form binding="#{approvalForm}" prependId="false">
+        <h:panelGroup layout="block">
+            <h:panelGroup layout="block" rendered="#{!stkMovementBean.formRendered}">
+                <p:panel style="width: 800px;">
+                    <p:dataTable value="#{stkMovementBean.beanList}" var="movement" emptyMessage="#{msg.emptyMessage}" scrollable="true" scrollHeight="500">                  
+                        <p:column style="width:20px">  
+                            <p:rowToggler />  
+                        </p:column>                                
+                        <p:column>
+                            <f:facet name="header">
+                                Descrição
+                            </f:facet>
+                            #{movement.supplyItem.description}
+                        </p:column>                      
+                        <p:column>
+                            <f:facet name="header">
+                                Data Último Movimento
+                            </f:facet>
+                            <h:outputText value="#{movement.dateLastMovement}" rendered="#{movement.dateLastMovement!=null}">  
+                                <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                            </h:outputText> 
+                        </p:column>              
+                        <p:column>
+                            <f:facet name="header">
+                                Saldo Atual
+                            </f:facet>
+                            <h:outputText value="#{movement.currentBalance}">
+                                <f:convertNumber type="number" pattern="#,##0.00"/>                                              
+                            </h:outputText>                                                                        
+                        </p:column>                                
+                        <p:rowExpansion> 
+                            <p:dataTable value="#{movement.movementItemList}" var="movementItem" emptyMessage="#{msg.emptyMessage}" scrollable="true" scrollHeight="100">
+                                <p:column>
+                                    <f:facet name="header">
+                                        Data Movimento
+                                    </f:facet>
+                                    <h:outputText value="#{movementItem.dateOfMovement}">  
+                                        <f:convertDateTime pattern="dd/MM/yyyy"/>  
+                                    </h:outputText> 
+                                </p:column> 
+                                <p:column>
+                                    <f:facet name="header">
+                                        Quantidade
+                                    </f:facet>
+                                    <h:outputText value="#{movementItem.amount}">
+                                        <f:convertNumber type="number" pattern="#,##0.00"/>                                              
+                                    </h:outputText>                                                                        
+                                </p:column>        
+                                <p:column>
+                                    <f:facet name="header">
+                                        Preço Unitário
+                                    </f:facet>
+                                    <h:outputText value="#{movementItem.unitPrice}">
+                                        <f:convertNumber type="number" pattern="#,##0.00"/>                                              
+                                    </h:outputText>
+                                </p:column> 
+                                <p:column>
+                                    <f:facet name="header">
+                                        Tipo de Movimento
+                                    </f:facet>
+                                    #{msg[movementItem.movementHistory.movementType]}
+                                </p:column>      
+                                <p:column>
+                                    <f:facet name="header">
+                                        Origem Movimento
+                                    </f:facet>
+                                    #{msg[movementItem.movementHistory.attribute]}
+                                </p:column>                                 
+                            </p:dataTable>
+                        </p:rowExpansion>                                
+                    </p:dataTable>
+                </p:panel>  
+
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+</html>

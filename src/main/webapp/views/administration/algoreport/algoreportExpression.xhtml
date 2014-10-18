@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <script type="text/javascript"> /* <![CDATA[ */
+        function createExpression1() {
+            createExpression();
+        }
+        function createExpression() {
+            if (nodeExp !== undefined) {
+                var nodeExpStr = nodeExp.split(";")[0];
+                var strExp = nodeExpStr;
+                if (typeExp === 'form') {
+                    if (tabExp === 'prop0') {
+                        strExp = "#" + "{app.$('" + nodeExpStr + "').val}";
+                    }
+                    if (tabExp === 'prop1') {
+                        strExp = "#" + "{app.$date('" + nodeExpStr + "','yyyy/MM/dd')}";
+                    }
+                    $('.elementPropertyValueParent').html(nodeExp.split(";")[1]);
+                }
+                if (typeExp === 'list') {
+                    if (tabExp === 'prop0') {
+                        strExp = "#" + "{app.$('" + nodeExpStr + "',item).val}"
+                    }
+                    if (tabExp === 'prop1') {
+                        strExp = "#" + "{app.$date('" + nodeExpStr + "','yyyy/MM/dd',item)}";
+                    }
+                }
+                $('.elementPropertyValueFactoryTab').html(strExp);
+                $('.elementPropertyValueFactory').html(strExp);
+            }
+        }
+        function applyExpression() {
+            elementPropertyValueWv.jq.val($('.elementPropertyValueFactory').html());
+            prepareElementPropertyValueWv.jq.val($('.elementPropertyValueFactory').html());
+        }
+        function showExpressionDlg(panel) {
+            $(esc('#{funcPanel.clientId}')).hide();
+            $(esc('#{propPanel.clientId}')).hide();
+            if (panel === 'action' || panel === 'actionListener' || panel === 'listener') {
+                tabExp = 'func0';
+                $(esc('#{funcPanel.clientId}')).show();
+            } else {
+                tabExp = 'prop0';
+                $(esc('#{propPanel.clientId}')).show();
+            }
+            $('.elementPropertyValueFactoryTab').html("");
+            $('.elementPropertyValueFactory').html("");
+            $('.elementPropertyValueParent').html("");
+            expressionDlg.show();
+        }
+
+        /* ]]> */
+    </script>
+    <div id="div_msg"></div>
+    <!--p:hotkey bind="r" onsuccess="positionChange('left',+2);"/-->  
+    <p:dialog widgetVar="preparePropertyDlg" header="Propriedade Item" closable="true" styleClass="propertyDlg" style="height: 483px;max-height: 483px; width: 488px;max-width: 488px;" resizable="false">
+        <h:outputText styleClass="elementPropertyLabel" value="value"/><br/>
+        <p:inputTextarea widgetVar="prepareElementPropertyValueWv" styleClass="prepareElementPropertyValue no-upper" style="width:400px !important; text-transform:none !important;"></p:inputTextarea>
+        <h:outputText styleClass="elementPropertyKey" value="value" style="display: none;"/>
+        <h:outputText styleClass="elementPropertyValueParent" value="value" style="display: none;"/>
+        <p:selectBooleanCheckbox itemLabel="Lista de dados?" value="true" widgetVar="dataListChkBox"/><br/>
+        <p:panelGrid columns="2" styleClass="panelGridEntityProperty">
+            <p:dataTable rowKey="#{ent.entityClassId}" id="algoRepEntityClass" var="ent" value="#{algoRep.entityClassList}"  
+                         selection="#{algoRep.entitySelected}"  style="width: 200px;" scrollable="true" scrollWidth="200px" scrollHeight="100">  
+                <f:facet name="header">  
+                    Entidades 
+                </f:facet> 
+                <p:ajax event="rowSelectRadio" immediate="true" update="@(.algoRepProperty)"/>                
+                <p:column selectionMode="single" style="width:20px">
+                </p:column>  
+                <p:column headerText="Nome">  
+                    #{ent.name}  
+                </p:column>  
+            </p:dataTable>        
+            <p:dataTable rowKey="#{prop.entityPropertyDescriptorId}" styleClass="algoRepProperty" id="algoRepProperty" var="prop" value="#{algoRep.entitySelected.entityPropertyDescriptorList}"  
+                         selection="#{algoRep.propertySelectedListCollection}" style="width: 200px;"  scrollable="true"  scrollWidth="200px" scrollHeight="100">  
+                <f:facet name="header">  
+                    Propriedades 
+                </f:facet> 
+                <p:ajax event="rowSelectCheckbox" immediate="true" process="@(.algoRepProperty)"/>                    
+                <p:ajax event="rowUnselectCheckbox" immediate="true" process="@(.algoRepProperty)"/>     
+                <p:column selectionMode="multiple" style="width:20px" />  
+                <p:column headerText="Nome">  
+                    #{prop.propertyName}  
+                </p:column>  
+            </p:dataTable>   
+        </p:panelGrid>
+        <p:commandButton id="repCarBtn2" value="^" immediate="true" update="@(.expressionDlg)" onstart="$('#expressionDlgDiv').html('');" oncomplete="showExpressionDlg($('.elementPropertyKey').html());"/>  
+        <p:commandButton widgetVar="elementPropertyApplyWv" styleClass="elementPropertyApply" value="Aplicar" immediate="true" onclick="dropCallbackFunc(dropCallbackParam, $('.prepareElementPropertyValue').val(), dataListChkBox.isChecked() ? $('.elementPropertyValueParent').html() : '');" onstart="updateCurrentConteiner();" oncomplete="preparePropertyDlg.hide();updateCurrentForm();"/>
+        <p:commandButton styleClass="elementPropertyApply" value="Entidade" immediate="true" oncomplete="entityDlg.show();"/>            
+    </p:dialog>    
+    <p:dialog widgetVar="propertyDlg" header="Propriedade Item" closable="true" styleClass="propertyDlg" style="height: 183px;max-height: 183px; width: 458px;max-width: 458px;" resizable="false">
+        <h:outputText styleClass="elementPropertyLabel"/><br/>
+        <p:inputTextarea widgetVar="elementPropertyValueWv" styleClass="elementPropertyValue no-upper" style="width:400px !important; text-transform:none !important;"></p:inputTextarea>
+        <h:outputText styleClass="elementPropertyKey" style="display: none;"/>
+        <p:commandButton id="repCarBtn" value="^" immediate="true" update="@(.expressionDlg)" onclick="$('#expressionDlgDiv').html('');" oncomplete="showExpressionDlg($('.elementPropertyKey').html());"/>  
+        <p:commandButton styleClass="elementPropertyApply" value="Aplicar" immediate="true" onclick="updateElementAux([{name: 'param_id', value: currentEl}, {name: $('.elementPropertyKey').html(), value: $('.elementPropertyValue').val()}]);" onstart="updateCurrentConteiner();" oncomplete="propertyDlg.hide();updateCurrentForm();"/>
+        <p:commandButton styleClass="elementPropertyApply" value="Entidade" immediate="true" oncomplete="entityDlg.show();"/>            
+    </p:dialog>
+    <p:dialog widgetVar="propertyBoolDlg" header="Propriedade Item" closable="true" styleClass="propertyDlg" style="height: 183px;max-height: 183px; width: 458px;max-width: 458px;" resizable="false">
+        <h:outputText styleClass="elementPropertyLabel"/><br/>
+        <p:selectBooleanCheckbox widgetVar="elementPropertyValueBoolWv" styleClass="elementPropertyValue no-upper" style="width:400px !important; text-transform:none !important;"/>
+        <h:outputText styleClass="elementPropertyKey" style="display: none;"/>
+        <p:commandButton id="repPropertyBoolDlgBtn" value="^" type="button" onclick="showExpressionDlg($('.elementPropertyKey').html());"/>  
+        <p:commandButton styleClass="elementPropertyApply" value="Aplicar" immediate="true" onclick="updateElementAux([{name: 'param_id', value: currentEl}, {name: $('.elementPropertyKey').html(), value: elementPropertyValueBoolWv.isChecked()}]);" onstart="updateCurrentConteiner();" oncomplete="propertyBoolDlg.hide();updateCurrentForm();"/>
+        <p:commandButton styleClass="elementPropertyApply" value="Entidade" immediate="true" oncomplete="entityDlg.show();"/>            
+    </p:dialog>
+    <p:dialog widgetVar="expressionDlg" header="Expressão" styleClass="expressionDlg">                
+        <p:selectOneRadio id="repOptionsExp" onchange="typeExp = event.target.value;
+            createExpression1();" widgetVar="optionsExpWv" value="form" >  
+            <f:selectItem itemLabel="Formulário" itemValue="form" />  
+            <f:selectItem itemLabel="Listagem" itemValue="list" />   
+        </p:selectOneRadio>                      
+        <p:panel binding="#{expressionDlg}">
+            <div id="expressionDlgDiv">
+                <h:panelGroup id="funcPanel"  binding="#{funcPanel}" style="display: none;">
+                    <h:panelGrid columns="2">  
+                        <p:tree value="#{algoRep.rootFunc}" widgetVar="propertyNodeFuncWv" styleClass="entityDlg" var="node" dynamic="false" cache="false"  
+                                selectionMode="single" datakey="#{node[1]}" style="width: 200px;"  selection="#{algoRep.selectedNode}" onNodeClick="nodeExp = node.attr('data-datakey');createExpression();">   
+                            <p:treeNode>  
+                                <h:outputText value="#{node[0]}" />  
+                            </p:treeNode>  
+                        </p:tree>
+                        <p:tabView>  
+                            <p:tab title="Geral">  
+                                <h:panelGrid columns="2">                                    
+                                    <h:outputText  
+                                        value="Resultado:" />
+                                    <h:outputText styleClass="elementPropertyValueFactoryTab"/>
+                                </h:panelGrid>  
+                            </p:tab>   
+                        </p:tabView>                    
+                    </h:panelGrid>
+                </h:panelGroup>
+                <h:panelGroup id="propPanel"  binding="#{propPanel}" style="display: none;">
+                    <h:panelGrid columns="2">  
+                        <p:tree value="#{algoRep.rootProp}" widgetVar="propertyNodePropWv" styleClass="entityDlg" var="node" dynamic="false" cache="false"  
+                                selectionMode="single" style="width: 200px;" datakey="#{node[1]};#{node[2]}"  selection="#{algoRep.selectedNode}" onNodeClick="nodeExp = node.attr('data-datakey');createExpression();">   
+                            <p:treeNode>  
+                                <h:outputText value="#{node[0]}" />  
+                            </p:treeNode>  
+                        </p:tree>
+                        <p:tabView orientation="left" onTabChange="tabExp = 'prop'+index;createExpression();">  
+                            <p:tab title="Geral">  
+                                <h:panelGrid columns="2">                                    
+                                    <h:outputText  
+                                        value="Resultado:" />
+                                    <h:outputText styleClass="elementPropertyValueFactoryTab"/>
+                                </h:panelGrid>  
+                            </p:tab>   
+                            <p:tab title="Data">  
+                                <h:panelGrid columns="2">                                    
+                                    <h:outputText  
+                                        value="Resultado:" />
+                                    <h:outputText styleClass="elementPropertyValueFactoryTab"/>
+                                </h:panelGrid>  
+                            </p:tab> 
+                            <p:tab title="Número">  
+                                <h:panelGrid columns="2">                                    
+                                    <h:outputText  
+                                        value="Resultado:" />
+                                    <h:outputText styleClass="elementPropertyValueFactoryTab"/>
+                                </h:panelGrid>  
+                            </p:tab>                         
+                        </p:tabView>                    
+                    </h:panelGrid>
+                    <h:outputText styleClass="elementPropertyValueFactory" style="display: none;"/>
+                </h:panelGroup>         
+            </div>
+        </p:panel>                    
+        <p:commandButton value="Aplicar" onclick="applyExpression();
+            expressionDlg.hide();"/>
+    </p:dialog>                
+
+</html>

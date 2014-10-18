@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <p:dialog id="dialog" header="Lançamento" widgetVar="dlgUnidadeObra" modal="true" onShow="$('.hasDatepicker').mask('99/99/9999')">   
+        <h:panelGrid columns="2" cellpadding="5">  
+            <h:outputLabel value="Sequencia" />  
+            <h:outputText value="#{gobObraBean.unidadeObra.sequencia}"/>
+            <h:outputLabel value="Atual Data Término Previsto:" />  
+            <h:outputText value="#{gobObraBean.unidadeObra.dataTerminoPrevisto}">  
+                <f:convertDateTime pattern="dd/MM/yyyy"/>  
+            </h:outputText>               
+            <h:outputLabel value="Nova Data Término Previsto:" />  
+            <p:calendar locale="br" value="#{gobObraBean.unidadeObra.dataTerminoPrevisto}"  pattern="dd/MM/yyyy" styleClass="dateMask" showOn="button"  required="true" requiredMessage="Data Emissão #{msg.required}." />
+            <f:facet name="footer">  
+                <p:commandButton value="Gravar"  rendered="#{gobObraBean.notReadOnly}"  action="#{gobObraBean.doUnidadeObraSave}" update="@form">
+                </p:commandButton>
+            </f:facet>  
+        </h:panelGrid>  
+    </p:dialog>             
+    <h:messages style="color:red;" errorClass="error"/>
+    <script> 
+        // Add the $() function
+        $ = jQuery;
+        // Now you can use it
+        $(document).ready(function() {
+            //$('.hasDatepicker').mask('99/99/9999');   
+            //applyMaskMoney();
+        });                               
+    </script>
+</html>

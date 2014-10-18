@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       template="#{request.contextPath}/../base.xhtml"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <p:commandButton  value="#{msg.list}" icon="ui-icon-search" action="#{gerFornecedorBean.doBeanList()}"  immediate="true"  update="@form"> 
+    </p:commandButton>
+    <p:panel header="Cadastro Fornecedor" style="width: 500px;">
+        <h:panelGrid columns="2">
+            <h:outputText value="#{msg.companyRegistrationType}"/>
+            <p:selectOneMenu id="gerFornecedorBeanCompanyRegistrationType" value="#{gerFornecedorBean.bean.companyRegistrationType}">
+                <f:selectItem  itemLabel="#{msg['corporateRegistration']}" itemValue="corporateRegistration"/>
+                <f:selectItem  itemLabel="#{msg['individualRegistration']}" itemValue="individualRegistration"/>
+                <p:ajax update="@form"/>
+            </p:selectOneMenu>               
+            <h:outputText value="#{msg.dualRegistrationNumber}:"/>
+            <p:inputMask mask="#{gerFornecedorBean.bean.companyRegistrationType=='individualRegistration'?msg.individualRegistrationMask:msg.corporateRegistrationMask}" value="#{gerFornecedorBean.bean.cpfCnpj}" required="true" requiredMessage="#{msg.dualRegistrationNumber} #{msg.required}."/>
+            <h:outputText value="#{msg.corporateName}:"/>
+            <p:inputText value="#{gerFornecedorBean.bean.razaoSocial}" required="true" requiredMessage="#{msg.corporateName} #{msg.required}."/>
+            <h:outputText value="#{msg.fancyName}:"/>
+            <p:inputText value="#{gerFornecedorBean.bean.nomeFantasia}" required="true" requiredMessage="#{msg.fancyName} #{msg.required}."/>
+            <h:outputText value="#{msg.address}:"/>
+            <p:inputText value="#{gerFornecedorBean.bean.endereco}"/>
+            <h:outputText value="#{msg.city}:"/>
+            <p:inputText value="#{gerFornecedorBean.bean.cidade}" required="true" requiredMessage="#{msg.city} #{msg.required}."/>
+            <h:outputText value="#{msg.abbreviationState}:"/>                    
+            <p:inputText value="#{gerFornecedorBean.bean.uf}" required="true" requiredMessage="#{msg.abbreviationState} #{msg.required}."/>
+            <h:outputText value="#{msg.phone}:"/>                    
+            <p:inputMask mask="#{msg.phoneMask}" value="#{gerFornecedorBean.bean.telefone}"/>                                                          
+        </h:panelGrid>
+        <p:commandButton value="Gravar"  rendered="#{gerFornecedorBean.notReadOnly}"  action="#{gerFornecedorBean.doBeanSave()}"  update="@form"></p:commandButton>
+    </p:panel>
+
+    <!--/ui:define-->
+    <script>inputUpperCase();</script>
+</html>

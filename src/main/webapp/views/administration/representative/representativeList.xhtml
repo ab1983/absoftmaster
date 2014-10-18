@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">
+    <h:form binding="#{representativeForm}" prependId="false">
+        <h:panelGroup  layout="block">
+            <h:panelGroup  layout="block" rendered="#{admRepresentativeBean.formRendered}">
+                <ui:include src="#{admRepresentativeBean.urlForm}"></ui:include>
+            </h:panelGroup>
+            <h:panelGroup  layout="block" rendered="#{!admRepresentativeBean.formRendered}">
+                <p:commandButton value="#{msg['include']}" action ="#{admRepresentativeBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton value="#{msg['exclude']}" onclick="listaUsuarioPanel.close();cadastroUsuarioPanel.show();" icon="ui-icon-trash" />
+                <p:panel header="#{msg['listing']} #{msg['representative']}" style="width: 500px;">
+                    <p:dataTable var="item" value="#{admRepresentativeBean.beanList}" rowKey=" #{item.representativeId}" emptyMessage="#{msg['emptyMessage']}">
+                        <p:column>
+                            <f:facet name="header">
+                                #{msg['name']}
+                            </f:facet>
+                            #{item.user.name}
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">
+                                #{msg['company']}
+                            </f:facet>
+                            #{item.company}
+                        </p:column>
+                        <p:column style="text-align: center;">
+                            <f:facet name="header">
+                                #{msg['action']}
+                            </f:facet>
+                            <p:commandLink action="#{admRepresentativeBean.doBeanForm()}" value="#{msg['edit']}" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{admRepresentativeBean.bean}" value="#{item}"/>
+                            </p:commandLink> |
+                            <p:commandLink action="#{admRepresentativeBean.doBeanRemove()}" value="#{msg['exclude']}" immediate="true"  update="@form">
+                                <f:setPropertyActionListener target="#{admRepresentativeBean.bean}" value="#{item}"/>
+                            </p:commandLink>                        
+                        </p:column>                             
+                    </p:dataTable>
+                </p:panel>
+            </h:panelGroup>        
+        </h:panelGroup>
+    </h:form>
+</html>

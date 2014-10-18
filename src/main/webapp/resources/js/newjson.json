@@ -1,0 +1,7 @@
+{"test": 
+["%DATA",{"´´PRESENÇA LOCAL":["layout=datatableedit",{"`FUNCIONARIO":["APELIDO","NOME COMPLETO","CPF","ENDEREÇO",
+            "NR","CIDADE","UF","CEP","CPF","RG"]},{"`OBRAS":["ID DA OBRA","NOME DA OBRA",
+            {"`CLIENTE":["NOME"]}]},{"`OCORRÊNCIA PRESENÇA":["NOME","!PRESENTE"]}]}            
+]
+}
+
