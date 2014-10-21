@@ -58,7 +58,13 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
 
     public DevEntityObject() {
     }
+    public DevEntityObject(DevEntityClass entityClass) {
+        if (entityClass != null) {
+            this.entityClass = entityClass;
+            loadProperties(this, entityClass.getEntityPropertyDescriptorList());
+        }
 
+    }
     public DevEntityObject(DevEntityObject obj) {
         if (obj != null) {
             //this.entityObjectId = obj.entityObjectId;
@@ -70,24 +76,12 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
         }
     }
     
-    public DevEntityPropertyValue getPropObj(String propName) {
-        for (DevEntityPropertyValue devEntityPropertyValue : entityPropertyValueList) {
-            if (devEntityPropertyValue.getEntityPropertyDescriptor().getPropertyName().equals(propName)) {
-                return devEntityPropertyValue;
-            }
-        }
-        return null;
+    public DevEntityPropertyValue getPropObj(String propName) {	
+    	return this.getEntityPropertyValueMap().get(propName);
     }
     
     public Object getProp(String propName) {
-        Object ret = null;
-        for (DevEntityPropertyValue devEntityPropertyValue : entityPropertyValueList) {
-            if (devEntityPropertyValue.getEntityPropertyDescriptor().getPropertyName().equals(propName)) {
-                ret = getPropObj(propName).getVal();
-                break;
-            }
-        }
-        return ret;
+        return getPropObj(propName).getVal();
     }
 
     public String $date(String attr, String format) {
@@ -102,30 +96,14 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
     }    
     
     public DevEntityPropertyValue $(String attr) {
-    	long timeIni = System.nanoTime();
+    	//long timeIni = System.nanoTime();
     	DevEntityObject entObj = this;
         DevEntityPropertyValue valReturn = new DevEntityPropertyValue();
         try {
             //SETAR PROPRIEDADES DA ENTITY CLASS NO ENTITY OBJECT
             if (entObj != null && entObj.getEntityClass() != null) {
             	List<DevEntityPropertyDescriptor> entityPropertyDescriptorList = entObj.getEntityClass().getEntityPropertyDescriptorList();
-                if (entObj.getEntityPropertyValueList().size() < entityPropertyDescriptorList.size()) {
-                    for (DevEntityPropertyDescriptor prop : entityPropertyDescriptorList) {
-                        DevEntityPropertyValue value = null;
-                        for (DevEntityPropertyValue propVal : entObj.getEntityPropertyValueList()) {
-                            if (propVal.getEntityPropertyDescriptor().getPropertyName().equals(prop.getPropertyName())) {
-                                value = propVal;
-                                break;
-                            }
-                        }
-                        if (value == null) {
-                            value = new DevEntityPropertyValue();
-                            value.setEntityPropertyDescriptor(prop);
-                            entObj.getEntityPropertyValueList().add(value);
-                            entObj.putEntityPropertyValueMap(entObj, value);
-                        }
-                    }
-                }
+            	loadProperties(entObj, entityPropertyDescriptorList);
                 if (!entObj.getEntityPropertyValueList().isEmpty()) {
                     String[] attrArray = attr.split(Pattern.quote("."));
                     DevEntityObject obj = entObj;
@@ -142,31 +120,33 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
                     }
                 }
             }
-            if(valReturn==null){
-            	this.getClass();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("Time getVal("+attr+"): "+BigDecimal.valueOf((System.nanoTime()-timeIni)/1000000000d).setScale(6));
+        //System.out.println("Time getVal("+attr+"): "+BigDecimal.valueOf((System.nanoTime()-timeIni)/1000000000d).setScale(6,BigDecimal.ROUND_UP));
         return valReturn;
     }
-
+    
+    private void loadProperties(DevEntityObject entObj, List<DevEntityPropertyDescriptor> entityPropertyDescriptorList){
+        for (DevEntityPropertyDescriptor prop : entityPropertyDescriptorList) {
+            DevEntityPropertyValue value = null;
+            for (DevEntityPropertyValue propVal : entObj.getEntityPropertyValueList()) {
+                if (propVal.getEntityPropertyDescriptor().getPropertyName().equals(prop.getPropertyName())) {
+                    value = propVal;
+                    break;
+                }
+            }
+            if (value == null) {
+                value = new DevEntityPropertyValue();
+                value.setEntityPropertyDescriptor(prop);
+                entObj.getEntityPropertyValueList().add(value);
+                entObj.putEntityPropertyValueMap(entObj, value);
+            }
+        }    	
+    }
+    
     private DevEntityPropertyValue findNode(DevEntityObject obj, String attr) {
         try {
-        	if(obj.getEntityPropertyValueMap().isEmpty()){
-        		for (DevEntityPropertyValue val : obj.getEntityPropertyValueList()) {
-        			/*
-        			if (val.getEntityPropertyDescriptor().getPropertyClass()!=null && val.getEntityPropertyDescriptor().getPropertyClass().getName().equals(attr)) {
-        				return val;
-        			}            	
-        			if (val.getEntityPropertyDescriptor().getPropertyName().equals(attr)) {
-        				return val;
-        			}
-        			*/
-        			putEntityPropertyValueMap(obj, val);		
-        		}        		
-        	}
         	DevEntityPropertyValue val = obj.getEntityPropertyValueMap().get(attr);
         	if(val!=null){
         		return val;
@@ -231,6 +211,11 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
 	}    
     
     public Map<String, DevEntityPropertyValue> getEntityPropertyValueMap() {
+    	if(this.entityPropertyValueMap.isEmpty()){
+    		for (DevEntityPropertyValue val : this.getEntityPropertyValueList()) {
+    			putEntityPropertyValueMap(this, val);		
+    		}        		
+    	}        	
 		return entityPropertyValueMap;
 	}
 

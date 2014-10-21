@@ -52,7 +52,18 @@ public class DevEntityClass extends GenericEntity implements Serializable {
     @JoinColumn(name = "property_class_id")
     private List<DevEntityPropertyDescriptor> entityPropertyDescriptorParentList;    
 
-    public Long getEntityClassId() {
+    
+    
+    public DevEntityClass() {
+		super();
+	}
+
+	public DevEntityClass(String name) {
+		super();
+		this.name = name;
+	}
+
+	public Long getEntityClassId() {
         return entityClassId;
     }
 

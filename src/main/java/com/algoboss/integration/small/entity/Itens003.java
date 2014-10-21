@@ -8,7 +8,7 @@ import javax.persistence.*;
  * The persistent class for the itens003 database table.
  * 
  */
-@Entity
+//@Entity 
 @NamedQuery(name="Itens003.findAll", query="SELECT i FROM Itens003 i")
 public class Itens003 implements Serializable {
 	private static final long serialVersionUID = 1L;

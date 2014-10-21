@@ -143,13 +143,24 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
         Object obj = null;
         try {
             if (propertyValue != null && !String.valueOf("null").equals(propertyValue) && entityPropertyDescriptor != null) {
-                if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("DATE")) {
-                    obj = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(propertyValue);
-                } else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("BOOLEAN")) {
-                    obj = Boolean.valueOf(propertyValue).booleanValue();
-                } else {
-                    obj = propertyValue;
-                }
+            	if(entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING")){
+            		obj = propertyValue;   
+            	}else if(!propertyValue.isEmpty()){
+            		if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("DATE")) {
+            			obj = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(propertyValue);
+            		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("BOOLEAN")) {
+            			obj = Boolean.valueOf(propertyValue).booleanValue();
+            		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("FLOAT")){
+            			obj = Double.valueOf(propertyValue).doubleValue();
+            			//obj = propertyValue;     
+            		}else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("INTEGER")){
+            			obj = Integer.valueOf(propertyValue).intValue();
+            			//obj = propertyValue;     
+            		}else{
+            			obj = propertyValue;                	
+            		}
+            		
+            	}
             }
         } catch(java.text.ParseException ex){
             Logger.getLogger(DevEntityPropertyValue.class.getName()).log(Level.SEVERE, "Parse Exception ->"+ex.getMessage(), obj);
@@ -164,13 +175,17 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
         Object obj = null;
         try {
             if (propertyValue != null && !String.valueOf("null").equals(propertyValue) && entityPropertyDescriptor != null) {
-                if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("DATE")) {
-                    obj = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(propertyValue);
-                } else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("BOOLEAN")) {
-                    obj = String.valueOf(propertyValue);
-                } else {
-                    obj = propertyValue;
-                }
+            	if(entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING")){
+            		obj = propertyValue;   
+            	}else if(!String.valueOf(propertyValue).isEmpty()){
+            		if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("DATE")) {
+            			obj = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(propertyValue);
+            		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("BOOLEAN")) {
+            			obj = String.valueOf(propertyValue);
+            		} else {
+            			obj = propertyValue;
+            		}            		
+            	}
             }
         } catch (Exception ex) {
             Logger.getLogger(DevEntityPropertyValue.class.getName()).log(Level.SEVERE, null, ex);

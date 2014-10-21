@@ -204,7 +204,7 @@ public class ComponentFactory {
 				parentContainer = (parentContainer != null && !parentContainer.isEmpty()) ? parentContainer : "list";
 				try {
 					UIComponent childAux = cloned.getChildren().get(0).getFacet("output");
-					cloned.getChildren().get(0).getFacets().put("input", createInputComponent(elementPanel, entitySelected, devEntityPropertyDescriptor, configMap, parentEntity, appType, parentContainer));
+
 					for (UIComponent child : childAux.getChildren()) {
 						if (Class.forName("javax.faces.component.html.HtmlOutputText").isAssignableFrom(child.getClass())) {
 							if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("INTEGER")) {
@@ -215,7 +215,7 @@ public class ComponentFactory {
 								// + "',item).val}");
 								// mapParam.put("filterMatchMode", "contains");
 								// mapParam.put("filterStyle", "display:none;");
-								setValue(child, "value", "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item)).val}");
+								setValue(child, "value", "#{(app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item))}");
 							} else if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("FLOAT")) {
 								mapParam.put("sortBy", "getProp('" + devEntityPropertyDescriptor.getPropertyName() + "')");
 								// mapParam.put("filterBy", "#{app.$('" +
@@ -224,13 +224,13 @@ public class ComponentFactory {
 								// + "',item).val}");
 								// mapParam.put("filterMatchMode", "contains");
 								// mapParam.put("filterStyle", "display:none;");
-								setValue(child, "value", "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item)).val}");
+								setValue(child, "value", "#{(app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item))}");
 							} else if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING")) {
 								mapParam.put("sortBy", "getProp('" + devEntityPropertyDescriptor.getPropertyName() + "')");
 								mapParam.put("filterBy", "getProp('" + devEntityPropertyDescriptor.getPropertyName() + "')");
 								mapParam.put("filterMatchMode", "contains");
 								mapParam.put("filterStyle", "display:none;");
-								setValue(child, "value", "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item)).val}");
+								setValue(child, "value", "#{(app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item))}");
 							} else if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("DATE")) {
 								String pattern = BaseBean.getBundle("calendar.pattern", "msg");
 								if (configMap.containsKey("pattern")) {
@@ -247,8 +247,8 @@ public class ComponentFactory {
 								mapParam.put("filterMatchMode", "contains");
 								mapParam.put("filterStyle", "display:none;");
 								Map<String, Object> mapParam2 = new HashMap<String, Object>();
-								mapParam2.put("value", "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item)).val}");
-								mapParam2.put("styleClass", "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item).val?' ui-icon ui-icon-check ':' ui-icon ui-icon-cancel ')}");
+								mapParam2.put("value", "#{(app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item))}");
+								mapParam2.put("styleClass", "#{(app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item)?' ui-icon ui-icon-check ':' ui-icon ui-icon-cancel ')}");
 								mapParam2.put("style", "display:inline-block;");
 								ComponentFactory.updateElementProperties(f2, child, mapParam2, null);
 								center = true;
@@ -257,7 +257,7 @@ public class ComponentFactory {
 								mapParam.put("filterStyle", "display:none;");
 								mapParam.put("filterBy", "getProp('" + devEntityPropertyDescriptor.getPropertyName() + "')");
 								mapParam.put("sortBy", "getProp('" + devEntityPropertyDescriptor.getPropertyName() + "')");
-								setValue(child, "value", "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item)).val}");
+								setValue(child, "value", "#{(app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item))}");
 							} else if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ENTITYCHILDREN")) {
 								mapParam.put("filterMatchMode", "contains");
 								mapParam.put("filterStyle", "display:none;");
@@ -266,7 +266,12 @@ public class ComponentFactory {
 								setValue(child, "value", "#{(app.count('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item))}");
 								center = true;
 							} else {
-								setValue(child, "value", "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item)).val}");
+								setValue(child, "value", "#{(app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "',item))}");
+							}
+							if(hasEdit){
+								cloned.getChildren().get(0).getFacets().put("input", createInputComponent(elementPanel, entitySelected, devEntityPropertyDescriptor, configMap, parentEntity, appType, parentContainer));
+							}else{
+								cloned.getChildren().set(0, child);
 							}
 						}
 					}
@@ -644,8 +649,8 @@ public class ComponentFactory {
 						input = child;
 						// mapParam.put("update", "@form");
 						mapParam.put("immediate", "true");
-						String propValObj = "app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "'" + item + ")";
-						String str = "#{(" + propValObj + ".val==null?msg['select']:" + propValObj + ".val)}";
+						String propValObj = "app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "'" + item + ")";
+						String str = "#{(" + propValObj + "==null?msg['select']:" + propValObj + ")}";
 						mapParam.put("value", str);
 						mapParam.put("action", "#{app.prepareUpload(" + propValObj + ")}");
 						mapParam.put("oncomplete", "(handleFileUploadDlg(xhr, status, args))");

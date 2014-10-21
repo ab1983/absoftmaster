@@ -62,3 +62,7 @@ ALTER TABLE dev_entity_object
   ADD COLUMN user_id bigint;
 ALTER TABLE dev_entity_class
   ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES sec_user (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION;
+--19/10/2014
+ALTER TABLE dev_entity_property_value
+   ALTER COLUMN property_value TYPE character varying(4000);
+  

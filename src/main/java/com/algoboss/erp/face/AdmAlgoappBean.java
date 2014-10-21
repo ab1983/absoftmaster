@@ -116,6 +116,14 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	public DevEntityPropertyValue $(String attr, DevEntityObject entObj) {
 		return entObj.$(attr);
 	}
+	
+	public Object $g(String attr) {
+		return $(attr, bean).getVal();
+	}
+
+	public Object $g(String attr, DevEntityObject entObj) {
+		return entObj.$(attr).getVal();
+	}	
 
 	public int count(String attr, DevEntityObject entObj) {
 		int c = 0;
@@ -422,7 +430,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 
 	@Override
 	public void doBeanList() {
-		beanList = findListByClass(entity.getName());
+		beanList = findListByClass(entity);
 		bean = new DevEntityObject();
 		bean.setEntityClass(entity);
 
@@ -470,7 +478,15 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 
 	public void doRemove(DevEntityObject obj) {
 		bean = obj;
-		doBeanRemove();
+		if(entity.getCanonicalClassName()==null){				
+			doBeanRemove();
+		}else{
+			try {
+				baseDao.removeReplicate(bean);
+			} catch (Throwable e) {
+				Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, e);
+			}
+		}		
 	}
 
 	public void doRemoveChild(DevEntityObject obj) {
@@ -568,7 +584,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		try {
 			if (bean != null) {
 				bean.setEntityClass(entity);
-				super.doBeanSave();
+				super.doBeanSave();					
 			}
 			if (hasList) {
 				doList();
@@ -621,7 +637,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			if (beanListMap.containsKey(className) && !className.contains(".")) {
 				entityObjectList = beanListMap.get(className);
 			} else {
-				entityObjectList = findListByClass(className);
+				entityObjectList = findListByClass(entity.getName().equals(className)?entity:new DevEntityClass(className));
 				beanListMap.put(className, entityObjectList);
 				beanListFilteredMap.put(className, entityObjectList);
 				formRendered = false;
@@ -658,9 +674,9 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		return childrenList;
 	}
 
-	public List<DevEntityObject> findListByClass(String className) {
+	public List<DevEntityObject> findListByClass(DevEntityClass className) {
 		List<DevEntityObject> entityObjectList = null;
-		if (className != null && !className.isEmpty()) {
+		if (className != null) {
 			String msgStr = "";
 			try {
 				if (className.equals("sec_user")) {
@@ -683,20 +699,20 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 						entityObjectList.add(entObj);
 					}
 				} else {
-					if (className.contains(".")) {
-						DevEntityPropertyValue childValueProp = $(className.toLowerCase());
+					if (className.getName().contains(".")) {
+						DevEntityPropertyValue childValueProp = $(className.getName());
 						if (childValueProp != null && childValueProp.getEntityPropertyDescriptor() != null) {
 							entityObjectList = childValueProp.getPropertyChildrenList();
 						}
 					} else {
-						entityObjectList = baseDao.findEntityObjectByClass(className, getSiteIdList(), null, null);
+						entityObjectList = baseDao.findEntityObjectByClass(className, getSiteIdList(), null, null);													
 					}
 				}
 				// entityObjectList = baseDao.findEntityObjectByClass(className,
 				// getSiteIdList(), startDate, endDate);
 				// bean = new DevEntityObject();
-				beanListMap.put(className, entityObjectList);
-				beanListFilteredMap.put(className, entityObjectList);
+				beanListMap.put(className.getName(), entityObjectList);
+				beanListFilteredMap.put(className.getName(), entityObjectList);
 				formRendered = false;
 				// return "/f/cadastro/usuario/usuarioList.xhtml";
 			} catch (Throwable ex) {

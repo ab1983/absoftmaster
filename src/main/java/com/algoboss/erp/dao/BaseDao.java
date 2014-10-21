@@ -5,15 +5,23 @@
 package com.algoboss.erp.dao;
 
 import com.algoboss.erp.entity.AdmContract;
+import com.algoboss.erp.entity.AdmInstantiatesSite;
 import com.algoboss.erp.entity.DevEntityClass;
 import com.algoboss.erp.entity.DevEntityObject;
+import com.algoboss.erp.entity.DevEntityPropertyDescriptor;
+import com.algoboss.erp.entity.DevEntityPropertyDescriptorConfig;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,6 +50,8 @@ public class BaseDao implements Serializable {
     private UserTransaction userTransaction;
     @PersistenceContext(/*type=PersistenceContextType.TRANSACTION,*/properties={@PersistenceProperty(name="javax.persistence.sharedCache.mode", value="ENABLE_SELECTIVE")},unitName = "ERPPU")
     public EntityManager entityManager;
+    @PersistenceContext(/*type=PersistenceContextType.TRANSACTION,*/properties={@PersistenceProperty(name="javax.persistence.sharedCache.mode", value="ENABLE_SELECTIVE")},unitName = "SMALLPU")
+    public EntityManager entityManagerSmall;    
     public EntityTransaction transacao;
     private boolean manualTransaction = false;
 
@@ -74,8 +84,16 @@ public class BaseDao implements Serializable {
         }
 
     }
-
     public Object save(Object obj) throws Throwable {
+    	if(obj instanceof DevEntityObject){
+    		DevEntityObject entObj = (DevEntityObject)obj;
+    		if(entObj.getEntityClass().getCanonicalClassName()!=null && !entObj.getEntityClass().getCanonicalClassName().isEmpty()){
+    			return saveReplicate(entObj);
+    		}
+    	}
+    	return saveImpl(obj);
+    }
+    public Object saveImpl(Object obj) throws Throwable {
         Throwable t = null;
         try {
             //entityManager = new JpaUtil().getEm();
@@ -345,8 +363,16 @@ public class BaseDao implements Serializable {
         }
 
     }
-
     public Object remove(Object obj) throws Throwable {
+    	if(obj instanceof DevEntityObject){
+    		DevEntityObject entObj = (DevEntityObject)obj;
+    		if(entObj.getEntityClass().getCanonicalClassName()!=null && !entObj.getEntityClass().getCanonicalClassName().isEmpty()){
+    			return removeReplicate(entObj);
+    		}
+    	}
+    	return removeImpl(obj);    	
+    }
+    public Object removeImpl(Object obj) throws Throwable {
         Throwable t = null;
         try {
             //entityManager = JpaUtil.getEntityManager();
@@ -437,15 +463,22 @@ public class BaseDao implements Serializable {
             return list;
         }
     }
-    public List<DevEntityObject> findEntityObjectByClass(String className, List<Long> siteIdList, Date startDate, Date endDate) {
+    public List<DevEntityObject> findEntityObjectByClass(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate) {
     	return findEntityObjectByClass(className, siteIdList, startDate, endDate, false);
     }
-    public List<DevEntityObject> findEntityObjectByClass(String className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) {
+    public List<DevEntityObject> findEntityObjectByClass(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) {
+    	if(className.getCanonicalClassName()!=null && !className.getCanonicalClassName().isEmpty()){
+    		return findEntityObjectByClassReplicate(className, siteIdList, startDate, endDate, refresh);
+    	}else{
+    		return findEntityObjectByClassImpl(className, siteIdList, startDate, endDate, refresh);
+    	}
+    }
+    public List<DevEntityObject> findEntityObjectByClassImpl(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) {
         Throwable t = null;
         List<DevEntityObject> objectList = null;
         Date ini = new Date();
         try {
-        	if(className==null || className.isEmpty()){
+        	if(className==null){
         		throw new IllegalArgumentException("ClassName is empty or null in findEntityObjectByClass.");
         	}
             CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -457,7 +490,7 @@ public class BaseDao implements Serializable {
 
             Path<Object> path2 = from.join("entityClass").get("name");
             CriteriaQuery<DevEntityObject> select = criteriaQuery.select(from);
-            Predicate where1 = criteriaBuilder.equal(path2, className);
+            Predicate where1 = criteriaBuilder.equal(path2, className.getName());
             boolean execute = false;
             //select.where(criteriaBuilder.equal(path, siteId));
             List<Predicate> whereList = new ArrayList<Predicate>();
@@ -508,11 +541,10 @@ public class BaseDao implements Serializable {
             if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
             }
-            Date fim = new Date();
-            System.err.println("Time Dao "+className+": "+(fim.getTime()-ini.getTime()));
+            Date end = new Date();
+            System.err.println("Time Dao "+className.getName()+": "+(end.getTime()-ini.getTime()));
             return objectList;
         }
-
     }
     public String generateEntityName(String entityClassName) {
         Throwable t = null;
@@ -539,5 +571,277 @@ public class BaseDao implements Serializable {
             return entityName;
         }
 
+    }
+    
+    public Object saveReplicate(DevEntityObject obj) throws Throwable {
+        Throwable t = null;
+        try {
+            //entityManager = new JpaUtil().getEm();
+            //transacao = entityManager.getTransaction();
+            //transacao.begin();
+            Object id = entityManager.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(obj);
+            if (id == null) {
+                userTransaction.begin();
+                entityManager.persist(obj);
+                if(obj.getEntityClass().getCanonicalClassName()!=null){
+                	CreateEm();
+                	Class clazz = Class.forName(obj.getEntityClass().getCanonicalClassName());
+                	Object objRepl = clazz.newInstance();
+                	Field[] fields = clazz.getDeclaredFields();
+                	for (int i = 0; i < fields.length; i++) {
+						Field field = fields[i];
+						if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
+							field.setAccessible(true);
+							Object val = obj.getProp(field.getName().toLowerCase());
+							try {							
+								field.set(objRepl, val);
+							} catch (IllegalArgumentException e) {
+								if(val!=null){
+									throw new IllegalArgumentException(e);
+								}
+								// TODO: handle exception
+							}
+						}
+						
+					}
+                	entityManagerSmall.persist(objRepl);
+                	entityManagerSmall.flush();
+                	entityManagerSmall.refresh(objRepl);
+                }
+                entityManager.flush();
+                entityManager.refresh(obj);
+                
+                userTransaction.commit();
+                //obj = entityManager.merge(obj);
+            } else {
+                userTransaction.begin();
+                obj = entityManager.merge(obj);
+                entityManager.flush();
+                entityManager.refresh(obj);                
+                if(obj.getEntityClass().getCanonicalClassName()!=null){
+                	CreateEm();
+                	Class clazz = Class.forName(obj.getEntityClass().getCanonicalClassName());
+                	Object objRepl = clazz.newInstance();
+                	Field[] fields = clazz.getDeclaredFields();
+                	for (int i = 0; i < fields.length; i++) {
+						Field field = fields[i];
+						if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
+							field.setAccessible(true);
+							Object val = obj.getProp(field.getName().toLowerCase());
+							try {							
+								field.set(objRepl, val);
+							} catch (IllegalArgumentException e) {
+								if(val!=null){
+									throw new IllegalArgumentException(e);
+								}
+								// TODO: handle exception
+							}
+						}
+						
+					}
+                	objRepl = entityManagerSmall.merge(objRepl);
+                	entityManagerSmall.flush();
+                	entityManagerSmall.refresh(objRepl);
+                }                
+                
+                userTransaction.commit();
+            }
+            //entityManager.flush();
+            //transacao.commit();
+        } catch (Throwable e) {
+            t = e;
+            if (!(e instanceof Error)) {
+                e.printStackTrace();
+            }
+            userTransaction.rollback();
+            obj = null;
+        } finally {
+            if (entityManager != null && entityManager.isOpen()) {
+                //entityManager.close();
+            }
+            if (t != null) {
+                throw t;
+            }
+            return obj;
+        }
+    }
+
+    public Object removeReplicate(DevEntityObject obj) throws Throwable {
+        Throwable t = null;
+        try {
+            //entityManager = JpaUtil.getEntityManager();
+            userTransaction.begin();
+            entityManager.flush();
+            obj = entityManager.merge(obj);
+            entityManager.remove(obj);
+            if(obj.getEntityClass().getCanonicalClassName()!=null){
+            	//CreateEm();
+            	Class clazz = Class.forName(obj.getEntityClass().getCanonicalClassName());
+            	Object objRepl = clazz.newInstance();
+            	Field[] fields = clazz.getDeclaredFields();
+            	for (int i = 0; i < fields.length; i++) {
+					Field field = fields[i];
+					if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
+						field.setAccessible(true);
+						Object val = obj.getProp(field.getName().toLowerCase());
+						try {							
+							field.set(objRepl, val);
+						} catch (IllegalArgumentException e) {
+							if(val!=null){
+								throw new IllegalArgumentException(e);
+							}
+							// TODO: handle exception
+						}
+					}
+					
+				}
+            	entityManagerSmall.flush();
+                objRepl = entityManagerSmall.merge(objRepl);
+                entityManagerSmall.remove(objRepl);            	
+            }                        
+            userTransaction.commit();
+        } catch (Exception e) {
+            t = e;
+            //e.printStackTrace();
+            obj = null;
+        } finally {
+            if (entityManager != null && entityManager.isOpen()) {
+                //entityManager.close();
+            }
+            if (t != null) {
+                throw t;
+            }
+            return obj;
+        }
     }    
+    public List<DevEntityObject> findEntityObjectByClassReplicate(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) {
+        Throwable t = null;
+        List<DevEntityObject> objectList = new ArrayList<DevEntityObject>();
+        Date ini = new Date();
+        try {
+        	if(className==null){
+        		throw new IllegalArgumentException("ClassName is empty or null in findEntityObjectByClass.");
+        	}
+            boolean execute = false;        	
+            /**
+             * Consulta para integragração
+             */
+            if(className.getCanonicalClassName()!=null){            	
+            	//CreateEm();
+            	Class clazz = Class.forName(className.getCanonicalClassName());
+            	Class<?> clazzType = Class.forName(className.getCanonicalClassName());
+            	List objectListSmall = null;
+            	List objectListSmallRest = null;
+	            CriteriaBuilder criteriaBuilderSmall = entityManagerSmall.getCriteriaBuilder();
+	            if(refresh){
+	            	entityManagerSmall.getEntityManagerFactory().getCache().evict(clazz);
+	            }
+	            CriteriaQuery criteriaQuerySmall = criteriaBuilderSmall.createQuery(clazzType);
+	            Root fromSmall = criteriaQuerySmall.from(clazz);
+	
+	            //Path<Object> path2Small = fromSmall.join("entityClass").get("name");
+	            CriteriaQuery<DevEntityObject> selectSmall = criteriaQuerySmall.select(fromSmall);
+	           // Predicate where1Small = criteriaBuilderSmall.equal(path2Small, className.getName());            
+                TypedQuery<DevEntityObject> typedQuerySmall = entityManagerSmall.createQuery(selectSmall);
+                if(refresh){
+                	typedQuerySmall.setHint("javax.persistence.cache.storeMode", "REFRESH");
+                }
+                objectList = findEntityObjectByClassImpl(className, siteIdList, startDate, endDate, refresh);
+                objectListSmall = typedQuerySmall.getResultList();
+	            objectListSmallRest = new ArrayList(objectListSmall);
+	            //for (Iterator iterator = objectListSmall.iterator(); iterator.hasNext();) {
+					//Object objRepl = (Object) iterator.next();
+				userTransaction.begin();
+				Object objRepl2 = clazz.newInstance();
+				Field[] fields = clazz.getDeclaredFields();
+				entityManagerSmall.flush();
+				entityManager.flush();	            
+				for (Iterator iterator2 = objectList.iterator(); iterator2.hasNext();) {
+					DevEntityObject obj = (DevEntityObject) iterator2.next();	
+					for (int i = 0; i < fields.length; i++) {
+						Field field = fields[i];
+						if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
+							field.setAccessible(true);
+							Object val = obj.getProp(field.getName().toLowerCase());
+							try {							
+								field.set(objRepl2, val);
+							} catch (IllegalArgumentException e) {
+								if(val!=null){
+									throw new IllegalArgumentException(e);
+								}
+								// TODO: handle exception
+							} catch (Exception e) {
+								if(val!=null){
+									throw new IllegalArgumentException(e);
+								}
+								// TODO: handle exception
+							}
+						}							
+					}
+					
+					//objRepl2 = entityManagerSmall.merge(objRepl2);	
+					objectListSmallRest.remove(objRepl2);
+				}
+					
+					
+					
+										
+	            	
+	            //}
+	            for (Iterator iterator3 = objectListSmallRest.iterator(); iterator3.hasNext();) {
+	            	Object objRepl3 = (Object) iterator3.next();
+	            	DevEntityObject obj = new DevEntityObject(className);
+	            	AdmInstantiatesSite site = new AdmInstantiatesSite();
+	            	site.setInstantiatesSiteId(siteIdList.get(0));
+	            	obj.setInstantiatesSite(site);
+	            	for (int i = 0; i < fields.length; i++) {
+	            		Field field = fields[i];
+	            		if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
+	            			field.setAccessible(true);
+	            			Object val = field.get(objRepl3);
+	            			obj.getPropObj(field.getName().toLowerCase()).setVal(val);
+	            		}					
+	            	}	            	            	
+	            	obj = entityManager.merge(obj);		
+	            	objectList.add(obj);
+	            }
+            }  
+            
+            userTransaction.commit();
+        	
+        	     
+            
+            //transacao.commit();
+        } catch (Exception e) {
+            t = e;
+            //e.printStackTrace();
+            objectList = null;
+            //transacao.rollback();
+        } finally {
+            if (entityManager != null && entityManager.isOpen()) {
+                //entityManager.close();
+            }
+            Date fim = new Date();
+            System.err.println("Time Dao "+className+": "+(fim.getTime()-ini.getTime()));
+            return objectList;
+        }
+    }    
+    public void CreateEm() {
+        try {
+            //entityManagerSmall.setProperty("javax.persistence.jdbc.driver", "org.firebirdsql.jdbc.FBDriver");
+            //entityManagerSmall.setProperty("javax.persistence.jdbc.url", "jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB)");
+            //entityManagerSmall.setProperty("javax.persistence.jdbc.url", "jdbc:firebirdsql:algoboss.zapto.org/3050:D:\\Documents\\@PESSOAL\\ERP\\integração small\\SMALL.GDB");            
+            //entityManagerSmall.setProperty("javax.persistence.jdbc.user", "SYSDBA");
+            //entityManagerSmall.setProperty("javax.persistence.jdbc.password","masterkey");
+            //EntityManagerFactory emf = javax.persistence.Persistence.createEntityManagerFactory("SMALLPU",properties);
+            //properties.put("javax.persistence.jdbc.url",  "jdbc:firebirdsql://localhost:3050/" + DBpath + "?roleName=myrole");
+            //EntityManager entityManager = emf.createEntityManager();
+            //return entityManager;
+        } catch (Throwable e) {
+            e.printStackTrace();
+            //return null;
+        }
+    }
+    
+    
 }

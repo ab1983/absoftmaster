@@ -317,7 +317,8 @@ public class AlgodevUtil {
         dictionary.putAll(dictionaryAux);
         dictionary.put("LONG", "+");
         dictionary.put("DOUBLE", "$");
-        dictionary.put("BIGDECIMAL", "$");  
+        dictionary.put("BIGDECIMAL", "$");
+        dictionary.put("BYTE[]", "*"); 
        
     }    
     public static boolean isPropertyClass(String type){

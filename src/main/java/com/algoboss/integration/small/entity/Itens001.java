@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  * The persistent class for the itens001 database table.
  * 
  */
-@Entity
+//@Entity
 @NamedQuery(name="Itens001.findAll", query="SELECT i FROM Itens001 i")
 public class Itens001 implements Serializable {
 	private static final long serialVersionUID = 1L;

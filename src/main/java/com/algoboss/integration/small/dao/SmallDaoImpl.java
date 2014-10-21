@@ -20,7 +20,7 @@ public class SmallDaoImpl {
         try {
             Map properties = new HashMap();
             properties.put("javax.persistence.jdbc.driver", "org.firebirdsql.jdbc.FBDriver");
-            properties.put("javax.persistence.jdbc.url", "jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB)");
+            properties.put("javax.persistence.jdbc.url", "jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB");
             properties.put("javax.persistence.jdbc.user", "SYSDBA");
             properties.put("javax.persistence.jdbc.password","masterkey");
             EntityManagerFactory emf = javax.persistence.Persistence.createEntityManagerFactory("SMALLPU",properties);
