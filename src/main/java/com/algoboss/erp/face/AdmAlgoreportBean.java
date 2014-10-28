@@ -1267,7 +1267,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                         toSaveList.add(contract);
                     }
                 }
-                super.doBeanSaveAndList(false, true, toSaveList.toArray());
+                super.doBeanSaveAndList(false, false, true, toSaveList.toArray());
                 if (service != null) {
                     service.setReportRequirement(bean);
                 } else {

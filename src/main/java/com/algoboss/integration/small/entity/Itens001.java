@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  * The persistent class for the itens001 database table.
  * 
  */
-//@Entity
+@Entity
 @NamedQuery(name="Itens001.findAll", query="SELECT i FROM Itens001 i")
 public class Itens001 implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -18,10 +18,10 @@ public class Itens001 implements Serializable {
 	private String registro;
 
 	@Column(name="aliq_cofins")
-	private BigDecimal aliqCofins;
+	private double aliqCofins;
 
 	@Column(name="aliq_pis")
-	private BigDecimal aliqPis;
+	private double aliqPis;
 
 	private double aliquota;
 
@@ -74,15 +74,15 @@ public class Itens001 implements Serializable {
 
 	private double unitario;
 
-	private BigDecimal vbc;
+	private double vbc;
 
-	private BigDecimal vbcst;
+	private double vbcst;
 
-	private BigDecimal vicms;
+	private double vicms;
 
-	private BigDecimal vicmsst;
+	private double vicmsst;
 
-	private BigDecimal vipi;
+	private double vipi;
 
 	private String xped;
 
@@ -97,19 +97,19 @@ public class Itens001 implements Serializable {
 		this.registro = registro;
 	}
 
-	public BigDecimal getAliqCofins() {
+	public double getAliqCofins() {
 		return this.aliqCofins;
 	}
 
-	public void setAliqCofins(BigDecimal aliqCofins) {
+	public void setAliqCofins(double aliqCofins) {
 		this.aliqCofins = aliqCofins;
 	}
 
-	public BigDecimal getAliqPis() {
+	public double getAliqPis() {
 		return this.aliqPis;
 	}
 
-	public void setAliqPis(BigDecimal aliqPis) {
+	public void setAliqPis(double aliqPis) {
 		this.aliqPis = aliqPis;
 	}
 
@@ -305,43 +305,43 @@ public class Itens001 implements Serializable {
 		this.unitario = unitario;
 	}
 
-	public BigDecimal getVbc() {
+	public double getVbc() {
 		return this.vbc;
 	}
 
-	public void setVbc(BigDecimal vbc) {
+	public void setVbc(double vbc) {
 		this.vbc = vbc;
 	}
 
-	public BigDecimal getVbcst() {
+	public double getVbcst() {
 		return this.vbcst;
 	}
 
-	public void setVbcst(BigDecimal vbcst) {
+	public void setVbcst(double vbcst) {
 		this.vbcst = vbcst;
 	}
 
-	public BigDecimal getVicms() {
+	public double getVicms() {
 		return this.vicms;
 	}
 
-	public void setVicms(BigDecimal vicms) {
+	public void setVicms(double vicms) {
 		this.vicms = vicms;
 	}
 
-	public BigDecimal getVicmsst() {
+	public double getVicmsst() {
 		return this.vicmsst;
 	}
 
-	public void setVicmsst(BigDecimal vicmsst) {
+	public void setVicmsst(double vicmsst) {
 		this.vicmsst = vicmsst;
 	}
 
-	public BigDecimal getVipi() {
+	public double getVipi() {
 		return this.vipi;
 	}
 
-	public void setVipi(BigDecimal vipi) {
+	public void setVipi(double vipi) {
 		this.vipi = vipi;
 	}
 

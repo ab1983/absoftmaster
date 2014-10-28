@@ -1,12 +1,18 @@
 package com.algoboss.integration.small.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -135,6 +141,10 @@ public class Venda implements Serializable {
 	private String vendedor;
 
 	private double volumes;
+	
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName="numeronf", name = "numeronf"/*,insertable=false,updatable=false*/)	
+	private List<Itens001> produtos = new ArrayList<Itens001>();
 
 	public Venda() {
 	}
@@ -561,6 +571,14 @@ public class Venda implements Serializable {
 
 	public void setVolumes(double volumes) {
 		this.volumes = volumes;
+	}	
+	
+	public List<Itens001> getProdutos() {
+		return produtos;
+	}
+
+	public void setProdutos(List<Itens001> produtos) {
+		this.produtos = produtos;
 	}
 
 	@Override

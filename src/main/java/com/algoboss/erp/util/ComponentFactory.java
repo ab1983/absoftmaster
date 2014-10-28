@@ -52,8 +52,12 @@ import com.algoboss.erp.entity.DevPrototypeComponentBehaviors;
 import com.algoboss.erp.entity.DevPrototypeComponentChildren;
 import com.algoboss.erp.entity.DevPrototypeComponentFacets;
 import com.algoboss.erp.entity.DevPrototypeComponentProperty;
+import com.algoboss.erp.entity.DevReportFieldContainer;
+import com.algoboss.erp.entity.DevReportFieldOptions;
+import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.face.AdmAlgodevBean;
 import com.algoboss.erp.face.BaseBean;
+import com.algoboss.integration.small.face.LayoutFieldsFormat;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -72,7 +76,7 @@ public class ComponentFactory {
 		return componentCreated;
 	}
 
-	public ComponentFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, List<DevEntityPropertyDescriptor> propertySelectedList, AppType appType) {
+	public ComponentFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, DevRequirement requirement, AppType appType) {
 		try {
 			if (entitySelected != null) {
 				UIComponent compClone = comp;// ComponentFactory.componentClone(comp,
@@ -83,24 +87,24 @@ public class ComponentFactory {
 				UIComponent compFinded = null;
 				if ((compFinded = findComponentByClassName("javax.faces.component.html.HtmlSelectOneMenu", compClone)) != null) {
 					if ((compFinded = findComponentByClassName("javax.faces.component.UISelectItems", compFinded)) != null) {
-						this.doSelectItemsFactory(compFinded, parentContainer, entitySelected, propertySelectedList, appType);
+						this.doSelectItemsFactory(compFinded, parentContainer, entitySelected);
 					}
 				}
 				if (styleClass != null && String.valueOf(styleClass).contains("data-list")) {
 					if ((compFinded = findComponentByClassName("javax.faces.component.UIColumn", compClone)) != null) {
-						this.doUIColumnFactory(compFinded, elementPanel, parentContainer, parentEntity, entitySelected, propertySelectedList, appType);
+						this.doUIColumnFactory(compFinded, elementPanel, parentContainer, parentEntity, entitySelected, requirement, appType);
 						elementsContainerMap.put("list", new ArrayList<UIComponent>(compClone.getParent().getChildren()));
 					}
 				}
 				if (styleClass != null && String.valueOf(styleClass).contains("data-form")) {
-					this.doUIFieldSetFactory(compClone, elementPanel, parentContainer, parentEntity, elementsContainerMap, entitySelected, propertySelectedList, appType);
+					this.doUIFieldSetFactory(compClone, elementPanel, parentContainer, parentEntity, elementsContainerMap, entitySelected, requirement, appType);
 					elementsContainerMap.put("form", new ArrayList<UIComponent>(compClone.getParent().getChildren()));
 				}
 				if (styleClass != null && String.valueOf(styleClass).contains("data-grid")) {
-					this.doUIDataGridFactory(compClone, elementPanel, parentContainer, parentEntity, elementsContainerMap, entitySelected, propertySelectedList, appType);
+					this.doUIDataGridFactory(compClone, elementPanel, parentContainer, parentEntity, elementsContainerMap, entitySelected, requirement, appType);
 				}
 				if (styleClass != null && String.valueOf(styleClass).contains("data-carousel")) {
-					this.doUICarouselFactory(compClone, elementPanel, parentContainer, parentEntity, elementsContainerMap, entitySelected, propertySelectedList, appType);
+					this.doUICarouselFactory(compClone, elementPanel, parentContainer, parentEntity, elementsContainerMap, entitySelected, requirement, appType);
 				}
 				/*
 				 * if
@@ -154,8 +158,9 @@ public class ComponentFactory {
 		comp.setValueExpression(field, (ValueExpression) o);
 	}
 
-	private void doSelectItemsFactory(UIComponent comp, String field, DevEntityClass entitySelected, List<DevEntityPropertyDescriptor> propertySelectedList, AppType appType) {
+	private void doSelectItemsFactory(UIComponent comp, String field, DevEntityClass entitySelected) {
 		String propertyArrayStr = "";
+		/*
 		for (int i = 0; false && i < propertySelectedList.size(); i++) {
 			DevEntityPropertyDescriptor devEntityPropertyDescriptor = propertySelectedList.get(i);
 			if (devEntityPropertyDescriptor.isPropertyIdentifier()) {
@@ -164,14 +169,14 @@ public class ComponentFactory {
 				}
 				propertyArrayStr += devEntityPropertyDescriptor.getPropertyName();
 			}
-		}
+		}*/
 		// String str = "#{app.beanMap('" + entitySelected.getName() + "','" +
 		// propertyArrayStr + "')}";
 		String str = "#{app.beanMap('" + entitySelected.getName() + "')}";
 		setValue(comp, field, str);
 	}
 
-	private void doUIColumnFactory(UIComponent compClone, UIComponent elementPanel, String parentContainer, String parentEntity, DevEntityClass entitySelected, List<DevEntityPropertyDescriptor> propertySelectedList, AppType appType) {
+	private void doUIColumnFactory(UIComponent compClone, UIComponent elementPanel, String parentContainer, String parentEntity, DevEntityClass entitySelected, DevRequirement requirement, AppType appType) {
 		try {
 			FacesContext context = FacesContext.getCurrentInstance();
 			Field f2 = UIComponentBase.class.getDeclaredField("pdMap");
@@ -180,8 +185,18 @@ public class ComponentFactory {
 			UIComponent cloned = null;
 			UIComponent parent = compClone.getParent();
 			UIComponent rowEditor = compClone.getChildren().remove(1);
-			for (int i = 0; i < propertySelectedList.size(); i++) {
-				DevEntityPropertyDescriptor devEntityPropertyDescriptor = propertySelectedList.get(i);
+			parentContainer = (parentContainer != null && !parentContainer.isEmpty()) ? parentContainer : "list";
+			DevReportFieldContainer fieldContainer = LayoutFieldsFormat.getFieldContainer(requirement, parentContainer);
+			
+			List<DevReportFieldOptions> fieldOptionsList = new ArrayList<DevReportFieldOptions>();
+			List<DevReportFieldOptions> fieldOptionsListTmp = fieldContainer.getFieldOptionsList();
+			for (DevReportFieldOptions devReportFieldOptions : fieldOptionsListTmp) {
+				if(Boolean.valueOf(LayoutFieldsFormat.loadOpt(devReportFieldOptions, "visible").getOptionsValue().toString())){
+					fieldOptionsList.add(devReportFieldOptions);
+				}	
+			}			
+			for (int i = 0; i < fieldOptionsList.size(); i++) {
+				DevEntityPropertyDescriptor devEntityPropertyDescriptor = fieldOptionsList.get(i).getEntityPropertyDescriptor();
 				if (i == 0) {
 					parent.getChildren().clear();
 				}
@@ -201,7 +216,7 @@ public class ComponentFactory {
 						}
 					}
 				}
-				parentContainer = (parentContainer != null && !parentContainer.isEmpty()) ? parentContainer : "list";
+
 				try {
 					UIComponent childAux = cloned.getChildren().get(0).getFacet("output");
 
@@ -348,11 +363,13 @@ public class ComponentFactory {
 				Logger.getLogger(ComponentFactory.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			String node = "";
-			if (!parentEntity.isEmpty()) {
-				node = parentEntity + ".";
+			if (parentEntity.isEmpty()) {
+				node = entitySelected.getName();
+			}else{
+				node = parentEntity;
 			}
-			String str = "#{app.beanListMap.get('" + String.valueOf(node + entitySelected.getName()).toLowerCase() + "')}";
-			String str3 = "#{app.beanListFilteredMap.get('" + String.valueOf(node + entitySelected.getName()).toLowerCase() + "')}";
+			String str = "#{app.beanListMap.get('" + String.valueOf(node).toLowerCase() + "')}";
+			String str3 = "#{app.beanListFilteredMap.get('" + String.valueOf(node).toLowerCase() + "')}";
 			String str2 = "#{app.beanSel}";
 			Map<String, Object> mapParam = new HashMap<String, Object>();
 			mapParam.put("value", str);
@@ -494,8 +511,10 @@ public class ComponentFactory {
 			UIComponent panelCloned = null;
 			boolean hasList = appType.hasList();
 			String node = "";
-			if (!parentEntity.isEmpty()) {
-				node = parentEntity + ".";
+			if (parentEntity.isEmpty()) {
+				node = entitySelected.getName();
+			}else{
+				node = parentEntity;
 			}
 			Map<String, Object> mapParam = new HashMap<String, Object>();
 			Map<String, Object> mapParamBasic = new HashMap<String, Object>();
@@ -513,8 +532,8 @@ public class ComponentFactory {
 			if (parentContainer.contains("-")) {
 				save = "#{app.doSaveChild()}";
 				if (hasList) {
-					saveAndBack = "#{app.doSaveAndListChild('" + parentContainerName(parentContainer) + "-list-" + entitySelected.getName() + "','" + node + entitySelected.getName() + "')}";
-					back = "#{app.doList('" + parentContainerName(parentContainer) + "-list-" + entitySelected.getName() + "','" + node + entitySelected.getName() + "')}";
+					saveAndBack = "#{app.doSaveAndListChild('" + parentContainerName(parentContainer) + "-list-" + entitySelected.getName() + "','" + node + "')}";
+					back = "#{app.doList('" + parentContainerName(parentContainer) + "-list-" + entitySelected.getName() + "','" + node + "')}";
 				} else {
 					saveAndBack = "#{app.doSaveAndListChild('" + parentContainerName(parentContainer) + "','" + node + "')}";
 					back = "#{app.doList('" + parentContainerName(parentContainer) + "','" + node + "')}";
@@ -728,7 +747,7 @@ public class ComponentFactory {
 					// ent.getEntityPropertyDescriptorList(), appType);
 					UIComponent compFinded = null;
 					if ((compFinded = findComponentByClassName("javax.faces.component.UISelectItems", inputCloned)) != null) {
-						this.doSelectItemsFactory(compFinded, "value", ent, ent.getEntityPropertyDescriptorList(), appType);
+						this.doSelectItemsFactory(compFinded, "value", ent);
 					}
 					if (!editableList) {
 						UIComponent labelSelect = ComponentFactory.componentClone(findComponentByStyleClass("ui-textOutput", elementPanel), false);
@@ -822,7 +841,7 @@ public class ComponentFactory {
 		mapParam.put("styleClass", Objects.toString(mapParam.get("styleClass"), "").concat(preffix + parent + preffix + entitySelected.getName() + preffix + devEntityPropertyDescriptor.getPropertyName() + (suffix.isEmpty() ? "" : preffix + suffix)));
 	}
 
-	private void doUIFieldSetFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, List<DevEntityPropertyDescriptor> propertySelectedList, AppType appType) {
+	private void doUIFieldSetFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, DevRequirement requirement, AppType appType) {
 		try {
 			String propertyArrayStr = "";
 			FacesContext context = FacesContext.getCurrentInstance();
@@ -875,14 +894,25 @@ public class ComponentFactory {
 			mapParam.put("style", "width:965px;height:335px");
 			mapParam.put("mode", "native");
 			ComponentFactory.updateElementProperties(panelScroll, mapParam);
-			if (propertySelectedList.size() > 14) {
+			//List<DevEntityPropertyDescriptor> propertySelectedList = new ArrayList<DevEntityPropertyDescriptor>();
+			String parent = (parentContainer != null && !parentContainer.isEmpty()) ? parentContainer : "form";
+			DevReportFieldContainer fieldContainer = LayoutFieldsFormat.getFieldContainer(requirement, parent);
+			
+			List<DevReportFieldOptions> fieldOptionsList = new ArrayList<DevReportFieldOptions>();
+			List<DevReportFieldOptions> fieldOptionsListTmp = fieldContainer.getFieldOptionsList();
+			for (DevReportFieldOptions devReportFieldOptions : fieldOptionsListTmp) {
+				if(Boolean.valueOf(LayoutFieldsFormat.loadOpt(devReportFieldOptions, "visible").getOptionsValue().toString())){
+					fieldOptionsList.add(devReportFieldOptions);
+				}	
+			}
+			if (fieldOptionsList.size() > 14) {
 				comp.getChildren().add(panelScroll);
 				panelScroll.getChildren().add(panelTableParent);
 			} else {
 				comp.getChildren().add(panelTableParent);
 			}
 			UIComponent panelTableChild = null;
-			for (int i = 0; i < propertySelectedList.size(); i++) {
+			for (int i = 0; i < fieldOptionsList.size(); i++) {
 				if (i % 7 == 0) {
 					UIComponent panelTableColumn = ComponentFactory.componentClone(panel, false);
 					mapParam.clear();
@@ -900,7 +930,9 @@ public class ComponentFactory {
 					ComponentFactory.updateElementProperties(panelTableChild, mapParam);
 					panelTableColumn.getChildren().add(panelTableChild);
 				}
-				DevEntityPropertyDescriptor devEntityPropertyDescriptor = propertySelectedList.get(i);
+				DevReportFieldOptions fieldOptions = fieldOptionsList.get(i);
+
+				DevEntityPropertyDescriptor devEntityPropertyDescriptor = fieldOptions.getEntityPropertyDescriptor();
 				UIComponent panelTableRow = ComponentFactory.componentClone(panel, false);
 				mapParam.clear();
 				mapParam.put("style", "display:table-row");
@@ -914,14 +946,16 @@ public class ComponentFactory {
 				try {
 					input = null;
 					buttom = null;
-					String parent = (parentContainer != null && !parentContainer.isEmpty()) ? parentContainer : "form";
+				
 					// Object styleClass;
 					input = createInputComponent(elementPanel, entitySelected, devEntityPropertyDescriptor, configMap, parentEntity, appType, parent);
 					// styleClass = getProperty(input, "styleClass");
 
 					String node = "";
-					if (!parentEntity.isEmpty()) {
-						node = parentEntity + ".";
+					if (parentEntity.isEmpty()) {
+						node = entitySelected.getName();
+					}else{
+						node = parentEntity;
 					}
 					boolean isButtonInputChildren = input instanceof javax.faces.component.html.HtmlCommandButton && devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ENTITYCHILDREN");
 					if (input != null && !isButtonInputChildren) {
@@ -981,11 +1015,11 @@ public class ComponentFactory {
 						DevEntityClass ent = devEntityPropertyDescriptor.getPropertyClass();
 						mapParam.clear();
 						if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ENTITYCHILDREN")) {
-							mapParam.put("value", devEntityPropertyDescriptor.getPropertyLabel() + " (#{app.count('" + String.valueOf(node + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName()).toLowerCase() + "')})");
-							mapParam.put("action", "#{app.doList('" + parent + "-list-" + ent.getName() + "','" + node + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "')}");
+							mapParam.put("value", devEntityPropertyDescriptor.getPropertyLabel() + " (#{app.count('" + String.valueOf(node + "." + devEntityPropertyDescriptor.getPropertyName()).toLowerCase() + "')})");
+							mapParam.put("action", "#{app.doList('" + parent + "-list-" + ent.getName() + "','" + node + "." + devEntityPropertyDescriptor.getPropertyName() + "')}");
 						} else {
 							mapParam.put("value", devEntityPropertyDescriptor.getPropertyLabel());
-							mapParam.put("action", "#{app.doList('" + parent + "-form-" + ent.getName() + "','" + node + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "')}");
+							mapParam.put("action", "#{app.doList('" + parent + "-form-" + ent.getName() + "','" + node + "." + devEntityPropertyDescriptor.getPropertyName() + "')}");
 						}
 						mapParam.put("update", "@form");
 						mapParam.put("immediate", "false");
@@ -1010,7 +1044,7 @@ public class ComponentFactory {
 							algoContainerCloned.getChildren().clear();
 							algoContainerCloned.getChildren().add(containerChildClone);
 							String parentList = parent + "-list-" + ent.getName();
-							new ComponentFactory(table, elementPanel, parentList, entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType).getComponentCreated();
+							new ComponentFactory(table, elementPanel, parentList, node + "." + devEntityPropertyDescriptor.getPropertyName(), elementsContainerMap, ent, requirement, appType).getComponentCreated();
 							elementsContainerMap.put(parentList, new ArrayList<UIComponent>(containerChildClone.getChildren()));
 						}
 						containerChildClone = ComponentFactory.componentClone(containerChild, false);
@@ -1019,7 +1053,7 @@ public class ComponentFactory {
 						algoContainerCloned.getChildren().clear();
 						algoContainerCloned.getChildren().add(containerChildClone);
 						String parentForm = parent + "-form-" + ent.getName();
-						new ComponentFactory(fieldSet, elementPanel, parentForm, entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ONEINTERNALOBJECT") ? AppType.FORM : appType)).getComponentCreated();
+						new ComponentFactory(fieldSet, elementPanel, parentForm, node + "." + devEntityPropertyDescriptor.getPropertyName(), elementsContainerMap, ent, requirement, (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ONEINTERNALOBJECT") ? AppType.FORM : appType)).getComponentCreated();
 						elementsContainerMap.put(parentForm, new ArrayList<UIComponent>(containerChildClone.getChildren()));
 						mapParam.clear();
 						mapParam.put("legend", "");
@@ -1055,7 +1089,7 @@ public class ComponentFactory {
 							}
 						}
 						tab.getChildren().add(table);
-						new ComponentFactory(table, elementPanel, "", parentEntity, elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType).getComponentCreated();
+						new ComponentFactory(table, elementPanel, "", parentEntity, elementsContainerMap, ent, requirement, appType).getComponentCreated();
 						/*
 						 * tab.getChildren().add(fieldSet); new
 						 * ComponentFactory(fieldSet, elementPanel, "",
@@ -1080,7 +1114,7 @@ public class ComponentFactory {
 				// devEntityPropertyDescriptor.getPropertyName();
 			}
 			mapParam.clear();
-			int colSise = BigDecimal.valueOf(propertySelectedList.size() / 8f).setScale(0, RoundingMode.UP).intValue() * 2;
+			int colSise = BigDecimal.valueOf(fieldOptionsList.size() / 8f).setScale(0, RoundingMode.UP).intValue() * 2;
 			mapParam.put("columns", String.valueOf(colSise));
 			// ComponentFactory.updateElementProperties(f2, comp, mapParam,
 			// null);
@@ -1149,7 +1183,7 @@ public class ComponentFactory {
 		}
 	}
 
-	private void doUIDataGridFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, List<DevEntityPropertyDescriptor> propertySelectedList, AppType appType) {
+	private void doUIDataGridFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, DevRequirement requirement, AppType appType) {
 		try {
 			UIComponent column = null;
 			for (UIComponent child : comp.getChildren()) {
@@ -1235,8 +1269,11 @@ public class ComponentFactory {
 			column.getChildren().clear();
 			column.getChildren().add(panelTableParent);
 			// comp.getChildren().add(panelTableParent);
-			UIComponent panelTableChild = null;
-			for (int i = 0; i < propertySelectedList.size(); i++) {
+			UIComponent panelTableChild = null;			
+			
+			List<DevReportFieldOptions> fieldOptionsList = LayoutFieldsFormat.filter(requirement, parentContainer, "visible", "true");
+			
+			for (int i = 0; i < fieldOptionsList.size(); i++) {
 				if (i % 7 == 0) {
 					UIComponent panelTableColumn = ComponentFactory.componentClone(panel, false);
 					mapParam.clear();
@@ -1259,7 +1296,7 @@ public class ComponentFactory {
 				mapParam.put("style", "display:table-row");
 				ComponentFactory.updateElementProperties(f2, panelTableRow, mapParam, null);
 				panelTableChild.getChildren().add(panelTableRow);
-				DevEntityPropertyDescriptor devEntityPropertyDescriptor = propertySelectedList.get(i);
+				DevEntityPropertyDescriptor devEntityPropertyDescriptor = fieldOptionsList.get(i).getEntityPropertyDescriptor();
 				Map<String, String> configMap = new HashMap<String, String>();
 				if (devEntityPropertyDescriptor.getEntityPropertyDescriptorConfigList() != null) {
 					for (DevEntityPropertyDescriptorConfig devEntityPropertyDescriptorConfig : devEntityPropertyDescriptor.getEntityPropertyDescriptorConfigList()) {
@@ -1434,7 +1471,7 @@ public class ComponentFactory {
 						mapParam.clear();
 						if (Class.forName("javax.faces.component.html.HtmlSelectOneMenu").isAssignableFrom(input.getClass())) {
 							DevEntityClass ent = devEntityPropertyDescriptor.getPropertyClass();
-							new ComponentFactory(inputCloned, elementPanel, "value", entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType);
+							new ComponentFactory(inputCloned, elementPanel, "value", entitySelected.getName(), elementsContainerMap, ent, requirement, appType);
 							mapParam.put("converter", "EntityObjectConverter");
 						}
 						// node += entitySelected.getName() + "." +
@@ -1528,7 +1565,7 @@ public class ComponentFactory {
 							containerChildClone.getChildren().add(table);
 							algoContainerCloned.getChildren().clear();
 							algoContainerCloned.getChildren().add(containerChildClone);
-							new ComponentFactory(table, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType).getComponentCreated();
+							new ComponentFactory(table, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, requirement, appType).getComponentCreated();
 							elementsContainerMap.put(parent + "-list-" + ent.getName(), containerChildClone.getChildren());
 						}
 						containerChildClone = ComponentFactory.componentClone(containerChild, false);
@@ -1536,7 +1573,7 @@ public class ComponentFactory {
 						containerChildClone.getChildren().add(fieldSet);
 						algoContainerCloned.getChildren().clear();
 						algoContainerCloned.getChildren().add(containerChildClone);
-						new ComponentFactory(fieldSet, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ONEINTERNALOBJECT") ? AppType.FORM : appType)).getComponentCreated();
+						new ComponentFactory(fieldSet, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, requirement, (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ONEINTERNALOBJECT") ? AppType.FORM : appType)).getComponentCreated();
 						elementsContainerMap.put(parent + "-form-" + ent.getName(), containerChildClone.getChildren());
 						mapParam.clear();
 						mapParam.put("legend", "");
@@ -1572,7 +1609,7 @@ public class ComponentFactory {
 							}
 						}
 						tab.getChildren().add(table);
-						new ComponentFactory(table, elementPanel, "", parentEntity, elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType).getComponentCreated();
+						new ComponentFactory(table, elementPanel, "", parentEntity, elementsContainerMap, ent, requirement, appType).getComponentCreated();
 						/*
 						 * tab.getChildren().add(fieldSet); new
 						 * ComponentFactory(fieldSet, elementPanel, "",
@@ -1597,7 +1634,7 @@ public class ComponentFactory {
 				// devEntityPropertyDescriptor.getPropertyName();
 			}
 			mapParam.clear();
-			int colSise = BigDecimal.valueOf(propertySelectedList.size() / 8f).setScale(0, RoundingMode.UP).intValue() * 2;
+			int colSise = BigDecimal.valueOf(fieldOptionsList.size() / 8f).setScale(0, RoundingMode.UP).intValue() * 2;
 			mapParam.put("columns", String.valueOf(colSise));
 			// ComponentFactory.updateElementProperties(f2, comp, mapParam,
 			// null);
@@ -1710,7 +1747,7 @@ public class ComponentFactory {
 		}
 	}
 
-	private void doUICarouselFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, List<DevEntityPropertyDescriptor> propertySelectedList, AppType appType) {
+	private void doUICarouselFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, DevRequirement requirement, AppType appType) {
 		try {
 			UIComponent column = null;
 			for (UIComponent child : comp.getChildren()) {
@@ -1779,7 +1816,8 @@ public class ComponentFactory {
 			// column.getChildren().add(uipanel);
 			comp.getChildren().add(panelTableParent);
 			UIComponent panelTableChild = null;
-			for (int i = 0; i < propertySelectedList.size(); i++) {
+			List<DevReportFieldOptions> fieldOptionsList = LayoutFieldsFormat.filter(requirement, parentContainer, "visible", "true");
+			for (int i = 0; i < fieldOptionsList.size(); i++) {
 				if (i % 7 == 0) {
 					UIComponent panelTableColumn = ComponentFactory.componentClone(panel, false);
 					mapParam.clear();
@@ -1802,7 +1840,7 @@ public class ComponentFactory {
 				mapParam.put("style", "display:table-row");
 				ComponentFactory.updateElementProperties(f2, panelTableRow, mapParam, null);
 				panelTableChild.getChildren().add(panelTableRow);
-				DevEntityPropertyDescriptor devEntityPropertyDescriptor = propertySelectedList.get(i);
+				DevEntityPropertyDescriptor devEntityPropertyDescriptor = fieldOptionsList.get(i).getEntityPropertyDescriptor();
 				Map<String, String> configMap = new HashMap<String, String>();
 				if (devEntityPropertyDescriptor.getEntityPropertyDescriptorConfigList() != null) {
 					for (DevEntityPropertyDescriptorConfig devEntityPropertyDescriptorConfig : devEntityPropertyDescriptor.getEntityPropertyDescriptorConfigList()) {
@@ -1948,7 +1986,7 @@ public class ComponentFactory {
 						mapParam.clear();
 						if (Class.forName("javax.faces.component.html.HtmlSelectOneMenu").isAssignableFrom(input.getClass())) {
 							DevEntityClass ent = devEntityPropertyDescriptor.getPropertyClass();
-							new ComponentFactory(inputCloned, elementPanel, "value", entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType);
+							new ComponentFactory(inputCloned, elementPanel, "value", entitySelected.getName(), elementsContainerMap, ent, requirement, appType);
 							mapParam.put("converter", "EntityObjectConverter");
 						}
 						// node += entitySelected.getName() + "." +
@@ -2042,7 +2080,7 @@ public class ComponentFactory {
 							containerChildClone.getChildren().add(table);
 							algoContainerCloned.getChildren().clear();
 							algoContainerCloned.getChildren().add(containerChildClone);
-							new ComponentFactory(table, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType).getComponentCreated();
+							new ComponentFactory(table, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, requirement, appType).getComponentCreated();
 							elementsContainerMap.put(parent + "-list-" + ent.getName(), containerChildClone.getChildren());
 						}
 						containerChildClone = ComponentFactory.componentClone(containerChild, false);
@@ -2050,7 +2088,7 @@ public class ComponentFactory {
 						containerChildClone.getChildren().add(fieldSet);
 						algoContainerCloned.getChildren().clear();
 						algoContainerCloned.getChildren().add(containerChildClone);
-						new ComponentFactory(fieldSet, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ONEINTERNALOBJECT") ? AppType.FORM : appType)).getComponentCreated();
+						new ComponentFactory(fieldSet, elementPanel, parent, entitySelected.getName(), elementsContainerMap, ent, requirement, (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ONEINTERNALOBJECT") ? AppType.FORM : appType)).getComponentCreated();
 						elementsContainerMap.put(parent + "-form-" + ent.getName(), containerChildClone.getChildren());
 						mapParam.clear();
 						mapParam.put("legend", "");
@@ -2086,7 +2124,7 @@ public class ComponentFactory {
 							}
 						}
 						tab.getChildren().add(table);
-						new ComponentFactory(table, elementPanel, "", parentEntity, elementsContainerMap, ent, ent.getEntityPropertyDescriptorList(), appType).getComponentCreated();
+						new ComponentFactory(table, elementPanel, "", parentEntity, elementsContainerMap, ent, requirement, appType).getComponentCreated();
 						/*
 						 * tab.getChildren().add(fieldSet); new
 						 * ComponentFactory(fieldSet, elementPanel, "",
@@ -2111,7 +2149,7 @@ public class ComponentFactory {
 				// devEntityPropertyDescriptor.getPropertyName();
 			}
 			mapParam.clear();
-			int colSise = BigDecimal.valueOf(propertySelectedList.size() / 8f).setScale(0, RoundingMode.UP).intValue() * 2;
+			int colSise = BigDecimal.valueOf(fieldOptionsList.size() / 8f).setScale(0, RoundingMode.UP).intValue() * 2;
 			mapParam.put("columns", String.valueOf(colSise));
 			// ComponentFactory.updateElementProperties(f2, comp, mapParam,
 			// null);

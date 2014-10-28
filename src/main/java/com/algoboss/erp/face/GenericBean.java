@@ -445,15 +445,15 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
     }
 
     public void doBeanSave(Object... values) {
-        doBeanSaveAndList(true, true, values);
+        doBeanSaveAndList(true, true, true, values);
     }
 
-    public void doBeanSaveAndList(boolean newBean, boolean list, Object... values) {
+    public void doBeanSaveAndList(boolean refresh, boolean newBean, boolean list, Object... values) {
         FacesMessage msg = null;
         try {
             if (notReadOnly) {
                 if (!Boolean.valueOf(false).equals(checkContract())) {
-                    baseDao.save(values);
+                    baseDao.saveRefresh(refresh, values);
                     //bean.save();
                     //usuario = new Usuario();
                     if (list) {

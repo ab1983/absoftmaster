@@ -131,7 +131,7 @@
         </f:facet>     
         <p:focus for="entityLabel"/>       
         <p:remoteCommand  name="configEntity" action="#{admAlgodevBean.editEntityNode()}" update="@(.entityDlg)"/>
-        <p:remoteCommand  name="selectConfigEntity" process="@(.itemPanel)" update="@(.configPanel)" oncomplete="entityClassListDlg.show();buttonApplyEntityProp.jq.show();buttonApplyEntityClas.jq.hide();"/>        
+        <p:remoteCommand  name="selectConfigEntity" process="@(.itemPanel)" actionListener="#{(admAlgodevBean.cancelEditItem())}" update="@(.configPanel)" oncomplete="entityClassListDlg.show();buttonApplyEntityProp.jq.show();buttonApplyEntityClas.jq.hide();"/>        
         <div id="entityDlgDiv">
             <p:outputPanel styleClass="entityPanel" binding="#{entityPanel}">
                 <p:dialog rendered="#{admAlgodevBean.actualConstructorTabIndex == 1}"  widgetVar="entityClassConfigDlg" styleClass="entityConfigPanel" header="#{msg['configuration']}" resizable="false" dynamic="true" width="300" height="150" closable="true" visible="false">

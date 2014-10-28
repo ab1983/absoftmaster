@@ -263,7 +263,7 @@ public class AdmContractBean extends GenericBean<AdmContract> {
         user.setContract(bean);
         user.setAdministrator(true);
         bean.getUserList().add(user);
-        doBeanSaveAndList(false, false, bean);
+        doBeanSaveAndList(true, false, false, bean);
         //bean = (AdmContract)doBeanRefresh(bean);
         beanList = new ArrayList<AdmContract>();
         beanList.add(bean);

@@ -22,6 +22,7 @@ import com.algoboss.erp.util.ComponentFactory;
 import com.algoboss.erp.util.report.PDFExporter;
 import com.algoboss.erp.util.report.PDFExporter2;
 import com.algoboss.erp.validations.LoginValidator;
+import com.algoboss.integration.small.face.LayoutFieldsFormat;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -595,7 +596,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 
 	public void doSaveItem(DevEntityObject obj) {
-		doBeanSaveAndList(false, false, obj);
+		doBeanSaveAndList(true, false, false, obj);
 	}
 
 	public Map beanMap(String key) {
@@ -652,11 +653,16 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		if (node != null && !node.isEmpty() && node.contains(".")) {
 			childValue = $(node.toLowerCase());
 			if (childValue != null && childValue.getEntityPropertyDescriptor() != null) {
+				//baseDao.entityObjectSyncList(className, siteIdList, objectList, objectListSmallRest, Class.forName(childEntity.getCanonicalClassName()));
 				childrenList = childValue.getPropertyChildrenList();
+				if(childrenList.isEmpty()){
+					baseDao.entityObjectSyncPopulate(bean);	
+					childValue = $(node.toLowerCase());
+					childrenList = childValue.getPropertyChildrenList();
+				}
 				childEntity = childValue.getEntityPropertyDescriptor().getPropertyClass();
 				beanListMap.put(node.toLowerCase(), childrenList);
 				beanListFilteredMap.put(node.toLowerCase(), childrenList);
-
 				childBean = new DevEntityObject();
 				childBean.setEntityClass(childEntity);
 				for (DevEntityPropertyDescriptor propDesc : childEntity.getEntityPropertyDescriptorList()) {

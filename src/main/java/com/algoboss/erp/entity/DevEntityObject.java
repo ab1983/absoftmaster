@@ -44,7 +44,7 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
     @JoinColumn(name = "entity_object_id")
     @OrderBy
     private List<DevEntityPropertyValue> entityPropertyValueList = new ArrayList();
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entity_class_id")
     private DevEntityClass entityClass;
     @ManyToOne(fetch = FetchType.EAGER)
@@ -77,7 +77,7 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
     }
     
     public DevEntityPropertyValue getPropObj(String propName) {	
-    	return this.getEntityPropertyValueMap().get(propName);
+        return $(this.getEntityClass().getName()+"."+propName);
     }
     
     public Object getProp(String propName) {
@@ -102,12 +102,11 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
         try {
             //SETAR PROPRIEDADES DA ENTITY CLASS NO ENTITY OBJECT
             if (entObj != null && entObj.getEntityClass() != null) {
-            	List<DevEntityPropertyDescriptor> entityPropertyDescriptorList = entObj.getEntityClass().getEntityPropertyDescriptorList();
-            	loadProperties(entObj, entityPropertyDescriptorList);
-                if (!entObj.getEntityPropertyValueList().isEmpty()) {
+                if (!entObj.getEntityClass().getEntityPropertyDescriptorList().isEmpty()) {
                     String[] attrArray = attr.split(Pattern.quote("."));
                     DevEntityObject obj = entObj;
                     for (int i = 1; i < attrArray.length; i++) {
+                    	loadProperties(obj, obj.getEntityClass().getEntityPropertyDescriptorList());
                         String string = attrArray[i];
                         valReturn = findNode(obj, string);
                         if (valReturn != null) {
@@ -115,6 +114,8 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
                                 obj = valReturn.getPropertyObject();
                             } else if (valReturn.getObjectParent() != null && !valReturn.getObjectParent().getEntityPropertyValueList().isEmpty()) {
                                 obj = valReturn.getObjectParent();
+                            } else if (valReturn.getEntityObjectMapped() != null) {
+                                obj = valReturn.getEntityObjectMapped();
                             }
                         }
                     }
@@ -128,21 +129,34 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
     }
     
     private void loadProperties(DevEntityObject entObj, List<DevEntityPropertyDescriptor> entityPropertyDescriptorList){
-        for (DevEntityPropertyDescriptor prop : entityPropertyDescriptorList) {
-            DevEntityPropertyValue value = null;
-            for (DevEntityPropertyValue propVal : entObj.getEntityPropertyValueList()) {
-                if (propVal.getEntityPropertyDescriptor().getPropertyName().equals(prop.getPropertyName())) {
-                    value = propVal;
-                    break;
-                }
-            }
-            if (value == null) {
-                value = new DevEntityPropertyValue();
-                value.setEntityPropertyDescriptor(prop);
-                entObj.getEntityPropertyValueList().add(value);
-                entObj.putEntityPropertyValueMap(entObj, value);
-            }
-        }    	
+    	if(entObj!=null){
+	        for (DevEntityPropertyDescriptor prop : entityPropertyDescriptorList) {
+	            DevEntityPropertyValue value = null;
+	            if(!entObj.entityPropertyValueMap.containsKey(prop.getPropertyName())){
+		            for (DevEntityPropertyValue propVal : entObj.getEntityPropertyValueList()) {
+		                if (propVal.getEntityPropertyDescriptor().getPropertyName().equals(prop.getPropertyName())) {
+		                    value = propVal;
+		                    break;
+		                }
+		            }
+		            if (value == null) {
+		                value = new DevEntityPropertyValue();
+		                value.setEntityPropertyDescriptor(prop);
+		                entObj.getEntityPropertyValueList().add(value);
+		                //entObj.putEntityPropertyValueMap(entObj, value);
+		            }
+	                entObj.entityPropertyValueMap.put(prop.getPropertyName(), value);
+	        		if (prop.getPropertyClass()!=null) {
+	        			DevEntityClass entCls = prop.getPropertyClass();
+	        			List<DevEntityPropertyDescriptor> _EntityPropertyDescriptorList = entCls.getEntityPropertyDescriptorList();
+	        			DevEntityObject entObj2 = new DevEntityObject();
+	        			entObj2.setEntityClass(entCls);        
+	        			value.setEntityObjectMapped(entObj2);
+	        			loadProperties(entObj2 , _EntityPropertyDescriptorList);
+	        		}	                
+	            }
+	        }    	
+    	}
     }
     
     private DevEntityPropertyValue findNode(DevEntityObject obj, String attr) {
@@ -224,11 +238,7 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
 	}
 	
 	public void putEntityPropertyValueMap(DevEntityObject obj, DevEntityPropertyValue val){
-		if (val.getEntityPropertyDescriptor().getPropertyClass()!=null) {
-			obj.entityPropertyValueMap.put(val.getEntityPropertyDescriptor().getPropertyClass().getName(), val);
-		}else{
-			obj.entityPropertyValueMap.put(val.getEntityPropertyDescriptor().getPropertyName(), val);
-		}			
+		obj.entityPropertyValueMap.put(val.getEntityPropertyDescriptor().getPropertyName(), val);		
 	}
 
 	@Override

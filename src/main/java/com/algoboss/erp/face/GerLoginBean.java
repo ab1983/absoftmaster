@@ -470,7 +470,7 @@ public class GerLoginBean implements Serializable {
                 if (auth.isAllowed() && !serviceContract.isInactive() && !admService.isInactive() && !admServiceModuleContract.isInactive()) {
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.DATE, -10);
-                    if (admService.getLastAccess() != null && cal.getTime().before(admService.getLastAccess())) {
+                    if (admService.getLastAccess() != null && cal.getTime().before(admService.getLastAccess()) && !user.isBoss()) {
                         app.generateElementsContainerMap(admService);
                     }
                     String[] nivelArray = admService.getName().split(">");

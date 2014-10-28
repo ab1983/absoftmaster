@@ -7,6 +7,8 @@ package com.algoboss.erp.entity;
 import com.algoboss.erp.face.BaseBean;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,7 +50,7 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
     @ManyToOne(fetch = FetchType.EAGER,optional = false)
     @JoinColumn(name = "user_id")
     private SecUser user;    
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "parent_id")
     private List<DevEntityObject> propertyChildrenList = new ArrayList<>();
     @ManyToOne(fetch = FetchType.EAGER)
@@ -58,6 +60,8 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
     @JoinColumn(name = "entity_property_descriptor_id")
     @OrderBy
     private DevEntityPropertyDescriptor entityPropertyDescriptor;
+    @Transient
+    private DevEntityObject entityObjectMapped; 
 
     public DevEntityPropertyValue() {
     }
@@ -182,7 +186,18 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
             			obj = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(propertyValue);
             		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("BOOLEAN")) {
             			obj = String.valueOf(propertyValue);
-            		} else {
+            		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("FLOAT")){
+            			DecimalFormat df = new DecimalFormat();
+            			DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+            			dfs.setDecimalSeparator(BaseBean.getBundle("decimalSeparator", "msg").charAt(0));
+            			dfs.setGroupingSeparator(BaseBean.getBundle("thousandsSeparator", "msg").charAt(0));
+            			df.setDecimalFormatSymbols(dfs);
+            			obj = df.parse(String.valueOf(propertyValue));
+            			//obj = propertyValue;     
+            		}else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("INTEGER")){
+            			obj = String.valueOf(propertyValue);
+            			//obj = propertyValue;     
+            		}else {
             			obj = propertyValue;
             		}            		
             	}
@@ -312,7 +327,15 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
         this.user = user;
     }
 
-    @Override
+    public DevEntityObject getEntityObjectMapped() {
+		return entityObjectMapped;
+	}
+
+	public void setEntityObjectMapped(DevEntityObject entityObjectMapped) {
+		this.entityObjectMapped = entityObjectMapped;
+	}
+
+	@Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;

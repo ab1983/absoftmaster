@@ -81,11 +81,13 @@
     <class>com.algoboss.erp.entity.StkSupplyCategory</class>
     <class>com.algoboss.erp.entity.StkSupplyItem</class>
     <class>com.algoboss.erp.entity.StkUnitOfMeasure</class>
-    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
 	    <property name="eclipselink.target-server" value="JBoss"/>
 	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
 		<property name="eclipselink.weaving" value="static"/> 
+ <!-- property name="eclipselink.logging.level.sql" value="FINE"/>
+ <property name="eclipselink.logging.parameters" value="true"/-->		
     </properties>
     <!--properties>
       <property name="eclipselink.ddl-generation" value="create-tables"/>
@@ -93,7 +95,8 @@
   </persistence-unit>
   <persistence-unit name="SMALLPU" transaction-type="JTA">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-  	<jta-data-source>small</jta-data-source>
+  	<!--jta-data-source>small</jta-data-source-->
+  	<jta-data-source>small_vixdigital</jta-data-source>
     <class>com.algoboss.integration.small.entity.Estoque</class>
     <class>com.algoboss.integration.small.entity.Itens001</class>
     <class>com.algoboss.integration.small.entity.Itens003</class>
@@ -104,6 +107,8 @@
 	    <property name="eclipselink.target-server" value="JBoss"/>
 	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
 		<property name="eclipselink.weaving" value="static"/> 
+ <property name="eclipselink.logging.level.sql" value="FINE"/>
+ <property name="eclipselink.logging.parameters" value="true"/>		
     </properties>
   </persistence-unit>
 </persistence>

@@ -54,7 +54,7 @@ public class DevRequirement implements Serializable {
     @OneToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @JoinColumn(name = "service_id")
     private AdmService service = new AdmService();
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "requirement_id")
     private List<DevReportFieldContainer> fieldContainerList = new ArrayList<DevReportFieldContainer>();
     

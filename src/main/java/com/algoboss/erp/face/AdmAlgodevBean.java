@@ -24,6 +24,7 @@ import com.algoboss.erp.util.AlgoUtil;
 import com.algoboss.erp.util.AlgodevUtil;
 import com.algoboss.erp.util.ComponentFactory;
 import com.algoboss.erp.util.ComponentFactory.AppType;
+import com.algoboss.integration.small.face.LayoutFieldsFormat;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -758,7 +759,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
 
             if (autorizationCheck() && msgStr.isEmpty()) {
                 generateElementsContainerMap(elementsContainerMap, bean);
-                this.bean.setFieldContainerList(algoRep.getFieldContainerList());
+                //this.bean.setFieldContainerList(algoRep.getFieldContainerList());
                 bean.setEntityClass(entity);
                 bean.getService().setMainAddress("#{app.indexBean()}");
                 bean.getService().setModule("APP");
@@ -815,7 +816,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                         toSaveList.add(contract);
                     }
                 }
-                super.doBeanSaveAndList(false, true, toSaveList.toArray());
+                super.doBeanSaveAndList(false, false, true, toSaveList.toArray());
                 if (service != null) {
                     service.setRequirement(bean);
                 } else {
@@ -1077,7 +1078,8 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
     	createByConstructor(map, cloned, compTarget, elementsContainerMap, bean, entity, propertySelectedFormCollection,  propertySelectedListCollection);
     }
     private void createByConstructor(Map map, UIComponent cloned, UIComponent compTarget, Map<String,List<UIComponent>> elementsContainerMap, DevRequirement bean, DevEntityClass entity, List<DevEntityPropertyDescriptor> propertySelectedFormCollection, List<DevEntityPropertyDescriptor> propertySelectedListCollection) {
-
+		LayoutFieldsFormat.populateContainerField(bean);
+		elementsContainerMap.clear();
         UIComponent elementPanel = algoPalette;
         try {
             if (map.containsKey("dataform") && !String.valueOf(map.get("dataform")).isEmpty()) {
@@ -1088,7 +1090,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     updateChildren(compTarget.getChildren(), cloned);
                     setContainerPage("form");
                 }
-                cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, propertySelectedFormCollection, AppType.get(bean.getInterfaceType())).getComponentCreated();
+                cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.get(bean.getInterfaceType())).getComponentCreated();
                 //elements.clear();
                 //elements.addAll(compTarget.getChildren());
                 generateElementsContainerMap(elementsContainerMap, bean);
@@ -1103,7 +1105,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     updateChildren(compTarget.getChildren(), cloned);
                     setContainerPage("list");
                 }
-                cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, propertySelectedListCollection, AppType.get(bean.getInterfaceType())).getComponentCreated();
+                cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.get(bean.getInterfaceType())).getComponentCreated();
                 //elements.clear();
                 //elements.addAll(compTarget.getChildren());
                 generateElementsContainerMap(elementsContainerMap, bean);
@@ -1120,7 +1122,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     mapParam.put("styleClass", String.valueOf(getProperty(cloned, "styleClass")).replaceAll("data-list", "data-grid"));
                     ComponentFactory.updateElementProperties(cloned, mapParam);
                 }
-                cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, propertySelectedListCollection, AppType.SUMM).getComponentCreated();
+                cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.SUMM).getComponentCreated();
                 //elements.clear();
                 //elements.addAll(compTarget.getChildren());
                 generateElementsContainerMap(elementsContainerMap, bean);

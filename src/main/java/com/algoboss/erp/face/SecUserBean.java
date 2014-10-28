@@ -100,7 +100,7 @@ public class SecUserBean extends GenericBean<SecUser> {
                 }
             }
 
-            doBeanSaveAndList(false, false, bean);
+            doBeanSaveAndList(true, false, false, bean);
             //bean = (AdmContract)doBeanRefresh(bean);
             beanList = new ArrayList<SecUser>();
             beanList.add(bean);
