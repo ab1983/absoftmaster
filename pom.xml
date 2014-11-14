@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.algoboss</groupId>
-    <artifactId>ERP1</artifactId>
+    <artifactId>AB1</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 

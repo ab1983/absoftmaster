@@ -312,6 +312,7 @@ public class GerLoginBean implements Serializable {
         this.model = null;
         session.invalidate();
         session = null;
+        baseDao.clearEntityManager();
         return "/f/login.xhtml";
     }
 
@@ -379,8 +380,14 @@ public class GerLoginBean implements Serializable {
                 } else if (user.isAdministrator() && user.getContract() != null) {
                     List<AdmServiceModuleContract> moduleList = user.getContract().getServiceModuleContractList();
                     for (AdmServiceModuleContract admServiceModuleContract : moduleList) {
+                    	if(admServiceModuleContract.isInactive()){
+                    		continue;
+                    	}
                         List<AdmServiceContract> serviceContractList = admServiceModuleContract.getServiceContractList();
                         for (AdmServiceContract admServiceContract : serviceContractList) {
+                        	if(admServiceContract.isInactive()){
+                        		continue;
+                        	}
                             SecUserAuthorization userAuthorization = new SecUserAuthorization();
                             SecAuthorization authorization = new SecAuthorization();
                             authorization.setAllowed(true);
@@ -463,11 +470,20 @@ public class GerLoginBean implements Serializable {
             }
             for (int i = 0; i < userAuthorizationList.size(); i++) {
                 SecUserAuthorization userAuthorization = userAuthorizationList.get(i);
-                SecAuthorization auth = userAuthorization.getAuthorization();
                 AdmServiceContract serviceContract = userAuthorization.getServiceContract();
-                AdmService admService = serviceContract.getService();
+                if(serviceContract.isInactive()){
+                	continue;
+                }
                 AdmServiceModuleContract admServiceModuleContract = serviceContract.getServiceModuleContract();
-                if (auth.isAllowed() && !serviceContract.isInactive() && !admService.isInactive() && !admServiceModuleContract.isInactive()) {
+                if(admServiceModuleContract.isInactive()){
+                	continue;
+                }
+                AdmService admService = serviceContract.getService();
+                if(admService.isInactive()){
+                	continue;
+                }
+                SecAuthorization auth = userAuthorization.getAuthorization();
+                if (auth.isAllowed()) {
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.DATE, -10);
                     if (admService.getLastAccess() != null && cal.getTime().before(admService.getLastAccess()) && !user.isBoss()) {
@@ -621,7 +637,7 @@ public class GerLoginBean implements Serializable {
     }
 
     public int getSessionTimeout() {
-        if (session == null) {
+        if (session == null || sessionTimeout == 0) {
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             session = (HttpSession) context.getSession(true);
             sessionTimeout = session.getMaxInactiveInterval();

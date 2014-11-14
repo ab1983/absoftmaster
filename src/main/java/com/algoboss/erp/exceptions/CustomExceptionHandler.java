@@ -13,10 +13,15 @@ import javax.faces.FacesException;
 import javax.faces.application.NavigationHandler;
 import javax.faces.context.ExceptionHandler;
 import javax.faces.context.ExceptionHandlerWrapper;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.context.Flash;
 import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.event.ExceptionQueuedEventContext;
+import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
+
+import com.algoboss.erp.face.GerLoginBean;
 
 /**
  *
@@ -25,7 +30,8 @@ import javax.faces.event.ExceptionQueuedEventContext;
 public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
     private ExceptionHandler wrapped;
-
+    @Inject GerLoginBean loginBean;
+    
     public CustomExceptionHandler(ExceptionHandler wrapped) {
         this.wrapped = wrapped;
     }
@@ -70,6 +76,10 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
                 }
                 fc.renderResponse();
             }catch(javax.enterprise.context.ContextNotActiveException ex){
+                ExternalContext contextExt = FacesContext.getCurrentInstance().getExternalContext();
+                contextExt.getFlash().clear();
+                FacesContext.getCurrentInstance().getViewRoot().getChildren().clear();
+                //loginBean.getSessionTimeout()
             	throw new IllegalStateException("javax.enterprise.context.ContextNotActiveException in Custom Exception.");
             }catch (Throwable ex) {            
                 Logger.getLogger(CustomExceptionHandler.class.getName()).log(Level.SEVERE, null, ex);

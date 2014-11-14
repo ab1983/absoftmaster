@@ -23,6 +23,7 @@ import com.algoboss.erp.util.report.PDFExporter;
 import com.algoboss.erp.util.report.PDFExporter2;
 import com.algoboss.erp.validations.LoginValidator;
 import com.algoboss.integration.small.face.LayoutFieldsFormat;
+import com.algoboss.integration.small.face.SmallUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -119,11 +121,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 	
 	public Object $g(String attr) {
-		return $(attr, bean).getVal();
+		return $(attr, bean).getStr();
 	}
 
 	public Object $g(String attr, DevEntityObject entObj) {
-		return entObj.$(attr).getVal();
+		return entObj.$(attr).getStr();
 	}	
 
 	public int count(String attr, DevEntityObject entObj) {
@@ -239,7 +241,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			long startTime1 = Calendar.getInstance().getTimeInMillis();
 			super.indexBeanNoList(nro);
 			long endTime1 = Calendar.getInstance().getTimeInMillis();
-			doList();
+			if(requirement.getInterfaceType().startsWith("list")){
+				doList();			
+			}else{
+				doForm();
+			}
 			long endTime2 = Calendar.getInstance().getTimeInMillis();
 			System.out.println("Time1 Bean " + this.subtitle + ": " + (endTime1 - startTime1));
 			System.out.println("Time2 Bean " + this.subtitle + ": " + (endTime2 - startTime1));
@@ -253,8 +259,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	@Override
 	public void indexBeanNewWin(Long nro) throws Throwable {
 		super.indexBeanNewWin(nro); // To change body of generated methods,
-									// choose Tools | Templates.
-		doList();
+		if(requirement.getInterfaceType().startsWith("list")){
+			doList();			
+		}else{
+			doForm();
+		}
 	}
 
 	@Override
@@ -282,6 +291,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			e.printStackTrace();
 		}
 		super.initBean();
+		bean = new DevEntityObject();
+		bean.setEntityClass(entity);		
 		long endTime2 = Calendar.getInstance().getTimeInMillis();
 		// System.out.println("Time initBean " + this.subtitle + ": " +
 		// (endTime2 - startTime1));
@@ -308,8 +319,10 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 					entity = requirement.getEntityClass();
 					List<DevComponentContainer> componentContainerList = requirement.getComponentContainerList();
 					for (DevComponentContainer devComponentContainer : componentContainerList) {
-						elements = AlgodevUtil.generateComponentList(devComponentContainer);
-						elementsContainerMap.put(devComponentContainer.getName(), elements);
+						if(devComponentContainer.getPrototypeComponentChildrenList()!=null && !devComponentContainer.getPrototypeComponentChildrenList().isEmpty()){
+							elements = AlgodevUtil.generateComponentList(devComponentContainer);
+							elementsContainerMap.put(devComponentContainer.getName(), elements);							
+						}
 					}
 				}
 			}
@@ -433,7 +446,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	public void doBeanList() {
 		beanList = findListByClass(entity);
 		bean = new DevEntityObject();
-		bean.setEntityClass(entity);
+		bean.setEntityClass(entity);	
 
 		// super.doBeanList(); //To change body of generated methods, choose
 		// Tools | Templates.
@@ -448,8 +461,6 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		updateContainerPage();
 		if (!container.equals("list")) {
 			doBeanListChild(node);
-			// String node =
-			// container.split("-")[container.split("-").length-1];
 		} else {
 			doBeanList();
 		}
@@ -461,7 +472,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 							// | Templates.
 	}
 
-	public void doForm() {
+	public void doForm() {	
 		doForm("form");
 	}
 
@@ -479,15 +490,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 
 	public void doRemove(DevEntityObject obj) {
 		bean = obj;
-		if(entity.getCanonicalClassName()==null){				
-			doBeanRemove();
-		}else{
-			try {
-				baseDao.removeReplicate(bean);
-			} catch (Throwable e) {
-				Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, e);
-			}
-		}		
+		doBeanRemove();		
 	}
 
 	public void doRemoveChild(DevEntityObject obj) {
@@ -510,7 +513,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 
 	public void doEdit(DevEntityObject obj) {
-		bean = obj;
+		bean = (DevEntityObject)doBeanRefresh(obj);
 		doForm();
 	}
 
@@ -584,8 +587,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	public void doSave(boolean hasList) {
 		try {
 			if (bean != null) {
+				super.doBeanSaveAndList(true, true, hasList, bean);					
 				bean.setEntityClass(entity);
-				super.doBeanSave();					
 			}
 			if (hasList) {
 				doList();
@@ -602,28 +605,44 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	public Map beanMap(String key) {
 		return beanMap(key, "");
 	}
-
 	public Map beanMap(String className, String keysStr) {
+		return beanMap(className, keysStr, "");
+	}
+	public Map beanMap(String className, String keysStr, String valsStr) {
 		String[] keys = keysStr.split(";");
-		Map<Object, DevEntityObject> map = new HashMap<Object, DevEntityObject>();
+		String[] vals = valsStr.split(";");
+		Map<Object, Object> map = new HashMap<Object, Object>();
 		List<DevEntityObject> list = doBeanList(className);
 		try {
 			if (list != null) {
 				for (DevEntityObject devEntityObject : list) {
-					String valueKey = "";
+					Object keyMap = devEntityObject;
+					Object valMap = devEntityObject;
+					String valStr = "";
+					for (int i = 0; i < vals.length && !valsStr.isEmpty(); i++) {
+						String val = vals[i];
+						DevEntityPropertyValue value = $(className + "." + val, devEntityObject);
+						if (i > 0) {
+							valStr += " - ";
+						}
+						valStr += String.valueOf(value.getPropertyValue());
+					}
+					String keyStr = "";
 					for (int i = 0; i < keys.length && !keysStr.isEmpty(); i++) {
 						String key = keys[i];
 						DevEntityPropertyValue value = $(className + "." + key, devEntityObject);
 						if (i > 0) {
-							valueKey += " - ";
+							keyStr += " - ";
 						}
-						valueKey += String.valueOf(value.getPropertyValue());
+						keyStr += String.valueOf(value.getPropertyValue());
+					}					
+					if (!keyStr.isEmpty()) {
+						keyMap = keyStr;
 					}
-					if (!valueKey.isEmpty()) {
-						map.put(valueKey, devEntityObject);
-					} else {
-						map.put(devEntityObject, devEntityObject);
-					}
+					if (!valStr.isEmpty()) {
+						valMap = valStr;
+					}					
+					map.put(keyMap, valMap);
 				}
 			}
 		} catch (Exception e) {
@@ -638,7 +657,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			if (beanListMap.containsKey(className) && !className.contains(".")) {
 				entityObjectList = beanListMap.get(className);
 			} else {
-				entityObjectList = findListByClass(entity.getName().equals(className)?entity:new DevEntityClass(className));
+				entityObjectList = findListByClass((entity.getName()!=null && entity.getName().equals(className))?entity:baseDao.findEntityClass(className));
 				beanListMap.put(className, entityObjectList);
 				beanListFilteredMap.put(className, entityObjectList);
 				formRendered = false;
@@ -655,10 +674,14 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			if (childValue != null && childValue.getEntityPropertyDescriptor() != null) {
 				//baseDao.entityObjectSyncList(className, siteIdList, objectList, objectListSmallRest, Class.forName(childEntity.getCanonicalClassName()));
 				childrenList = childValue.getPropertyChildrenList();
-				if(childrenList.isEmpty()){
+				if(childrenList == null){
 					baseDao.entityObjectSyncPopulate(bean);	
 					childValue = $(node.toLowerCase());
 					childrenList = childValue.getPropertyChildrenList();
+					if(childrenList == null){
+						childrenList = new ArrayList();						
+						childValue.setPropertyChildrenList(childrenList);
+					}
 				}
 				childEntity = childValue.getEntityPropertyDescriptor().getPropertyClass();
 				beanListMap.put(node.toLowerCase(), childrenList);
@@ -711,7 +734,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 							entityObjectList = childValueProp.getPropertyChildrenList();
 						}
 					} else {
-						entityObjectList = baseDao.findEntityObjectByClass(className, getSiteIdList(), null, null);													
+						List<String> cols = new ArrayList<String>();
+						if(entity.getName()!=null && entity.getName().equals(className.getName())){
+							cols = LayoutFieldsFormat.getVisibleFieldsNames(requirement, containerPage, entity);							
+						}
+						entityObjectList = baseDao.findEntityObjectByClass(className,cols, getSiteIdList(), null, null);													
 					}
 				}
 				// entityObjectList = baseDao.findEntityObjectByClass(className,
@@ -813,6 +840,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 
 	protected UIComponent filePreview;
 	protected int imgRandon;
+	private Map<String, Object> methodMap;
 
 	public int getImgRandon() {
 		imgRandon = Double.valueOf(Math.random() * 10000).intValue();
@@ -1098,7 +1126,12 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-
+	public void eventBean(){
+		Map callMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();	
+		AlgodevUtil.event(callMap, this);	
+		//String listField = String.valueOf(map.get("list_field"));
+		//String targetField = String.valueOf(map.get("target_field"));
+	}
 	protected boolean isInvalidUpdateContainer = false;
 
 	public PhaseListener getPhaseListenerImpl() {

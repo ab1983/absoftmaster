@@ -5,6 +5,7 @@
 package com.algoboss.erp.entity;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
 
 /**
@@ -15,9 +16,10 @@ import javax.persistence.*;
     @NamedQuery(name = "findAllDevReportFieldOptionsMap",
     query = "select u from DevReportFieldOptionsMap u")
 })
+@Cacheable(true)
 @Entity
 @Table(name="dev_report_field_options_map")
-public class DevReportFieldOptionsMap implements Serializable {
+public class DevReportFieldOptionsMap implements Serializable, Cloneable {
   
     private static final long serialVersionUID = 1L;
     @Id
@@ -67,7 +69,7 @@ public class DevReportFieldOptionsMap implements Serializable {
 
     public Object getOptionsValue() {
         Object obj = null;
-        if(optionsType!=null){
+        if(optionsType!=null && optionsValue!=null){
             if(optionsType.equals("Boolean")){
                 obj = Boolean.valueOf(optionsValue);
             }else{
@@ -108,4 +110,15 @@ public class DevReportFieldOptionsMap implements Serializable {
         return "DevReportFieldOptions{" + "fieldOptionsId=" + fieldOptionsId + ", optionsType=" + optionsType + ", optionsName=" + optionsName + ", optionsValue=" + optionsValue + '}';
     }
              
+	@Override
+	public Object clone() {
+		// TODO Auto-generated method stub
+		
+		try {
+			return super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}   
+    
 }

@@ -1,7 +1,9 @@
 package com.algoboss.integration.small.entity;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
 import java.math.BigDecimal;
 
 
@@ -15,6 +17,8 @@ public class Itens001 implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+    @SequenceGenerator(name = "Itens001", sequenceName = "g_itens001", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "Itens001")	
 	private String registro;
 
 	@Column(name="aliq_cofins")

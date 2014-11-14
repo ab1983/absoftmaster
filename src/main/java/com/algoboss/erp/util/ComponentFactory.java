@@ -186,23 +186,16 @@ public class ComponentFactory {
 			UIComponent parent = compClone.getParent();
 			UIComponent rowEditor = compClone.getChildren().remove(1);
 			parentContainer = (parentContainer != null && !parentContainer.isEmpty()) ? parentContainer : "list";
-			DevReportFieldContainer fieldContainer = LayoutFieldsFormat.getFieldContainer(requirement, parentContainer);
-			
-			List<DevReportFieldOptions> fieldOptionsList = new ArrayList<DevReportFieldOptions>();
-			List<DevReportFieldOptions> fieldOptionsListTmp = fieldContainer.getFieldOptionsList();
-			for (DevReportFieldOptions devReportFieldOptions : fieldOptionsListTmp) {
-				if(Boolean.valueOf(LayoutFieldsFormat.loadOpt(devReportFieldOptions, "visible").getOptionsValue().toString())){
-					fieldOptionsList.add(devReportFieldOptions);
-				}	
-			}			
+			List<DevReportFieldOptions> fieldOptionsList = LayoutFieldsFormat.getVisibleFields(requirement, parentContainer, entitySelected);	
 			for (int i = 0; i < fieldOptionsList.size(); i++) {
+				DevReportFieldOptions fieldOptions = fieldOptionsList.get(i);
 				DevEntityPropertyDescriptor devEntityPropertyDescriptor = fieldOptionsList.get(i).getEntityPropertyDescriptor();
 				if (i == 0) {
 					parent.getChildren().clear();
 				}
 				cloned = ComponentFactory.componentClone(compClone, false);
 				parent.getChildren().add(cloned);
-
+				
 				boolean center = false;
 				Map<String, Object> mapParam = new HashMap<String, Object>();
 				// mapParam.put("filterMatchMode", "");
@@ -293,13 +286,22 @@ public class ComponentFactory {
 				} catch (ClassNotFoundException ex) {
 					Logger.getLogger(ComponentFactory.class.getName()).log(Level.SEVERE, null, ex);
 				}
-
-				mapParam.put("header", devEntityPropertyDescriptor.getPropertyLabel());
-				mapParam.put("headerText", devEntityPropertyDescriptor.getPropertyLabel());
-				generateComponentStyleClassName(mapParam, "list", entitySelected, devEntityPropertyDescriptor, "");
+				Object label2 = LayoutFieldsFormat.loadOpt(fieldOptions, "label").getOptionsValue();
+				if(label2!=null){
+					mapParam.put("header", label2.toString());
+					mapParam.put("headerText", label2.toString());
+				}else{
+					mapParam.put("header", devEntityPropertyDescriptor.getPropertyLabel());
+					mapParam.put("headerText", devEntityPropertyDescriptor.getPropertyLabel());
+				}
+				generateComponentStyleClassName(mapParam, "list", entitySelected, devEntityPropertyDescriptor, "","");
 				if (center) {
 					mapParam.put("style", "text-align:center;");
 				}
+				Object style = LayoutFieldsFormat.loadOpt(fieldOptions, "style").getOptionsValue();
+				if(style!=null){
+					mapParam.put("style", Objects.toString(mapParam.get("style"), "").concat(style.toString()));
+				}					
 				mapParam.put("style", Objects.toString(mapParam.get("style"), "").concat("overflow: hidden;white-space:nowrap;"));
 				ComponentFactory.updateElementProperties(f2, cloned, mapParam, null);
 				// propertyArrayStr +=
@@ -466,21 +468,23 @@ public class ComponentFactory {
 			UIComponent button = null;
 			UIComponent buttonCloned = null;
 			UIComponent buttonCloned2 = null;
-
+			//c_"parentContainer" c_include
 			button = findComponentByClassName("javax.faces.component.html.HtmlCommandButton", elementPanel);
 			buttonCloned = ComponentFactory.componentClone(button, false);
+			String style = getProperty(buttonCloned, "styleClass")+" c_"+parentContainer;
 			String action = "#{app.doForm()}";
 			if (parentContainer.contains("-") && entitySelected != null) {
 				action = "#{app.doForm('" + parentContainerName(parentContainer) + "-form-" + entitySelected.getName() + "')}";
 				buttonCloned2 = ComponentFactory.componentClone(button, false);
 			}
-
+			
 			Map<String, Object> mapParam = new HashMap<String, Object>();
 			if (buttonCloned != null) {
 				mapParam.put("value", "#{msg['include']}");
 				mapParam.put("action", action);
 				mapParam.put("update", "@form");
 				mapParam.put("immediate", "true");
+				mapParam.put("styleClass", style+" c_include_button");
 				ComponentFactory.updateElementProperties(f2, buttonCloned, mapParam, null);
 				container.getChildren().add(0, buttonCloned);
 			}
@@ -490,6 +494,7 @@ public class ComponentFactory {
 				mapParam.put("action", "#{app.doForm('" + parentContainerName(parentContainer) + "')}");
 				mapParam.put("update", "@form");
 				mapParam.put("immediate", "true");
+				mapParam.put("styleClass", style+" c_back");
 				ComponentFactory.updateElementProperties(f2, buttonCloned2, mapParam, null);
 				container.getChildren().add(1, buttonCloned2);
 			}
@@ -524,7 +529,7 @@ public class ComponentFactory {
 			ComponentFactory.updateElementProperties(f2, panelCloned, mapParam, null);
 
 			button = findComponentByClassName("javax.faces.component.html.HtmlCommandButton", elementPanel);
-
+			String style = getProperty(button, "styleClass")+" c_"+parentContainer;
 			String save = "#{app.doSave()}";
 			String saveAndBack = "#{app.doSaveAndList()}";
 			String back = "#{app.doList()}";
@@ -547,6 +552,7 @@ public class ComponentFactory {
 				mapParam.putAll(mapParamBasic);
 				mapParam.put("value", "#{msg['save']}");
 				mapParam.put("action", save);
+				mapParam.put("styleClass", style+" c_save_button");
 				ComponentFactory.updateElementProperties(f2, buttonCloned, mapParam, null);
 				panelCloned.getChildren().add(buttonCloned);
 			}
@@ -554,6 +560,7 @@ public class ComponentFactory {
 			mapParam.putAll(mapParamBasic);
 			mapParam.put("value", "#{msg['saveAndBack']}");
 			mapParam.put("action", saveAndBack);
+			mapParam.put("styleClass", style+" c_save_and_back_button");
 			ComponentFactory.updateElementProperties(f2, buttonCloned, mapParam, null);
 			panelCloned.getChildren().add(buttonCloned);
 
@@ -562,6 +569,7 @@ public class ComponentFactory {
 				mapParam.putAll(mapParamBasic);
 				mapParam.put("value", "#{msg['copy']}");
 				mapParam.put("action", copy);
+				mapParam.put("styleClass", style+" c_copy_button");
 				ComponentFactory.updateElementProperties(f2, buttonCloned, mapParam, null);
 				panelCloned.getChildren().add(buttonCloned);
 			}
@@ -571,6 +579,7 @@ public class ComponentFactory {
 			mapParam.put("value", "#{msg['back']}");
 			mapParam.put("action", back);
 			mapParam.put("immediate", "true");
+			mapParam.put("styleClass", style+" c_back_button");
 			ComponentFactory.updateElementProperties(f2, buttonCloned, mapParam, null);
 			panelCloned.getChildren().add(buttonCloned);
 			container.getChildren().add(0, panelCloned);
@@ -603,6 +612,22 @@ public class ComponentFactory {
 			}
 		}
 		try {
+			boolean isList = false;
+			boolean isObjectList = false;
+			boolean isMask = false;
+			boolean isShort = false;
+			boolean isLong = false;
+			if (configMap.containsKey("list") && !configMap.get("list").isEmpty()) {
+				isList = true;
+			} else if (configMap.containsKey("objectList") && !configMap.get("objectList").isEmpty()) {
+				isObjectList = true;
+			} else if (configMap.containsKey("mask") && configMap.get("mask") != null && !configMap.get("mask").isEmpty()) {
+				isMask = true;
+			} else if ((!configMap.containsKey("length") || configMap.get("length") == null || configMap.get("length").equals("short"))) {
+				isShort = true;
+			} else if (configMap.containsKey("length") && configMap.get("length").equals("long")) {
+				isLong = true;
+			}			
 			for (UIComponent child : elementPanel.getChildren()) {
 				styleClass = getProperty(child, "styleClass");
 				if (styleClass != null && String.valueOf(styleClass).contains("ui-integer")) {
@@ -620,21 +645,8 @@ public class ComponentFactory {
 						break;
 					}
 				}
-				boolean isList = false;
-				boolean isMask = false;
-				boolean isShort = false;
-				boolean isLong = false;
-				if (configMap.containsKey("list") && !configMap.get("list").isEmpty()) {
-					isList = true;
-				} else if (configMap.containsKey("mask") && configMap.get("mask") != null && !configMap.get("mask").isEmpty()) {
-					isMask = true;
-				} else if ((!configMap.containsKey("length") || configMap.get("length") == null || configMap.get("length").equals("short"))) {
-					isShort = true;
-				} else if (configMap.containsKey("length") && configMap.get("length").equals("long")) {
-					isLong = true;
-				}
 				if (Class.forName("javax.faces.component.html.HtmlSelectOneMenu").isAssignableFrom(child.getClass())) {
-					if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING") && isList) {
+					if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING") && (isList || isObjectList)) {
 						input = child;
 						break;
 					}
@@ -721,15 +733,11 @@ public class ComponentFactory {
 			}
 			inputCloned = ComponentFactory.componentClone(input, false);
 			mapParam.clear();
-			if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING") && configMap.containsKey("list") && !configMap.get("list").isEmpty()) {
-				UIComponent childAux = null;
-				for (UIComponent child : inputCloned.getChildren()) {
-					if (Class.forName("javax.faces.component.UISelectItem").isAssignableFrom(child.getClass())) {
-						childAux = child;
-						break;
-					}
-				}
-				String[] strList = configMap.get("list").split("\n");
+			if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING") && isList) {
+				UIComponent childAux = findComponentByClassName("javax.faces.component.UISelectItem", inputCloned);
+				UIComponent childAux2 = findComponentByClassName("javax.faces.component.UISelectItems", inputCloned);
+				inputCloned.getChildren().remove(childAux2);
+				String[] strList = configMap.get("list").split("\r\n");
 				for (int j = 0; j < strList.length; j++) {
 					String string = strList[j];
 					UIComponent childCloned = ComponentFactory.componentClone(childAux, false);
@@ -738,6 +746,32 @@ public class ComponentFactory {
 					ComponentFactory.updateElementProperties(childCloned, mapParam);
 					inputCloned.getChildren().add(childCloned);
 				}
+				mapParam.clear();
+			} else if (devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("STRING") && isObjectList) {
+				UIComponent compFinded = null;
+				String[] objectList = AlgodevUtil.formatDescription(configMap.get("objectList")).split(",");
+				String className = objectList[0];
+				String value = objectList[1];
+				String label[] = Arrays.copyOfRange(objectList, 2, objectList.length);
+				String labelStr = "";
+				for (int j = 0; j < label.length; j++) {
+					if(j>0){
+						labelStr+=";";
+					}
+					labelStr+=label[j];
+				}				
+				if ((compFinded = findComponentByClassName("javax.faces.component.UISelectItems", inputCloned)) != null) {
+					//this.doSelectItemsFactory(compFinded, "value", new DevEntityClass(className));
+					String str = "#{app.beanMap('" + className + "','"+labelStr+"','"+value+"')}";
+					//String str = "#{app.beanMap('" + className + "','"+labelStr+"')}";
+					setValue(compFinded, "value", str);
+				}
+				//mapParam.put("var", "item");
+				////mapParam.put("itemValue", "#{item.getProp('"+value+"')}");
+				//mapParam.put("itemLabel", "#{item.getProp('"+label[0]+"')}");
+				//String[] label = configMap.get("list").split("\n");
+
+				ComponentFactory.updateElementProperties(compFinded, mapParam);
 				mapParam.clear();
 			} else {
 				if (Class.forName("javax.faces.component.html.HtmlSelectOneMenu").isAssignableFrom(input.getClass())) {
@@ -795,7 +829,7 @@ public class ComponentFactory {
 			// devEntityPropertyDescriptor.getPropertyName();
 			String str = "";
 			if (inputCloned.getValueExpression("value") == null) {
-				str = "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "'" + item + ")).val}";
+				str = "#{(app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "'" + item + ")).str}";
 				mapParam.put("value", str);
 			}
 			// mapParam.put("styleClass", "");
@@ -823,7 +857,7 @@ public class ComponentFactory {
 					mapParam.put("timeOnly", true);
 				}
 			}
-			generateComponentStyleClassName(mapParam, "form", entitySelected, devEntityPropertyDescriptor, "input");
+			generateComponentStyleClassName(mapParam, "form", entitySelected, devEntityPropertyDescriptor, "input",styleClass);
 			// setValue(inputCloned, "value", str);
 			ComponentFactory.updateElementProperties(inputCloned, mapParam);
 		} catch (ClassNotFoundException e) {
@@ -836,9 +870,9 @@ public class ComponentFactory {
 		return inputCloned;
 	}
 
-	private void generateComponentStyleClassName(Map<String, Object> mapParam, String parent, DevEntityClass entitySelected, DevEntityPropertyDescriptor devEntityPropertyDescriptor, String suffix) {
+	private void generateComponentStyleClassName(Map<String, Object> mapParam, String parent, DevEntityClass entitySelected, DevEntityPropertyDescriptor devEntityPropertyDescriptor, String suffix, Object styleClass) {
 		String preffix = " c_";
-		mapParam.put("styleClass", Objects.toString(mapParam.get("styleClass"), "").concat(preffix + parent + preffix + entitySelected.getName() + preffix + devEntityPropertyDescriptor.getPropertyName() + (suffix.isEmpty() ? "" : preffix + suffix)));
+		mapParam.put("styleClass",Objects.toString(styleClass).concat(" ").concat(Objects.toString(mapParam.get("styleClass"), "")).concat(preffix + parent + preffix + entitySelected.getName() + preffix + devEntityPropertyDescriptor.getPropertyName() + (suffix.isEmpty() ? "" : preffix + suffix)));
 	}
 
 	private void doUIFieldSetFactory(UIComponent comp, UIComponent elementPanel, String parentContainer, String parentEntity, Map<String, List<UIComponent>> elementsContainerMap, DevEntityClass entitySelected, DevRequirement requirement, AppType appType) {
@@ -896,15 +930,7 @@ public class ComponentFactory {
 			ComponentFactory.updateElementProperties(panelScroll, mapParam);
 			//List<DevEntityPropertyDescriptor> propertySelectedList = new ArrayList<DevEntityPropertyDescriptor>();
 			String parent = (parentContainer != null && !parentContainer.isEmpty()) ? parentContainer : "form";
-			DevReportFieldContainer fieldContainer = LayoutFieldsFormat.getFieldContainer(requirement, parent);
-			
-			List<DevReportFieldOptions> fieldOptionsList = new ArrayList<DevReportFieldOptions>();
-			List<DevReportFieldOptions> fieldOptionsListTmp = fieldContainer.getFieldOptionsList();
-			for (DevReportFieldOptions devReportFieldOptions : fieldOptionsListTmp) {
-				if(Boolean.valueOf(LayoutFieldsFormat.loadOpt(devReportFieldOptions, "visible").getOptionsValue().toString())){
-					fieldOptionsList.add(devReportFieldOptions);
-				}	
-			}
+			List<DevReportFieldOptions> fieldOptionsList = LayoutFieldsFormat.getVisibleFields(requirement, parent, entitySelected);
 			if (fieldOptionsList.size() > 14) {
 				comp.getChildren().add(panelScroll);
 				panelScroll.getChildren().add(panelTableParent);
@@ -936,7 +962,7 @@ public class ComponentFactory {
 				UIComponent panelTableRow = ComponentFactory.componentClone(panel, false);
 				mapParam.clear();
 				mapParam.put("style", "display:table-row");
-				generateComponentStyleClassName(mapParam, "form", entitySelected, devEntityPropertyDescriptor, "");
+				generateComponentStyleClassName(mapParam, "form", entitySelected, devEntityPropertyDescriptor, "","");
 				ComponentFactory.updateElementProperties(panelTableRow, mapParam);
 				panelTableChild.getChildren().add(panelTableRow);
 				Map<String, String> configMap = new HashMap<String, String>();
@@ -950,7 +976,6 @@ public class ComponentFactory {
 					// Object styleClass;
 					input = createInputComponent(elementPanel, entitySelected, devEntityPropertyDescriptor, configMap, parentEntity, appType, parent);
 					// styleClass = getProperty(input, "styleClass");
-
 					String node = "";
 					if (parentEntity.isEmpty()) {
 						node = entitySelected.getName();
@@ -959,6 +984,27 @@ public class ComponentFactory {
 					}
 					boolean isButtonInputChildren = input instanceof javax.faces.component.html.HtmlCommandButton && devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ENTITYCHILDREN");
 					if (input != null && !isButtonInputChildren) {
+						Object readonly = LayoutFieldsFormat.loadOpt(fieldOptions, "readonly").getOptionsValue();
+						Object disabled = LayoutFieldsFormat.loadOpt(fieldOptions, "disabled").getOptionsValue();
+						if(readonly!=null && disabled!=null){
+							mapParam.put("readonly", readonly.toString());
+							mapParam.put("disabled", disabled.toString());
+						}	
+						Object value = LayoutFieldsFormat.loadOpt(fieldOptions, "value").getOptionsValue();
+						if(value!=null){
+							mapParam.put("value", value.toString());
+						}
+						Object onblur = LayoutFieldsFormat.loadOpt(fieldOptions, "onblur").getOptionsValue();
+						if(onblur!=null){
+							mapParam.put("onblur", onblur.toString());
+						}	
+						Object onchange = LayoutFieldsFormat.loadOpt(fieldOptions, "onchange").getOptionsValue();
+						if(onchange!=null){
+							mapParam.put("onchange", onchange.toString());
+						}	
+						
+						ComponentFactory.updateElementProperties(input, mapParam);
+						
 						UIComponent panelTableCellIcon = ComponentFactory.componentClone(panel, false);
 						mapParam.clear();
 						mapParam.put("style", "display:table-cell;padding:5px;vertical-align:middle;");
@@ -978,7 +1024,12 @@ public class ComponentFactory {
 						ComponentFactory.updateElementProperties(panelTableCellLabel, mapParam);
 						mapParam.clear();
 						labelCloned = ComponentFactory.componentClone(label, false);
-						mapParam.put("value", devEntityPropertyDescriptor.getPropertyLabel());
+						Object label2 = LayoutFieldsFormat.loadOpt(fieldOptions, "label").getOptionsValue();
+						if(label2!=null){
+							mapParam.put("value", label2.toString());
+						}else{
+							mapParam.put("value", devEntityPropertyDescriptor.getPropertyLabel());
+						}
 						// mapParam.put("styleClass", "");
 						ComponentFactory.updateElementProperties(labelCloned, mapParam);
 						panelTableCellLabel.getChildren().add(labelCloned);
@@ -1176,6 +1227,30 @@ public class ComponentFactory {
 				}
 			}
 			doUICommandButtonFormFactory(comp.getParent(), elementPanel, entitySelected, parentContainer, parentEntity, appType);
+			javax.faces.component.html.HtmlOutputText outtext = new HtmlOutputText();
+			for (DevReportFieldOptions devReportFieldOptions : LayoutFieldsFormat.getContainerOptions(requirement, parent, entitySelected)) {
+				Object obj = LayoutFieldsFormat.loadOpt(devReportFieldOptions, "onload").getOptionsValue();
+				if(obj!=null){
+					outtext.setValue("<script>"+obj+"</script>");
+					outtext.setEscape(false);
+					comp.getParent().getChildren().add(0, outtext);
+					//break;
+				}	
+				if(devReportFieldOptions.getName().equals("c_save_button")){
+					Object value = LayoutFieldsFormat.loadOpt(devReportFieldOptions, "value").getOptionsValue();
+					UIComponent c_save_button = findComponentByStyleClass("c_save_button",comp.getParent());
+					mapParam.clear();
+					mapParam.put("value", value);
+					ComponentFactory.updateElementProperties(c_save_button, mapParam);
+				}
+				if(devReportFieldOptions.getName().equals("c_save_and_back_button")){
+					Object value = LayoutFieldsFormat.loadOpt(devReportFieldOptions, "value").getOptionsValue();
+					UIComponent c_save_and_back_button = findComponentByStyleClass("c_save_and_back_button",comp.getParent());
+					mapParam.clear();
+					mapParam.put("value", value);
+					ComponentFactory.updateElementProperties(c_save_and_back_button, mapParam);
+				}				
+			}			
 		} catch (NoSuchFieldException ex) {
 			Logger.getLogger(ComponentFactory.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (SecurityException ex) {

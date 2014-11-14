@@ -10,7 +10,7 @@ import java.util.Date;
  * The persistent class for the estoque database table.
  * 
  */
-//@Entity
+@Entity
 @NamedQuery(name="Estoque.findAll", query="SELECT e FROM Estoque e")
 public class Estoque implements Serializable {
 	private static final long serialVersionUID = 1L;

@@ -75,12 +75,27 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
             }
         }
     }
-    
+    public boolean isEmpty(){
+    	boolean hasValue = false;
+        for (DevEntityPropertyValue propVal : this.getEntityPropertyValueList()) {
+        	Object val = propVal.getVal();   
+			if(val instanceof List){
+				hasValue = !((List)val).isEmpty();   
+			}else{
+				hasValue = val!=null;    							    							
+			}        		
+        }
+        return hasValue;
+    }
     public DevEntityPropertyValue getPropObj(String propName) {	
         return $(this.getEntityClass().getName()+"."+propName);
     }
     
     public Object getProp(String propName) {
+    	DevEntityPropertyValue propObj = getPropObj(propName);
+    	if(propObj==null){
+    		throw new IllegalArgumentException("Property "+propName+" not found in "+this.getEntityClass().getName()+".");
+    	}
         return getPropObj(propName).getVal();
     }
 
@@ -253,7 +268,7 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
         if (this.entityObjectId != other.entityObjectId && (this.entityObjectId == null || !this.entityObjectId.equals(other.entityObjectId))) {
             return false;
         }
-        if (this.entityObjectId == other.entityObjectId && this.entityObjectId == null && !String.valueOf(this).equals(String.valueOf(obj))) {
+        if (this.entityObjectId == other.entityObjectId && this.entityObjectId == null && !this.registrationDate.equals(other.registrationDate)) {
             return false;
         }
         return true;
@@ -262,7 +277,7 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 59 * hash + (this.entityObjectId != null ? this.entityObjectId.hashCode() : 0);
+        hash = 59 * hash + (this.entityObjectId != null ? this.entityObjectId.hashCode() : this.registrationDate.hashCode());
         return hash;
     }
 

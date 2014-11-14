@@ -7,6 +7,7 @@ package com.algoboss.erp.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.*;
 
 /**
@@ -17,9 +18,10 @@ import javax.persistence.*;
     @NamedQuery(name = "findAllDevReportFieldOptions",
     query = "select u from DevReportFieldOptions u")
 })
+@Cacheable(true)
 @Entity
 @Table(name="dev_report_field_options")
-public class DevReportFieldOptions implements Serializable {
+public class DevReportFieldOptions implements Serializable, Cloneable {
   
     private static final long serialVersionUID = 1L;
     @Id
@@ -93,6 +95,17 @@ public class DevReportFieldOptions implements Serializable {
     @Override
     public String toString() {
         return "DevReportFieldOptions{" + "fieldOptionsId=" + fieldOptionsId + ", name=" + name + ", entityPropertyDescriptor=" + entityPropertyDescriptor + ", fieldOptionsMapList=" + fieldOptionsMapList + '}';
-    }    
+    }   
+    
+	@Override
+	public Object clone() {
+		// TODO Auto-generated method stub
+		
+		try {
+			return super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}    
     
 }

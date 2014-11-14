@@ -21,7 +21,7 @@ import javax.persistence.*;
 @Cacheable(true)
 @Entity
 @Table(name = "dev_requirement")
-public class DevRequirement implements Serializable {
+public class DevRequirement implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -58,7 +58,28 @@ public class DevRequirement implements Serializable {
     @JoinColumn(name = "requirement_id")
     private List<DevReportFieldContainer> fieldContainerList = new ArrayList<DevReportFieldContainer>();
     
-    public List<DevComponentContainer> getComponentContainerList() {
+    public DevRequirement() {
+		super();
+	}
+
+    public static DevRequirement clone(DevRequirement req) {
+		//super();
+    	try {
+    		DevRequirement reqCloned = (DevRequirement) req.clone();
+			List<DevReportFieldContainer> fieldContainerList = req.fieldContainerList;
+			for (DevReportFieldContainer devReportFieldContainer : fieldContainerList) {
+				
+			}
+			//reqCloned.
+			
+			return reqCloned;
+		} catch (CloneNotSupportedException e) {
+			// TODO Auto-generated catch block
+			return null;
+		}
+	}    
+    
+	public List<DevComponentContainer> getComponentContainerList() {
         return componentContainerList;
     }
 
@@ -179,6 +200,12 @@ public class DevRequirement implements Serializable {
     }
 
     @Override
+	protected Object clone() throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		return super.clone();
+	}
+
+	@Override
     public int hashCode() {
         int hash = 3;
         hash = 97 * hash + (this.requirementId != null ? this.requirementId.hashCode() : 0);

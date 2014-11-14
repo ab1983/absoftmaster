@@ -8,7 +8,7 @@ import javax.persistence.*;
  * The persistent class for the vendedor database table.
  * 
  */
-//@Entity
+@Entity
 @NamedQuery(name="Vendedor.findAll", query="SELECT v FROM Vendedor v")
 public class Vendedor implements Serializable {
 	private static final long serialVersionUID = 1L;

@@ -52,7 +52,7 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
     private SecUser user;    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "parent_id")
-    private List<DevEntityObject> propertyChildrenList = new ArrayList<>();
+    private List<DevEntityObject> propertyChildrenList;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "object_id")
     private DevEntityObject propertyObject;
@@ -155,7 +155,16 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
             		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("BOOLEAN")) {
             			obj = Boolean.valueOf(propertyValue).booleanValue();
             		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("FLOAT")){
-            			obj = Double.valueOf(propertyValue).doubleValue();
+            			try {
+							obj = Double.valueOf(propertyValue).doubleValue();
+						} catch (Exception e) {
+							DecimalFormat df = new DecimalFormat();
+							DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+							dfs.setDecimalSeparator(BaseBean.getBundle("decimalSeparator", "msg").charAt(0));
+							dfs.setGroupingSeparator(BaseBean.getBundle("thousandsSeparator", "msg").charAt(0));
+							df.setDecimalFormatSymbols(dfs);
+							obj = df.parse(String.valueOf(propertyValue));
+						}            			
             			//obj = propertyValue;     
             		}else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("INTEGER")){
             			obj = Integer.valueOf(propertyValue).intValue();
@@ -187,12 +196,17 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
             		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("BOOLEAN")) {
             			obj = String.valueOf(propertyValue);
             		} else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("FLOAT")){
-            			DecimalFormat df = new DecimalFormat();
-            			DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-            			dfs.setDecimalSeparator(BaseBean.getBundle("decimalSeparator", "msg").charAt(0));
-            			dfs.setGroupingSeparator(BaseBean.getBundle("thousandsSeparator", "msg").charAt(0));
-            			df.setDecimalFormatSymbols(dfs);
-            			obj = df.parse(String.valueOf(propertyValue));
+            			try {
+							obj = Double.valueOf(String.valueOf(propertyValue));
+						} catch (Exception e) {
+							DecimalFormat df = new DecimalFormat();
+							DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+							dfs.setDecimalSeparator(BaseBean.getBundle("decimalSeparator", "msg").charAt(0));
+							dfs.setGroupingSeparator(BaseBean.getBundle("thousandsSeparator", "msg").charAt(0));
+							df.setDecimalFormatSymbols(dfs);
+							obj = df.parse(String.valueOf(propertyValue));
+							// TODO: handle exception
+						}
             			//obj = propertyValue;     
             		}else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("INTEGER")){
             			obj = String.valueOf(propertyValue);
@@ -225,17 +239,6 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
         return obj;
     }
     
-    public String str(){
-    	return propertyValue;
-    }
-    
-    public void clear() {
-        this.propertyObject = null;
-        this.propertyFile = null;
-        this.propertyValue = null;
-        this.propertyChildrenList = null;
-    }
-
     public void setVal(Object propertyValue) {
         try {
 
@@ -259,6 +262,34 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }    
+    
+	public Object getStr() {
+		Object obj = getVal();
+		if(obj instanceof Double){
+			DecimalFormat df = new DecimalFormat();
+			DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+			dfs.setDecimalSeparator(BaseBean.getBundle("decimalSeparator", "msg").charAt(0));
+			dfs.setGroupingSeparator(BaseBean.getBundle("thousandsSeparator", "msg").charAt(0));
+			df.setDecimalFormatSymbols(dfs);
+			df.setMinimumFractionDigits(2);
+			obj = df.format(obj);			
+		}
+		return obj;
+	}
+	
+	public void setStr(Object obj) {
+		setVal(obj);
+	}	    
+    public String internalPropertyValue(){
+    	return propertyValue;
+    }
+    
+    public void clear() {
+        this.propertyObject = null;
+        this.propertyFile = null;
+        this.propertyValue = null;
+        this.propertyChildrenList = null;
     }
 
     public byte[] getPropertyFile() {

@@ -6,11 +6,15 @@
        xmlns:p="http://primefaces.org/ui"
        xmlns:c="http://java.sun.com/jsp/jstl/core">
     <script>var loaded = false;
-        var page = null</script>     
+        var page = null; 
+        var formOld = "";
+        var formOld2 = "";
+        </script>     
     <h:form prependId="false" acceptcharset="ISO-8859-1" styleClass="ui-algo-container-form">    
         <p:remoteCommand rendered="true" name="updateCurrentForm" immediate="true" update="@form"/>
         <p:remoteCommand rendered="false" name="updateBasePanel" update=":basePanel"/>  
         <p:remoteCommand name="updateStartPage" actionListener="#{app.updateContainerPage()}" update="@form"/>  
+        <p:remoteCommand name="eventBeanRc" actionListener="#{app.eventBean()}" update="@form"/>
         <script type="text/javascript">
             /* <![CDATA[ */
             function init1() {
@@ -30,11 +34,43 @@
                     }, 100);
                 }
             }
+            function isFormChanged(){
+                var formNew = $('.ui-algo-container').html();  
+                if(formNew !== formOld && formNew!== formOld2){
+                	formOld2 = formOld;
+    	            formOld = formNew;  
+    	            return true;
+                }else{
+                	return false;
+                }        	
+            }
+            function clearFormChanged(){
+	            formOld = "";
+	            formOld2 = "";            	
+            }
+            function eventPage(call) {
+                //if (page !== '#{app.containerPage}') {
+                    //page = '#{app.containerPage}';
+                //}
+            	if(isFormChanged()){
+	           		eventBeanRc([{name: 'call', value: call}]);            		
+            	}                
+            }             
+            function eventBean(call) {
+            	if(isFormChanged()){
+	           		eventBeanRc([{name: 'call', value: call}]);            		
+            	}
+            }
+            function focusBean(element) {
+	            window.setTimeout(function() {
+	                $(element).focus();
+	            }, 1000);            
+            }            
             //init1();
             /* ]]> */
-        </script>     
-        <p:panel binding="#{app.algoContainerView}"  style="width: 1024px;height: 490px;" styleClass="ui-algo-container" >
-
+        </script>
+        <p:panel  binding="#{app.algoContainerView}"  style="width: 1024px;height: 490px;" styleClass="ui-algo-container" >
+			
         </p:panel>                   
 
         <p:dialog onShow="prepareExportHtmlToPdf('.ui-algo-container .ui-datatable-tablewrapper');" widgetVar="exportTableDlg" header="Selecione o Formato para Exportação" modal="false" dynamic="true" resizable="false">
@@ -86,12 +122,13 @@
             /* <![CDATA[ */
             var tabindex = null;
             var firstindex = null;
+
             function findIndex(elements) {
                 elements.each(function() {
                     if ($(this).children().length > 0) {
                         findIndex($(this).children());
                     }
-                    if (this.type !== "hidden") {
+                    if (this.type !== "hidden" && this.value === '') {
                         if (firstindex === null) {
                             firstindex = this;
                         }
@@ -106,10 +143,12 @@
                 });
             }
             function init2() {
-                var elements = $(this.form).find('[tabindex]');
+                var elements = $('.ui-algo-container').find('[tabindex]');
                 findIndex(elements);
                 if (tabindex === null && firstindex !== null) {
-                    //$(firstindex).focus();
+                	window.setTimeout(function() {
+                        $(firstindex).focus();
+                    }, 1000);
                 }
                 //alert($(tabindex).attr("tabindex"));
                 if (!loaded) {
@@ -118,8 +157,29 @@
                     //updateBasePanel();
                     loaded = true;
                 }
+            }   
+            function formIsEmpty(){
+            	var isEmpty = true;
+            	var elements = $('.ui-algo-container').find('[tabindex]');
+            	elements.each(function() {
+                    if ($(this).children().length > 0) {
+                        //findIndex($(this).children());
+                    }
+                    if (this.value !== '') {
+                    	isEmpty = false;
+                    	return;
+                    }
+            	});
+            	return isEmpty;
             }
-            init2();
+            if(formIsEmpty()){
+	            init2();            	
+            }
+            if (page !== '#{app.containerPage}') {            	
+	            page = '#{app.containerPage}';
+	            clearFormChanged();
+	            init2();   
+            }            
             /* ]]> */
         </script>     
         <script>
@@ -143,6 +203,7 @@
             }
             // Add the $() function
             $ = jQuery;
+            
             // Now you can use it
             $(document).ready(function() {
                 $('.dateFormat .hasDatepicker').mask('#{msg['dateMask']}');
@@ -236,7 +297,7 @@
             }
             function randomSort(list_field, amount_field, target_field) {
                 randomSortRc([{name: 'list_field', value: list_field}, {name: 'amount_field', value: amount_field}, {name: 'target_field', value: target_field}]);
-            }
+            }           
         </script>
         <script type="text/javascript">
             function start() {
@@ -246,6 +307,19 @@
             function stop() {
                 PF('statusDialog').hide();
             }
+            /*
+            $('.myElement').bind('keypress', function(event){
+                if(event.which === 13){
+                    if(event.shiftKey){
+                        $.tabPrev();
+                    }
+                    else{
+                        $.tabNext();
+                    }
+                    return false;
+                }
+            });
+            */            
         </script>             
     </h:form>
 </html>

@@ -845,6 +845,8 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
 
     private void generateElementsContainerMap(Map<String, List<UIComponent>> elementsContainerMap, DevRequirement bean) {
         try {
+        	List<DevComponentContainer> componentContainerList = bean.getComponentContainerList();
+        	List<DevComponentContainer> componentContainerListAux = new ArrayList<DevComponentContainer>();
             for (Map.Entry<String, List<UIComponent>> object : elementsContainerMap.entrySet()) {
                 String object1 = object.getKey();
                 List<UIComponent> elementList = object.getValue();
@@ -856,13 +858,11 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     List<DevPrototypeComponentProperty> property = ComponentFactory.componentSerializer(f2, comp, null, false);
                     children.add(new DevPrototypeComponentChildren(comp.getClass().getName(), property));
                 }
-                List<DevComponentContainer> componentContainerList = bean.getComponentContainerList();
                 DevComponentContainer componentContainer = null;
                 for (DevComponentContainer devComponentContainer : componentContainerList) {
                     if (devComponentContainer.getName().equals(object1)) {
-                        devComponentContainer.getPrototypeComponentChildrenList().clear();
-                        devComponentContainer.getPrototypeComponentChildrenList().addAll(children);
-                        //bean.getComponentContainerList().add(devComponentContainer);
+                        //devComponentContainer.getPrototypeComponentChildrenList().clear();
+                        devComponentContainer.setPrototypeComponentChildrenList(children);
                         componentContainer = devComponentContainer;
                         break;
                     }
@@ -871,10 +871,12 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     componentContainer = new DevComponentContainer();
                     componentContainer.setName(object1);
                     componentContainer.setPrototypeComponentChildrenList(children);
-                    bean.getComponentContainerList().add(componentContainer);
+                    //bean.getComponentContainerList().add(componentContainer);
                 }
+                componentContainerListAux.add(componentContainer);
                 elementsContainerMap.put(componentContainer.getName(), AlgodevUtil.generateComponentList(componentContainer));
             }
+            bean.setComponentContainerList(componentContainerListAux);
         } catch (Throwable ex) {
             Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -983,22 +985,25 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
     
     private void prepareCreateByConstructor() { 
     	try {
-    		if (bean != null && bean.getService() != null && !bean.getService().getDescription().isEmpty() && !bean.getService().getDescription().equals(actualServiceDescription)) {
-    			propertySelectedListCollection = new ArrayList<DevEntityPropertyDescriptor>();
-    			propertySelectedFormCollection = new ArrayList<DevEntityPropertyDescriptor>();
+    		if (bean != null && bean.getService() != null){
     			String[] strPath = bean.getService().getName().split(">");
-    			Gson json = new Gson();
-    			Object[] je= json.fromJson("["+AlgodevUtil.formatDescription(bean.getService().getDescription()).replace(' ', Character.toChars(0)[0])+"]",Object[].class);
-    			//String[] strArray = stringToArray(je.getAsJsonArray().get(0).getAsString());
-    			entity = AlgodevUtil.arrayToEntity(je,entity);
-    			entity.setLabel(strPath.length > 0 ? strPath[strPath.length - 1] : "");
-    			entityClassNodeList.add(entity);
-    			//entity = entitySelected;
-    			bean.setRequirementName(entity.getLabel());
+    			bean.setRequirementName(strPath.length > 0 ? strPath[strPath.length - 1] : "");
+    			if(!bean.getService().getDescription().isEmpty() && !bean.getService().getDescription().equals(actualServiceDescription)) {
+    				propertySelectedListCollection = new ArrayList<DevEntityPropertyDescriptor>();
+    				propertySelectedFormCollection = new ArrayList<DevEntityPropertyDescriptor>();
+    				Gson json = new Gson();
+    				Object[] je= json.fromJson("["+AlgodevUtil.formatDescription(bean.getService().getDescription()).replace(' ', Character.toChars(0)[0])+"]",Object[].class);
+    				//String[] strArray = stringToArray(je.getAsJsonArray().get(0).getAsString());
+    				entity = AlgodevUtil.arrayToEntity(je,entity);
+    				entity.setLabel(bean.getRequirementName());
+    				entityClassNodeList.add(entity);
+    				//entity = entitySelected;
+    				
+    				propertySelectedListCollection.addAll(entity.getEntityPropertyDescriptorList());
+    				propertySelectedFormCollection.addAll(entity.getEntityPropertyDescriptorList());
     			
-    			propertySelectedListCollection.addAll(entity.getEntityPropertyDescriptorList());
-    			propertySelectedFormCollection.addAll(entity.getEntityPropertyDescriptorList());
-    		}			
+    			}
+    		}
 		} catch (Exception e) {
 			Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, e);
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), ""));
@@ -1013,10 +1018,10 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
         if (bean != null && bean.getInterfaceType() == null) {
             bean.setInterfaceType("listForm");
         }
-        if (bean.getInterfaceType().equals("listForm") || bean.getInterfaceType().equals("listEditForm")) {
+        if (bean.getInterfaceType().equals("listForm") || bean.getInterfaceType().equals("listEditForm") || bean.getInterfaceType().equals("formList") || bean.getInterfaceType().equals("formlistEdit")) {
+        	map.put("dataform", "true");
             map.put("datalist", "true");
-            map.put("dataform", "true");
-        }
+        }    
         if (bean.getInterfaceType().equals("summary")) {
             map.put("datagrid", "true");
         }
@@ -1078,7 +1083,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
     	createByConstructor(map, cloned, compTarget, elementsContainerMap, bean, entity, propertySelectedFormCollection,  propertySelectedListCollection);
     }
     private void createByConstructor(Map map, UIComponent cloned, UIComponent compTarget, Map<String,List<UIComponent>> elementsContainerMap, DevRequirement bean, DevEntityClass entity, List<DevEntityPropertyDescriptor> propertySelectedFormCollection, List<DevEntityPropertyDescriptor> propertySelectedListCollection) {
-		LayoutFieldsFormat.populateContainerField(bean);
+		LayoutFieldsFormat.create(bean);
 		elementsContainerMap.clear();
         UIComponent elementPanel = algoPalette;
         try {

@@ -5,14 +5,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -29,6 +34,8 @@ public class Venda implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+    @SequenceGenerator(name = "Venda", sequenceName = "g_vendas", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "Venda")		
 	private String registro;
 
 	private double aliquota;
@@ -40,14 +47,16 @@ public class Venda implements Serializable {
 	private double baseiss;
 
 	private double basesubsti;
-
+	@Lob
+	@Basic(fetch=FetchType.LAZY)
 	private String ccexml;
 
 	private String cliente;
 
 	@Column(name="cod_sit")
 	private String codSit;
-
+	@Lob
+	@Basic(fetch=FetchType.LAZY)
 	private String complemento;
 
 	@Temporal(TemporalType.DATE)
@@ -99,7 +108,8 @@ public class Venda implements Serializable {
 	private String nfeprotocolo;
 
 	private String nferecibo;
-
+	@Lob
+	@Basic(fetch=FetchType.LAZY)
 	private String nfexml;
 
 	private String nsu;
@@ -108,7 +118,9 @@ public class Venda implements Serializable {
 	private Date nsud;
 
 	private String nsuh;
-
+	
+    //@SequenceGenerator(name = "numeronf", sequenceName = "g_serie1", allocationSize = 1)
+    //@GeneratedValue(strategy = GenerationType.AUTO, generator = "Venda")	
 	private String numeronf;
 
 	private String nvol;
@@ -120,7 +132,8 @@ public class Venda implements Serializable {
 	private double pesoliqui;
 
 	private String placa;
-
+	@Lob
+	@Basic(fetch=FetchType.LAZY)
 	private String reciboxml;
 
 	@Temporal(TemporalType.DATE)

@@ -322,7 +322,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
     public void indexBeanNewWin(Long nro) throws Throwable {
         //getUserAuthorization(nro);
         //notReadOnly = !nro;
-        prepareIndexBean(nro, true, true);
+        prepareIndexBean(nro, false, true);
     }
 
     public void indexBeanNewWin() throws Throwable {
@@ -458,6 +458,10 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
                     //usuario = new Usuario();
                     if (list) {
                         doBeanList(newBean, null, null);
+                    }else{
+                        if (newBean) {
+                            bean = newInstance();
+                        }
                     }
                     msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro gravado com sucesso!", "");
                 } else {
@@ -579,7 +583,11 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
         } finally {
             return erro;
         }
-    }
+    }    
+    
+	public BaseDao getBaseDao() {
+		return baseDao;
+	}
 
 	@Override
 	public Object clone() {

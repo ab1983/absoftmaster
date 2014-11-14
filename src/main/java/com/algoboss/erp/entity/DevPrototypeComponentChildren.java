@@ -34,7 +34,9 @@ public class DevPrototypeComponentChildren implements Serializable {
     @OrderBy
     @JoinColumn(name="prototype_component_children_id")    
     List<DevPrototypeComponentProperty> prototypeComponentPropertyList = new ArrayList<DevPrototypeComponentProperty>();
-
+    @Column(name="component_container_id")
+    private Long componentContainerId;
+    
     public DevPrototypeComponentChildren() {
     }    
     
@@ -65,9 +67,17 @@ public class DevPrototypeComponentChildren implements Serializable {
 
     public void setPrototypeComponentType(String prototypeComponentType) {
         this.prototypeComponentType = prototypeComponentType;
-    }
+    }    
+    
+    public Long getComponentContainerId() {
+		return componentContainerId;
+	}
 
-    @Override
+	public void setComponentContainerId(Long componentContainerId) {
+		this.componentContainerId = componentContainerId;
+	}
+
+	@Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
