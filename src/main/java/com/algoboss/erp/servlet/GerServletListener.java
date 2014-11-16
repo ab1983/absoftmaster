@@ -20,6 +20,11 @@ import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -44,6 +49,41 @@ public class GerServletListener extends ManualCDILookup implements ServletContex
         //baseDao = getFacadeWithJNDI(BaseDao.class);
         System.out.println("CONTEXT INITIALIZED!!!!!!!!!! " + new Date());
         baseDao.resetCurrentLicense();
+        
+        org.firebirdsql.ds.FBConnectionPoolDataSource pool = 
+        		 new org.firebirdsql.ds.FBConnectionPoolDataSource();
+        		 //pool.setMaxPoolSize(5);
+        		 //pool.setMinPoolSize(2);
+        		 //pool.setMaxStatements(10);
+        		 //pool.setMaxIdleTime(30 * 60 * 60);
+        		 pool.setDatabaseName("C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB");
+        		 pool.setPortNumber(3050);
+        		 pool.setServerName("localhost");
+        		 pool.setUser("SYSDBA");
+        		 pool.setPassword("masterkey");
+        		 
+        		 try {
+        		 Reference ref = new Reference(
+        				 "org.firebirdsql.ds.FBConnectionPoolDataSource");
+        		 /*
+        				 ref.add(new StringRefAddr("maxPoolSize", "5"));
+        				 ref.add(new StringRefAddr("minPoolSize", "2"));
+        				 ref.add(new StringRefAddr("maxStatements", "10"));
+        				 ref.add(new StringRefAddr("maxIdleTime", "108000"));
+        				 ref.add(new StringRefAddr("database","localhost/3050:C:/Program Files (x86)/SmallSoft/Small Commerce/SMALL.GDB"));
+        				 */
+        		 ref.add(new StringRefAddr("serverName","localhost"));
+        		 ref.add(new StringRefAddr("databaseName","C:/Program Files (x86)/SmallSoft/Small Commerce/SMALL.GDB"));
+				 ref.add(new StringRefAddr("portNumber","3050"));
+        		 ref.add(new StringRefAddr("user", "SYSDBA"));
+        		 ref.add(new StringRefAddr("password", "masterkey"));
+        				 Context ctx = new InitialContext();
+							ctx.bind("jdbc/smalldyn", ref);
+					} catch (NamingException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}        		 
+        		 
         //loginBean = getFacadeWithJNDI(GerLoginBean.class);
         Thread t = new Thread(new Runnable() {
             public void run() {

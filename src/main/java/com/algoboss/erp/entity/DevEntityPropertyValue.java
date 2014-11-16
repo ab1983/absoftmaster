@@ -52,7 +52,7 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
     private SecUser user;    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "parent_id")
-    private List<DevEntityObject> propertyChildrenList = new ArrayList<>();
+    private List<DevEntityObject> propertyChildrenList;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "object_id")
     private DevEntityObject propertyObject;

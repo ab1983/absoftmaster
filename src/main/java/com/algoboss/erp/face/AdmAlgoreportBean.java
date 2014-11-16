@@ -1527,6 +1527,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             cEnd.setTime(endDate);
             cEnd.add(Calendar.MONTH, +3);
             
+            try {
             entityObjectList = baseDao.findEntityObjectByClass(entity, getSiteIdList(), cIni.getTime(), cEnd.getTime(), true);
             updateReport();
             //super.doBeanList();
@@ -1549,13 +1550,8 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             params.put(JRParameter.REPORT_TIME_ZONE, TimeZone.getTimeZone("GMT-3:00"));
             byte[] bytes = null;
 
-            try {
                 bytes =
                         JasperRunManager.runReportToPdf(relatorioJasper.getPath(), params, jrxmlds);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-            }
             if (bytes != null && bytes.length > 0) {
                 try {
                     // Envia o relatório em formato PDF para o browser
@@ -1573,9 +1569,13 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                     fc.responseComplete();  
                 }
             }
-        }  catch (JRException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+            } catch (Throwable e) {
+            	e.printStackTrace();
+            } finally {
+            }
+        } catch (Throwable e) {
+        	e.printStackTrace();
+        } finally {
+        }
     }    
 }

@@ -7,6 +7,7 @@ package com.algoboss.erp.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.*;
 
 /**
@@ -17,6 +18,7 @@ import javax.persistence.*;
     @NamedQuery(name = "findAllDevReportFieldContainer",
     query = "select u from DevReportFieldContainer u")
 })
+@Cacheable(true)
 @Entity
 @Table(name="dev_report_field_container")
 public class DevReportFieldContainer implements Serializable {

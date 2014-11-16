@@ -458,6 +458,10 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
                     //usuario = new Usuario();
                     if (list) {
                         doBeanList(newBean, null, null);
+                    }else{
+                        if (newBean) {
+                            bean = newInstance();
+                        }
                     }
                     msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Registro gravado com sucesso!", "");
                 } else {

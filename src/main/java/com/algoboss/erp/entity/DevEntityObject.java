@@ -75,7 +75,18 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
             }
         }
     }
-    
+    public boolean isEmpty(){
+    	boolean hasValue = false;
+        for (DevEntityPropertyValue propVal : this.getEntityPropertyValueList()) {
+        	Object val = propVal.getVal();   
+			if(val instanceof List){
+				hasValue = !((List)val).isEmpty();   
+			}else{
+				hasValue = val!=null;    							    							
+			}        		
+        }
+        return hasValue;
+    }
     public DevEntityPropertyValue getPropObj(String propName) {	
         return $(this.getEntityClass().getName()+"."+propName);
     }

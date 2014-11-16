@@ -845,6 +845,8 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
 
     private void generateElementsContainerMap(Map<String, List<UIComponent>> elementsContainerMap, DevRequirement bean) {
         try {
+        	List<DevComponentContainer> componentContainerList = bean.getComponentContainerList();
+        	List<DevComponentContainer> componentContainerListAux = new ArrayList<DevComponentContainer>();
             for (Map.Entry<String, List<UIComponent>> object : elementsContainerMap.entrySet()) {
                 String object1 = object.getKey();
                 List<UIComponent> elementList = object.getValue();
@@ -856,13 +858,11 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     List<DevPrototypeComponentProperty> property = ComponentFactory.componentSerializer(f2, comp, null, false);
                     children.add(new DevPrototypeComponentChildren(comp.getClass().getName(), property));
                 }
-                List<DevComponentContainer> componentContainerList = bean.getComponentContainerList();
                 DevComponentContainer componentContainer = null;
                 for (DevComponentContainer devComponentContainer : componentContainerList) {
                     if (devComponentContainer.getName().equals(object1)) {
                         devComponentContainer.getPrototypeComponentChildrenList().clear();
                         devComponentContainer.getPrototypeComponentChildrenList().addAll(children);
-                        //bean.getComponentContainerList().add(devComponentContainer);
                         componentContainer = devComponentContainer;
                         break;
                     }
@@ -871,10 +871,12 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     componentContainer = new DevComponentContainer();
                     componentContainer.setName(object1);
                     componentContainer.setPrototypeComponentChildrenList(children);
-                    bean.getComponentContainerList().add(componentContainer);
+                    //bean.getComponentContainerList().add(componentContainer);
                 }
+                componentContainerListAux.add(componentContainer);
                 elementsContainerMap.put(componentContainer.getName(), AlgodevUtil.generateComponentList(componentContainer));
             }
+            bean.setComponentContainerList(componentContainerListAux);
         } catch (Throwable ex) {
             Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {

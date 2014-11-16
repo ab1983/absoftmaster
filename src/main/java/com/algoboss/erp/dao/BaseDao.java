@@ -43,13 +43,13 @@ import javax.transaction.*;
  * @author Agnaldo
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.BEAN)
+@TransactionManagement(TransactionManagementType.CONTAINER)
 public class BaseDao implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Resource/*(shareable=true)*/
+    @Resource(shareable=true)
     private UserTransaction userTransaction;
-    @PersistenceContext(/*type=PersistenceContextType.TRANSACTION,*/properties={@PersistenceProperty(name="javax.persistence.sharedCache.mode", value="ENABLE_SELECTIVE")},unitName = "ERPPU")
+    @PersistenceContext(type=PersistenceContextType.TRANSACTION, properties={@PersistenceProperty(name="javax.persistence.sharedCache.mode", value="ENABLE_SELECTIVE")},unitName = "ERPPU")
     public EntityManager entityManager;
     @PersistenceContext(/*type=PersistenceContextType.TRANSACTION,*/properties={@PersistenceProperty(name="javax.persistence.sharedCache.mode", value="ENABLE_SELECTIVE")},unitName = "SMALLPU")
     public EntityManager entityManagerSmall;    
@@ -68,7 +68,7 @@ public class BaseDao implements Serializable {
     private void beginTransaction() {
         try {
             if (userTransaction.getStatus() != Status.STATUS_ACTIVE) {
-                userTransaction.begin();
+                //userTransaction.begin();
             }
         } catch (Exception e) {
         }
@@ -77,7 +77,7 @@ public class BaseDao implements Serializable {
     private void commitTransaction() {
         if (!manualTransaction) {
             try {
-                userTransaction.commit();
+                //userTransaction.commit();
             } catch (Exception ex) {
                 Logger.getLogger(BaseDao.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -102,18 +102,18 @@ public class BaseDao implements Serializable {
             //transacao.begin();
             Object id = entityManager.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(obj);
             if (id == null) {
-                userTransaction.begin();
+                //userTransaction.begin();
                 entityManager.persist(obj);
                 entityManager.flush();
                 entityManager.refresh(obj);
-                userTransaction.commit();
+                //userTransaction.commit();
                 //obj = entityManager.merge(obj);
             } else {
-                userTransaction.begin();
+                //userTransaction.begin();
                 obj = entityManager.merge(obj);
                 entityManager.flush();
                 entityManager.refresh(obj);
-                userTransaction.commit();
+                //userTransaction.commit();
             }
             //entityManager.flush();
             //transacao.commit();
@@ -122,12 +122,12 @@ public class BaseDao implements Serializable {
             if (!(e instanceof Error)) {
                 e.printStackTrace();
             }
-            userTransaction.rollback();
+            //userTransaction.rollback();
             obj = null;
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
@@ -145,7 +145,7 @@ public class BaseDao implements Serializable {
             //entityManager = new JpaUtil().getEm();
             //transacao = entityManager.getTransaction();
             //transacao.begin();
-        	userTransaction.begin();
+        	//userTransaction.begin();
             Object id = entityManager.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(obj);
             if (id != null) {
             	if(clearCache){
@@ -153,18 +153,18 @@ public class BaseDao implements Serializable {
             	}
                 obj = entityManager.find(obj.getClass(), id);
             }
-            obj = entityManager.merge(obj);
-            entityManager.refresh(obj);
-            userTransaction.commit();
+            //obj = entityManager.merge(obj);
+            //entityManager.refresh(obj);
+            //userTransaction.commit();
         } catch (Throwable e) {
             t = e;
             e.printStackTrace();
-            userTransaction.rollback();
+            //userTransaction.rollback();
             obj = null;
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
@@ -172,6 +172,12 @@ public class BaseDao implements Serializable {
         }
     }
     public Object saveRefresh(boolean refresh,Object... obj) throws Throwable {
+    	if(obj[0] instanceof DevEntityObject){
+    		DevEntityObject entObj = (DevEntityObject)obj[0];
+    		if(entObj.getEntityClass().getCanonicalClassName()!=null && !entObj.getEntityClass().getCanonicalClassName().isEmpty()){
+    			return saveReplicate(entObj);
+    		}
+    	}
     	return saveImpl(refresh, obj);
     }    
     public Object save(Object... obj) throws Throwable {
@@ -182,7 +188,7 @@ public class BaseDao implements Serializable {
         try {
             //entityManager = new JpaUtil().getEm();
             //transacao = entityManager.getTransaction();
-            userTransaction.begin();
+            //userTransaction.begin();
             //beginTransaction();
             for (int i = 0; i < obj.length; i++) {
                 Object object = obj[i];
@@ -202,13 +208,13 @@ public class BaseDao implements Serializable {
                     }                    
                 }
             }
-            userTransaction.commit();
+            //userTransaction.commit();
             //commitTransaction();
             //entityManager.flush();
         } catch (Throwable e) {
             t = e;
             e.printStackTrace();
-            userTransaction.rollback();
+            //userTransaction.rollback();
             obj = null;
         } finally {
             if (entityManager != null && entityManager.isOpen()) {
@@ -236,9 +242,9 @@ public class BaseDao implements Serializable {
             e.printStackTrace();
             //transacao.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
@@ -261,9 +267,9 @@ public class BaseDao implements Serializable {
             e.printStackTrace();
             //transacao.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
@@ -335,9 +341,9 @@ public class BaseDao implements Serializable {
             e.printStackTrace();
             //transacao.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
@@ -369,9 +375,9 @@ public class BaseDao implements Serializable {
             seqnum = 0L;
             //transacao.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             return seqnum + 1;
         }
 
@@ -389,19 +395,20 @@ public class BaseDao implements Serializable {
         Throwable t = null;
         try {
             //entityManager = JpaUtil.getEntityManager();
-            userTransaction.begin();
+            //userTransaction.begin();
             entityManager.flush();
             obj = entityManager.merge(obj);
             entityManager.remove(obj);
-            userTransaction.commit();
-        } catch (Exception e) {
+            //userTransaction.commit();
+        } catch (Throwable e) {
             t = e;
             //e.printStackTrace();
+            //userTransaction.rollback();
             obj = null;
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
@@ -412,18 +419,18 @@ public class BaseDao implements Serializable {
     public void resetCurrentLicense() {
         List<AdmContract> list = null;
         try {
-            userTransaction.begin();
+            //userTransaction.begin();
             entityManager.createQuery("update AdmServiceModuleContract u set u.currentAmount = 0").executeUpdate();
-            userTransaction.commit();
+            //userTransaction.commit();
         } catch (NoResultException e) {
             list = null;
         } catch (Exception e) {
             e.printStackTrace();
-            //userTransaction.rollback();
+            ////userTransaction.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
         }
     }
 
@@ -476,10 +483,10 @@ public class BaseDao implements Serializable {
             return list;
         }
     }
-    public List<DevEntityObject> findEntityObjectByClass(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate) {
+    public List<DevEntityObject> findEntityObjectByClass(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate) throws Throwable {
     	return findEntityObjectByClass(className, siteIdList, startDate, endDate, false);
     }
-    public List<DevEntityObject> findEntityObjectByClass(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) {
+    public List<DevEntityObject> findEntityObjectByClass(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) throws Throwable {
     	if(className.getCanonicalClassName()!=null && !className.getCanonicalClassName().isEmpty()){
     		return findEntityObjectByClassReplicate(className, siteIdList, startDate, endDate, refresh);
     	}else{
@@ -551,9 +558,9 @@ public class BaseDao implements Serializable {
             objectList = null;
             //transacao.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             Date end = new Date();
             System.err.println("Time Dao "+className.getName()+": "+(end.getTime()-ini.getTime()));
             return objectList;
@@ -578,9 +585,9 @@ public class BaseDao implements Serializable {
             //e.printStackTrace();
             //transacao.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             return entityName;
         }
 
@@ -594,7 +601,7 @@ public class BaseDao implements Serializable {
             //transacao.begin();
             Object id = "";//entityManager.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(obj);
             if (id == null) {
-                userTransaction.begin();
+                //userTransaction.begin();
                 //entityManager.persist(obj);
                 if(obj.getEntityClass().getCanonicalClassName()!=null){
                 	Object objRepl = entityObjectSyncImpl(false,obj);
@@ -605,10 +612,10 @@ public class BaseDao implements Serializable {
                 //entityManager.flush();
                 //entityManager.refresh(obj);
                 
-                userTransaction.commit();
+                //userTransaction.commit();
                 //obj = entityManager.merge(obj);
             } else {
-                userTransaction.begin();
+                //userTransaction.begin();
                 //obj = entityManager.merge(obj);
                 //entityManager.flush();
                 //entityManager.refresh(obj);                
@@ -620,7 +627,7 @@ public class BaseDao implements Serializable {
                 	entityManagerSmall.refresh(objRepl);
                 }                
                 
-                userTransaction.commit();
+                //userTransaction.commit();
             }
             //entityManager.flush();
             //transacao.commit();
@@ -629,12 +636,12 @@ public class BaseDao implements Serializable {
             if (!(e instanceof Error)) {
                 e.printStackTrace();
             }
-            userTransaction.rollback();
+            //userTransaction.rollback();
             obj = null;
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
@@ -646,29 +653,29 @@ public class BaseDao implements Serializable {
         Throwable t = null;
         try {
             //entityManager = JpaUtil.getEntityManager();
-            userTransaction.begin();
+            //userTransaction.begin();
             //entityManager.flush();
             //obj = entityManager.merge(obj);
             //entityManager.remove(obj);
             if(obj.getEntityClass().getCanonicalClassName()!=null){
                 entityManagerSmall.remove(entityObjectSync(obj));            	
             }                        
-            userTransaction.commit();
+            //userTransaction.commit();
         } catch (Exception e) {
             t = e;
             //e.printStackTrace();
             obj = null;
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
             if (t != null) {
                 throw t;
             }
             return obj;
         }
     }    
-    public List<DevEntityObject> findEntityObjectByClassReplicate(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) {
+    public List<DevEntityObject> findEntityObjectByClassReplicate(DevEntityClass className, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) throws Throwable {
         Throwable t = null;
         List<DevEntityObject> objectList = new ArrayList<DevEntityObject>();
         Date ini = new Date();
@@ -703,6 +710,7 @@ public class BaseDao implements Serializable {
                 }
                 Date iniQuerySmall = new Date();
                 //userTransaction.begin();
+                //userTransaction.setTransactionTimeout(60);
                 objectListSmall = typedQuerySmall.getResultList();
                 //userTransaction.commit();
                 System.err.println("Time QuerySmall "+className.getName()+": "+(new Date().getTime()-iniQuerySmall.getTime()));
@@ -726,15 +734,18 @@ public class BaseDao implements Serializable {
         	     
             
             //transacao.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             t = e;
             //e.printStackTrace();
             objectList = null;
             //transacao.rollback();
         } finally {
-            if (entityManager != null && entityManager.isOpen()) {
+            //if (entityManager != null && entityManager.isOpen()) {
                 //entityManager.close();
-            }
+            //}
+            if (t != null) {
+                throw t;
+            }            
             Date fim = new Date();
             System.err.println("Time Dao "+className.getName()+": "+(fim.getTime()-ini.getTime()));
             return objectList;
@@ -742,13 +753,13 @@ public class BaseDao implements Serializable {
     }
     public void entityObjectSyncPopulate(DevEntityObject obj){    
     	try {
-    		userTransaction.begin();
-    		entityObjectImportSyncConverter(entityObjectSync(obj), obj);
-    		userTransaction.commit();			
-		} catch (Exception e) {
+    		//userTransaction.begin();
+    		entityObjectImportSyncConverter(entityObjectSync(obj), obj, false);
+    		//userTransaction.commit();			
+		} catch (Throwable e) {
 			try {
-				userTransaction.rollback();
-			} catch (Exception e1) {
+				//userTransaction.rollback();
+			} catch (Throwable e1) {
 				e1.printStackTrace();
 			}
 			e.printStackTrace();
@@ -757,48 +768,60 @@ public class BaseDao implements Serializable {
     public Object entityObjectSyncImpl(boolean refresh, DevEntityObject obj){
     	
     	Object objRepl = null;
+    	boolean hasValue = false;
     	try {
     		if(obj.getEntityClass().getCanonicalClassName()!=null){
     			//CreateEm();
     			Class clazz = Class.forName(obj.getEntityClass().getCanonicalClassName());
-    			objRepl = clazz.newInstance();
     			Field[] fields = clazz.getDeclaredFields();
     			for (int i = 0; i < fields.length; i++) {
     				Field field = fields[i];
     				if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
     					field.setAccessible(true);
     					DevEntityPropertyValue entPropVal = obj.getPropObj(field.getName().toLowerCase());
-    					Object val = entPropVal.getVal();    					
-        				if(entPropVal.getEntityPropertyDescriptor().getPropertyClass()!=null){
-        					if(entPropVal.getEntityPropertyDescriptor().getPropertyType().equals("ENTITYCHILDREN")){
-        						List<DevEntityObject> entObjList = entPropVal.getPropertyChildrenList();
-        						List objReplList = new ArrayList();
-        						for (DevEntityObject devEntityObject : entObjList) {
-        							objReplList.add(entityObjectSyncImpl(refresh, devEntityObject));
-								}
-        						field.set(objRepl, objReplList);
-        					}
-        				}else{
-	    					try {							
-	    						field.set(objRepl, val);
-	    					} catch (IllegalArgumentException e) {
-	    						if(val!=null){
-	    							throw new IllegalArgumentException(e);
-	    						}
-	    						// TODO: handle exception
-	    					}
-        				}
+    					Object val = entPropVal.getVal();   
+						if(val instanceof List){
+							hasValue = !((List)val).isEmpty();   
+						}else{
+							hasValue = val!=null;    							    							
+						}
+						if(objRepl == null && hasValue){
+			    			objRepl = clazz.newInstance();
+						}  
+						if(objRepl!=null){
+	        				if(entPropVal.getEntityPropertyDescriptor().getPropertyClass()!=null){
+	        					if(entPropVal.getEntityPropertyDescriptor().getPropertyType().equals("ENTITYCHILDREN")){
+	        						List<DevEntityObject> entObjList = entPropVal.getPropertyChildrenList();
+	        						List objReplList = new ArrayList();
+	        						for (DevEntityObject devEntityObject : entObjList) {
+	        							objReplList.add(entityObjectSyncImpl(refresh, devEntityObject));
+									}
+	        						field.set(objRepl, objReplList);
+	        					}
+	        				}else{
+		    					try {
+		    						if(hasValue){
+		    							field.set(objRepl, val);	    							
+		    						}
+		    					} catch (IllegalArgumentException e) {
+		    						if(val!=null){
+		    							throw new IllegalArgumentException(e);
+		    						}
+		    						// TODO: handle exception
+		    					}
+	        				}
+						}
     				}
     				
     			}
-    			if(refresh){
+    			if(refresh && objRepl!=null){
 	    			entityManagerSmall.flush();
 	    			objRepl = entityManagerSmall.merge(objRepl);
 	    			entityManagerSmall.refresh(objRepl);      
     			}
     		} 
 			
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
     	return objRepl;
@@ -824,7 +847,7 @@ public class BaseDao implements Serializable {
 							throw new IllegalArgumentException(e);
 						}
 						// TODO: handle exception
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						if(val!=null){
 							throw new IllegalArgumentException(e);
 						}
@@ -837,50 +860,58 @@ public class BaseDao implements Serializable {
 			objectListSmallRest.remove(objRepl2);
 		}    	
 		if(!objectListSmallRest.isEmpty()){
-			userTransaction.begin();
+			//userTransaction.begin();
 			for (Iterator iterator3 = objectListSmallRest.iterator(); iterator3.hasNext();) {
 				Object objRepl3 = (Object) iterator3.next();
 				DevEntityObject obj = new DevEntityObject(className);
 				AdmInstantiatesSite site = new AdmInstantiatesSite();
 				site.setInstantiatesSiteId(siteIdList.get(0));
 				obj.setInstantiatesSite(site);
-				entityObjectImportSyncConverter(objRepl3, obj);   	
+				entityObjectImportSyncConverter(objRepl3, obj, true);   	
 				//obj = entityManager.merge(obj);		
 				objectList.add(obj);
 			}					
-			userTransaction.commit();
+			//userTransaction.commit();
 		}		
-		} catch (Exception e1) {
+		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} 
     }
-    public void entityObjectImportSyncConverter(Object objRepl3, DevEntityObject obj){
+    public void entityObjectImportSyncConverter(Object objRepl3, DevEntityObject obj, boolean lazy){
     	try {
-    		Field[] fields = objRepl3.getClass().getDeclaredFields();	
-    		for (int i = 0; i < fields.length; i++) {
-    			Field field = fields[i];
-    			if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
-    				field.setAccessible(true);
-    				Object val = field.get(objRepl3);
-    				//((List)objRepl3.getClass().getDeclaredMethod("getProdutos", new Class<?>[]{}).invoke(objRepl3, new Object[]{})).size();//entityManagerSmall.createQuery("select u from Venda u").getResultList();entityManagerSmall.createQuery("select u from Itens001 u where u.numeronf = '000000630001'").getResultList()//((com.algoboss.integration.small.entity.Venda)objRepl3).getProdutos()
-    				DevEntityPropertyValue entPropVal = obj.getPropObj(field.getName().toLowerCase());
-    				if(entPropVal.getEntityPropertyDescriptor().getPropertyClass()!=null){
-    					if(entPropVal.getEntityPropertyDescriptor().getPropertyType().equals("ENTITYCHILDREN") && val instanceof List){
-    						entPropVal.getPropertyChildrenList().clear();
-    						List valList = (List)val;
-    						for (Object object : valList) {
-    							DevEntityObject obj2 = new DevEntityObject(entPropVal.getEntityPropertyDescriptor().getPropertyClass());
-    							entityObjectImportSyncConverter(object, obj2);    
-    							entPropVal.getPropertyChildrenList().add(obj2);
+    		if(objRepl3!=null){
+	    		Field[] fields = objRepl3.getClass().getDeclaredFields();	
+	    		for (int i = 0; i < fields.length; i++) {
+	    			Field field = fields[i];
+	    			if(!Modifier.isStatic(field.getModifiers()) && !field.getName().startsWith("_")){
+	    				field.setAccessible(true);
+	    				Object val = field.get(objRepl3);
+	    				//((List)objRepl3.getClass().getDeclaredMethod("getProdutos", new Class<?>[]{}).invoke(objRepl3, new Object[]{})).size();//entityManagerSmall.createQuery("select u from Venda u").getResultList();entityManagerSmall.createQuery("select u from Itens001 u where u.numeronf = '000000630001'").getResultList()//((com.algoboss.integration.small.entity.Venda)objRepl3).getProdutos()
+	    				DevEntityPropertyValue entPropVal = obj.getPropObj(field.getName().toLowerCase());
+	    				if(entPropVal.getEntityPropertyDescriptor().getPropertyClass()!=null){
+	    					if(entPropVal.getEntityPropertyDescriptor().getPropertyType().equals("ENTITYCHILDREN") && val instanceof List && !lazy){
+	    						entPropVal.getPropertyChildrenList().clear();
+	    						List valList = (List)val;
+	    						for (Object object : valList) {
+	    							DevEntityObject obj2 = new DevEntityObject(entPropVal.getEntityPropertyDescriptor().getPropertyClass());
+	    							entityObjectImportSyncConverter(object, obj2, lazy);    
+	    							entPropVal.getPropertyChildrenList().add(obj2);
+								}
+	    					}
+	    				}else{
+	    					try {
+	    						if(val!=null){
+	    							entPropVal.setVal(val);
+	    						}
+							} catch (Throwable e) {
+								throw e;
 							}
-    					}
-    				}else{
-    					entPropVal.setVal(val);    					
-    				}
-    			}					
-    		}	    				
-		} catch (Exception e) {
+	    				}
+	    			}					
+	    		}	
+    		}
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
     }

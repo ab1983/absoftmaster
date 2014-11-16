@@ -239,7 +239,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			long startTime1 = Calendar.getInstance().getTimeInMillis();
 			super.indexBeanNoList(nro);
 			long endTime1 = Calendar.getInstance().getTimeInMillis();
-			doList();
+			if(requirement.getInterfaceType().startsWith("list")){
+				doList();			
+			}else{
+				doForm();
+			}
 			long endTime2 = Calendar.getInstance().getTimeInMillis();
 			System.out.println("Time1 Bean " + this.subtitle + ": " + (endTime1 - startTime1));
 			System.out.println("Time2 Bean " + this.subtitle + ": " + (endTime2 - startTime1));
@@ -253,8 +257,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	@Override
 	public void indexBeanNewWin(Long nro) throws Throwable {
 		super.indexBeanNewWin(nro); // To change body of generated methods,
-									// choose Tools | Templates.
-		doList();
+		if(requirement.getInterfaceType().startsWith("list")){
+			doList();			
+		}else{
+			doForm();
+		}
 	}
 
 	@Override
@@ -282,6 +289,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			e.printStackTrace();
 		}
 		super.initBean();
+		bean = new DevEntityObject();
+		bean.setEntityClass(entity);		
 		long endTime2 = Calendar.getInstance().getTimeInMillis();
 		// System.out.println("Time initBean " + this.subtitle + ": " +
 		// (endTime2 - startTime1));
@@ -433,7 +442,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	public void doBeanList() {
 		beanList = findListByClass(entity);
 		bean = new DevEntityObject();
-		bean.setEntityClass(entity);
+		bean.setEntityClass(entity);	
 
 		// super.doBeanList(); //To change body of generated methods, choose
 		// Tools | Templates.
@@ -448,8 +457,6 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		updateContainerPage();
 		if (!container.equals("list")) {
 			doBeanListChild(node);
-			// String node =
-			// container.split("-")[container.split("-").length-1];
 		} else {
 			doBeanList();
 		}
@@ -461,7 +468,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 							// | Templates.
 	}
 
-	public void doForm() {
+	public void doForm() {	
 		doForm("form");
 	}
 
@@ -584,8 +591,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	public void doSave(boolean hasList) {
 		try {
 			if (bean != null) {
+				super.doBeanSaveAndList(true, true, hasList, bean);					
 				bean.setEntityClass(entity);
-				super.doBeanSave();					
 			}
 			if (hasList) {
 				doList();
@@ -655,10 +662,14 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			if (childValue != null && childValue.getEntityPropertyDescriptor() != null) {
 				//baseDao.entityObjectSyncList(className, siteIdList, objectList, objectListSmallRest, Class.forName(childEntity.getCanonicalClassName()));
 				childrenList = childValue.getPropertyChildrenList();
-				if(childrenList.isEmpty()){
+				if(childrenList == null){
 					baseDao.entityObjectSyncPopulate(bean);	
 					childValue = $(node.toLowerCase());
 					childrenList = childValue.getPropertyChildrenList();
+					if(childrenList == null){
+						childrenList = new ArrayList();						
+						childValue.setPropertyChildrenList(childrenList);
+					}
 				}
 				childEntity = childValue.getEntityPropertyDescriptor().getPropertyClass();
 				beanListMap.put(node.toLowerCase(), childrenList);
