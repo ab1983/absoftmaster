@@ -89,6 +89,7 @@ public class GerLoginBean implements Serializable {
     private boolean newUserForm;
     private Map<String, HashMap<String, Object>> fileDataBaseMap = new HashMap<String, HashMap<String, Object>>();
     private int sessionTimeout;
+    private Map<String,String> jndiMap = new HashMap<String, String>();
 
     public GerLoginBean() {
         user = new SecUser();
@@ -215,9 +216,17 @@ public class GerLoginBean implements Serializable {
 
     public FacesContext getFacesContext() {
         return FacesContext.getCurrentInstance();
-    }
+    }        
 
-    public void doSendQuestionsOrSuggestions() {
+    public Map<String, String> getJndiMap() {
+		return jndiMap;
+	}
+
+	public void setJndiMap(Map<String, String> jndiMap) {
+		this.jndiMap = jndiMap;
+	}
+
+	public void doSendQuestionsOrSuggestions() {
         try {
             List<String[]> destin = new ArrayList<String[]>();
             destin.add(new String[]{"agnaldo_luiz@msn.com", "Agnaldo luiz."});
@@ -586,6 +595,9 @@ public class GerLoginBean implements Serializable {
                     mm.addElement(me);
                     menuModelList.add(mm);
                 }
+            }
+            if(instantiatesSiteContract.getContract()!=null){
+            	baseDao.CreateEm();            
             }
         } catch (Throwable ex) {
             Logger.getLogger(GerMenuBean.class.getName()).log(Level.SEVERE, null, ex);

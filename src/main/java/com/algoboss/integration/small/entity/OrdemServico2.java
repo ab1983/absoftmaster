@@ -29,12 +29,12 @@ import javax.persistence.Temporal;
 })
 @Entity
 @Table(name = "OS")
-public class OrdemServico implements Serializable {
+public class OrdemServico2 implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @SequenceGenerator(name = "OrdemServico", sequenceName = "G_OS", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "OrdemServico")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "OrdemServico")
     @Column(name = "registro")
     private Long registro;
     @Temporal(javax.persistence.TemporalType.DATE)
@@ -77,7 +77,7 @@ public class OrdemServico implements Serializable {
     private String identifi4;     
     @Column(name = "garantia")
     @Temporal(javax.persistence.TemporalType.DATE)
-    private Date garantia = new Date();     
+    private Date garantia;     
     @Column(name = "observacao")
     private String observacao;
     @Column(name = "total_serv",precision=12,scale=4)
@@ -314,7 +314,7 @@ public class OrdemServico implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final OrdemServico other = (OrdemServico) obj;
+        final OrdemServico2 other = (OrdemServico2) obj;
         if (!Objects.equals(this.registro, other.registro)) {
             return false;
         }

@@ -81,6 +81,7 @@
     <class>com.algoboss.erp.entity.StkSupplyCategory</class>
     <class>com.algoboss.erp.entity.StkSupplyItem</class>
     <class>com.algoboss.erp.entity.StkUnitOfMeasure</class>
+    <class>com.algoboss.integration.small.entity.Itens002</class>    
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
 	    <property name="eclipselink.target-server" value="JBoss"/>
@@ -95,22 +96,25 @@
       <property name="eclipselink.ddl-generation" value="create-tables"/>
     </properties-->
   </persistence-unit>
-  <persistence-unit name="SMALLPU" transaction-type="JTA">
+  <persistence-unit name="SMALLPU1" transaction-type="JTA">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+  	<jta-data-source>small1</jta-data-source>
   	<!-- 
-    <jta-data-source>small_agua_boca</jta-data-source>
   	<jta-data-source>small</jta-data-source>
-  	 -->
+    <jta-data-source>small_agua_boca</jta-data-source>
   	<jta-data-source>small_vixdigital</jta-data-source>
+  	 -->
     <class>com.algoboss.integration.small.entity.Estoque</class>
     <class>com.algoboss.integration.small.entity.Itens001</class>
     <class>com.algoboss.integration.small.entity.Itens003</class>
-    <class>com.algoboss.integration.small.entity.OrdemServico</class>
+    <!--class>com.algoboss.integration.small.entity.OrdemServico2</class-->
     <class>com.algoboss.integration.small.entity.Vendedor</class>
     <class>com.algoboss.integration.small.entity.Venda</class>  
     <class>com.algoboss.integration.small.entity.Clifor</class>  
     <class>com.algoboss.integration.small.entity.Icm</class>
     <class>com.algoboss.integration.small.entity.Transpor</class>     
+    <class>com.algoboss.integration.small.entity.Os</class>
+    <class>com.algoboss.integration.small.entity.Compra</class>
    	<properties>
 	    <property name="eclipselink.target-server" value="JBoss"/>
 	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
@@ -125,4 +129,70 @@
         -->
     </properties>
   </persistence-unit>
+  <persistence-unit name="SMALLPU2" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+  	<jta-data-source>small2</jta-data-source>
+  	<!-- 
+  	<jta-data-source>small</jta-data-source>
+    <jta-data-source>small_agua_boca</jta-data-source>
+  	<jta-data-source>small_vixdigital</jta-data-source>
+  	 -->
+    <class>com.algoboss.integration.small.entity.Estoque</class>
+    <class>com.algoboss.integration.small.entity.Itens001</class>
+    <class>com.algoboss.integration.small.entity.Itens003</class>
+    <!--class>com.algoboss.integration.small.entity.OrdemServico2</class-->
+    <class>com.algoboss.integration.small.entity.Vendedor</class>
+    <class>com.algoboss.integration.small.entity.Venda</class>  
+    <class>com.algoboss.integration.small.entity.Clifor</class>  
+    <class>com.algoboss.integration.small.entity.Icm</class>
+    <class>com.algoboss.integration.small.entity.Transpor</class>     
+    <class>com.algoboss.integration.small.entity.Os</class>
+    <class>com.algoboss.integration.small.entity.Compra</class>
+   	<properties>
+	    <property name="eclipselink.target-server" value="JBoss"/>
+	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
+		<property name="eclipselink.weaving" value="static"/> 
+		<property name="eclipselink.logging.level.sql" value="FINE"/>
+		<property name="eclipselink.logging.parameters" value="true"/>	
+		<property name="eclipselink.jdbc.fetch-size" value="5000"/> 
+        <property name="eclipselink.jdbc.batch-writing" value="JDBC" />
+        <property name="eclipselink.jdbc.batch-writing.size" value="1000" />	
+        <!--  Optimization #9 - statement caching 
+        <property name="eclipselink.jdbc.cache-statements" value="true" />        		cc
+        -->
+    </properties>
+  </persistence-unit>
+  <persistence-unit name="SMALLPU3" transaction-type="JTA">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+  	<jta-data-source>small3</jta-data-source>
+  	<!-- 
+  	<jta-data-source>small</jta-data-source>
+    <jta-data-source>small_agua_boca</jta-data-source>
+  	<jta-data-source>small_vixdigital</jta-data-source>
+  	 -->
+    <class>com.algoboss.integration.small.entity.Estoque</class>
+    <class>com.algoboss.integration.small.entity.Itens001</class>
+    <class>com.algoboss.integration.small.entity.Itens003</class>
+    <!--class>com.algoboss.integration.small.entity.OrdemServico2</class-->
+    <class>com.algoboss.integration.small.entity.Vendedor</class>
+    <class>com.algoboss.integration.small.entity.Venda</class>  
+    <class>com.algoboss.integration.small.entity.Clifor</class>  
+    <class>com.algoboss.integration.small.entity.Icm</class>
+    <class>com.algoboss.integration.small.entity.Transpor</class>     
+    <class>com.algoboss.integration.small.entity.Os</class>
+    <class>com.algoboss.integration.small.entity.Compra</class>
+   	<properties>
+	    <property name="eclipselink.target-server" value="JBoss"/>
+	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
+		<property name="eclipselink.weaving" value="static"/> 
+		<property name="eclipselink.logging.level.sql" value="FINE"/>
+		<property name="eclipselink.logging.parameters" value="true"/>	
+		<property name="eclipselink.jdbc.fetch-size" value="5000"/> 
+        <property name="eclipselink.jdbc.batch-writing" value="JDBC" />
+        <property name="eclipselink.jdbc.batch-writing.size" value="1000" />	
+        <!--  Optimization #9 - statement caching 
+        <property name="eclipselink.jdbc.cache-statements" value="true" />        		
+        -->
+    </properties>
+  </persistence-unit>    
 </persistence>

@@ -39,7 +39,7 @@ public class DevEntityClass extends GenericEntity implements Serializable {
     @Column(name = "canonical_class_name")
     private String canonicalClassName;    
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    //@OrderBy
+    @OrderBy
     @JoinColumn(name = "entity_class_id")
     private List<DevEntityPropertyDescriptor> entityPropertyDescriptorList = new ArrayList<DevEntityPropertyDescriptor>();
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true)

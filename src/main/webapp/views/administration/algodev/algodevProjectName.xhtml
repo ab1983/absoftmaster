@@ -28,7 +28,7 @@
         </div>
     </p:panel>
     <p:dialog widgetVar="serviceDescriptionGenerateWv">
-    	<p:inputText value="#{admAlgodevBean.entity.canonicalClassName}" styleClass="no-upper"></p:inputText>
+    	<p:inputText value="#{admAlgodevBean.entitySelected.canonicalClassName}" styleClass="no-upper"></p:inputText>
     	<p:commandButton icon="ui-icon-circle-check" actionListener="#{admAlgodevBean.generateClassDescriptionByClassName()}"  update="@(.tabViewConfig)" oncomplete="updateEntity();"></p:commandButton>
     </p:dialog>   
     <style>

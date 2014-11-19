@@ -23,7 +23,7 @@ import com.algoboss.erp.entity.DevEntityPropertyDescriptor;
 import com.algoboss.erp.entity.DevEntityPropertyDescriptorConfig;
 import com.algoboss.erp.entity.DevPrototypeComponentChildren;
 import com.algoboss.erp.face.AdmAlgoappBean;
-import com.algoboss.integration.small.face.SmallUtil;
+import com.algoboss.integration.small.business.SmallUtil;
 
 /**
  *
@@ -48,7 +48,7 @@ public class AlgodevUtil {
 		for (int i = 0; i < charArray.length; i++) {
 			char c = charArray[i];
 			String cStr = "";
-			if (c == ';' || c == ',' || c == '.' || c == '\n' || c == '\t') {
+			if (c == ';' || c == ',' || c == '.' || c == '\n' || c == '\t' || c == '\r') {
 				if (!isString) {
 					continue;
 				}

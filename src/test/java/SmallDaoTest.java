@@ -5,7 +5,7 @@
 
 import com.algoboss.integration.small.dao.SmallDao;
 import com.algoboss.integration.small.dao.SmallDaoImpl;
-import com.algoboss.integration.small.entity.OrdemServico;
+import com.algoboss.integration.small.entity.OrdemServico2;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -30,7 +30,7 @@ public class SmallDaoTest {
     public void saveOs(){
         try {
             EntityManager em  = SmallDaoImpl.CreateEm();
-            OrdemServico os = new OrdemServico();
+            OrdemServico2 os = new OrdemServico2();
             os.setCliente("teste");
             SmallDaoImpl.saveImpl(em.getTransaction(),em, os);            
         } catch (Throwable ex) {

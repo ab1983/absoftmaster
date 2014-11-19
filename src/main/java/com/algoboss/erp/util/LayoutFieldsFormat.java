@@ -1,4 +1,4 @@
-package com.algoboss.integration.small.face;
+package com.algoboss.erp.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,31 +24,34 @@ public class LayoutFieldsFormat {
 	}
 	public DevRequirement populateContainerField(){
 		List<String> fieldNames = new ArrayList<String>();
+		if(requirement.getRequirementId()==null){
+			return requirement;
+		}
 		if(requirement.getRequirementId() == 232){//PRÉ-VENDAS
-			putTypeConfig(requirement.getEntityClass(),"cliente","objectList","1236_clifor;nome;nome;cgc");
+			putTypeConfig(requirement.getEntityClass(),"cliente","objectList","1236_clifor;nome;nome;cgc;comple");
 			putTypeConfig(requirement.getEntityClass(),"vendedor","objectList","1236_vendedor;nome;nome");
 			putTypeConfig(requirement.getEntityClass(),"operacao","objectList","1236_icm;nome;cfop,nome");
-			putTypeConfig(requirement.getEntityClass(),"transporta","objectList","1236_transpor;nome;placa,nome");
+			putTypeConfig(requirement.getEntityClass(),"placa","objectList","1236_transpor;placa;placa,nome");
 			fieldNames.clear();
 			fieldNames.add("numeronf");
 			fieldNames.add("vendedor");
 			fieldNames.add("operacao");
 			fieldNames.add("cliente");
-			fieldNames.add("tipopreco");
+			fieldNames.add("identificador1");
 			fieldNames.add("desconto");
 			fieldNames.add("emissao");
 			fieldNames.add("saidad");
 			fieldNames.add("saidah");
-			fieldNames.add("transporta");
+			fieldNames.add("placa");
 			fieldNames.add("total");
 			fieldNames.add("volumes");
 			fieldNames.add("produtos");
 			clear(requirement);
 			List<String> fieldNamesList = new ArrayList<String>(fieldNames);
-			fieldNamesList.remove("tipopreco");
+			fieldNamesList.remove("identificador1");
 			fieldNamesList.remove("desconto");
 			fieldNamesList.remove("operacao");
-			fieldNamesList.remove("transporta");
+			fieldNamesList.remove("placa");
 			fieldNamesList.remove("produtos");
 			fieldNamesList.remove("saidad");
 			fieldNamesList.remove("saidah");
@@ -74,7 +77,9 @@ public class LayoutFieldsFormat {
 			readOnly("form-form-1236_itens001", new String[]{"produtos.total"});
 			
 			label("numeronf", "Nº PRÉ-VENDA","form","list");
-			label("transporta", "TRANSPORTADORA","form","list");
+			label("identificador1", "TIPO PREÇO","form","list");
+			//label("transporta", "TRANSPORTADORA","form","list");
+			label("placa", "PLACA","form","list");
 			label("operacao", "OPERAÇÃO","form","list");
 			label("emissao","EMISSÃO","form","list");
 			label("saidad","DATA SAÍDA","form","list");
@@ -84,12 +89,12 @@ public class LayoutFieldsFormat {
 			label("produtos.codigo", "CÓDIGO/DESCRIÇÃO","form-form-1236_itens001");
 			label("produtos.unitario", "UNITÁRIO","form-form-1236_itens001","form-list-1236_itens001");
 			
-			eventField("form-form-1236_itens001", new String[]{"produtos.codigo"}, "eventBean('com.algoboss.integration.small.face.SmallUtil.precoProdutoGen');focusBean('.c_quantidade.c_input');", "onchange");
-			eventField("form-form-1236_itens001", new String[]{"produtos.quantidade","produtos.unitario"}, "eventBean('com.algoboss.integration.small.face.SmallUtil.produtoTotalCalc')", "onblur");
-			eventField("form", new String[]{"tipopreco"}, "eventBean('com.algoboss.integration.small.face.SmallUtil.produtoTotalCalc')", "onchange");
-			eventField("form", new String[]{"cliente"}, "eventBean('com.algoboss.integration.small.face.SmallUtil.descontoCliente')", "onchange");
-			eventField("form", new String[]{"transporta"}, "eventBean('com.algoboss.integration.small.face.SmallUtil.setTransportadoraPlaca')", "onchange");
-			propertyStyleClass("form","data-form" ,"onload","if($('.c_numeronf.c_input').val()===''){eventPage('com.algoboss.integration.small.face.SmallUtil.numeroNfGen');clearFormChanged();};eventPage('com.algoboss.integration.small.face.SmallUtil.produtoTotalCalc');");
+			eventField("form-form-1236_itens001", new String[]{"produtos.codigo"}, "eventBean('com.algoboss.integration.small.business.PreVendaBo.precoProdutoGen');focusBean('.c_quantidade.c_input');", "onchange");
+			eventField("form-form-1236_itens001", new String[]{"produtos.quantidade","produtos.unitario"}, "eventBean('com.algoboss.integration.small.business.PreVendaBo.produtoCalc')", "onblur");
+			eventField("form", new String[]{"identificador1"}, "eventBean('com.algoboss.integration.small.business.PreVendaBo.produtoTotalCalc')", "onchange");
+			eventField("form", new String[]{"cliente"}, "eventBean('com.algoboss.integration.small.business.PreVendaBo.descontoCliente')", "onchange");
+			eventField("form", new String[]{"placa"}, "eventBean('com.algoboss.integration.small.business.PreVendaBo.setTransportadoraPlaca')", "onchange");
+			propertyStyleClass("form","data-form" ,"onload","if($('.c_numeronf.c_input').val()===''){eventPage('com.algoboss.integration.small.business.PreVendaBo.numeroNfGen');clearFormChanged();};eventPage('com.algoboss.integration.small.business.PreVendaBo.produtoTotalCalc');");
 			propertyStyleClass("form","c_save_button" ,"value","Gravar Pré-Venda");
 			propertyStyleClass("form","c_save_and_back_button" ,"value","Finalizar Pré-Venda e Voltar");
 			propertyStyleClass("form-form-1236_itens001","c_save_button" ,"value","Confirmar Produto");
@@ -106,6 +111,56 @@ public class LayoutFieldsFormat {
 			
 			//returnReq.setFieldContainerList(fieldContainerList);
 			return reqCloned;
+		}if(requirement.getRequirementId() == 238){//ORDEM SERVIÇO
+			clear(requirement);
+			putTypeConfig(requirement.getEntityClass(),"identifi1","list","Interno,Externo");
+			putTypeConfig(requirement.getEntityClass(),"cliente","objectList","1236_clifor;nome;nome;cgc");
+			putTypeConfig(requirement.getEntityClass(),"tecnico","objectList","1236_vendedor[funcao|equals|TECNICO];nome;nome");
+			fieldNames.clear();
+			fieldNames.add("numero");
+			fieldNames.add("identifi1");
+			fieldNames.add("tecnico");
+			fieldNames.add("data");
+			fieldNames.add("hora");
+			fieldNames.add("situacao");
+			fieldNames.add("cliente");
+			fieldNames.add("problema");
+			fieldNames.add("totalos");
+			fieldNames.add("produtos");
+			List<String> fieldNamesList = new ArrayList<String>(fieldNames);
+			fieldNamesList.remove("identifi1");
+			fieldNamesList.remove("produtos");			
+			show("list", fieldNamesList.toArray(new String[]{}));	
+			show("form", fieldNames.toArray(new String[]{}));
+			readOnly("form", new String[]{"numero","totalos"});		
+			
+			label("numero", "NÚMERO OS","form","list");
+			label("identifi1", "ORIGEM","form","list");
+			label("tecnico", "ATENDENTE","form","list");
+			label("situacao", "SITUAÇÃO","form","list");
+			label("totalos", "TOTAL OS","form","list");
+			
+			style("list", "cliente", "width:200px;");
+			style("list", "hora", "width:50px;");
+			style("list", "data", "width:80px;");
+			style("list", "identifi1", "width:60px;");
+			style("list", "problema", "width:120px;");			
+			
+			propertyStyleClass("form","data-form" ,"onload","if($('.c_numero.c_input').val()===''){eventPage('com.algoboss.integration.small.business.OrdemServicoBo.numeroOsGen');};");			
+			
+			putTypeConfig(requirement.getEntityClass(),"produtos.codigo","objectList","1236_estoque;codigo;codigo;descricao");
+			//putTypeConfig(requirement.getEntityClass(),"produtos.total","value","#{(app.$('produtos.quantidade')).val*app.$('produtos.unitario').val)}");
+			fieldNames.clear();
+			//fieldNames.add("produtos.registro");
+			fieldNames.add("produtos.codigo");
+			//fieldNames.add("produtos.descricao");
+			fieldNames.add("produtos.quantidade");
+			fieldNames.add("produtos.unitario");
+			fieldNames.add("produtos.total");
+			//clear(requirement);
+			show("form-form-1236_itens001", fieldNames.toArray(new String[]{}));
+			show("form-list-1236_itens001", fieldNames.toArray(new String[]{}));			
+			
 		}else if(requirement.getRequirementName().equals("PRODUTOS")){
 			fieldNames.clear();
 			fieldNames.add("codigo");
@@ -127,8 +182,8 @@ public class LayoutFieldsFormat {
 			show("form", fieldNames.toArray(new String[]{}));
 			show("list", fieldNames.toArray(new String[]{}));	
 			*/
-			return requirement;
 		}
+		return requirement;
 		
 	}
 	private void style(String container, String fieldName, String style) {

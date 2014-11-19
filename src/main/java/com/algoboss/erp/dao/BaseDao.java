@@ -4,59 +4,86 @@
  */
 package com.algoboss.erp.dao;
 
-import com.algoboss.erp.entity.AdmContract;
-import com.algoboss.erp.entity.AdmInstantiatesSite;
-import com.algoboss.erp.entity.DevEntityClass;
-import com.algoboss.erp.entity.DevEntityObject;
-import com.algoboss.erp.entity.DevEntityPropertyDescriptor;
-import com.algoboss.erp.entity.DevEntityPropertyDescriptorConfig;
-import com.algoboss.erp.entity.DevEntityPropertyValue;
-import com.fasterxml.jackson.databind.introspect.Annotated;
-
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.text.SimpleDateFormat;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Resource;
-import javax.ejb.*;
-import javax.persistence.*;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
+import javax.inject.Inject;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Id;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.PersistenceProperty;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.transaction.*;
+import javax.sql.DataSource;
+import javax.transaction.Status;
+import javax.transaction.UserTransaction;
+
+import org.springframework.mock.jndi.SimpleNamingContext;
+import org.springframework.mock.jndi.SimpleNamingContextBuilder;
+
+import com.algoboss.erp.entity.AdmContract;
+import com.algoboss.erp.entity.AdmInstantiatesSite;
+import com.algoboss.erp.entity.DevEntityClass;
+import com.algoboss.erp.entity.DevEntityObject;
+import com.algoboss.erp.entity.DevEntityPropertyValue;
+import com.algoboss.erp.face.GerLoginBean;
+import com.algoboss.erp.face.GerMenuBean;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
  *
  * @author Agnaldo
  */
 @Stateless
-@TransactionManagement(TransactionManagementType.CONTAINER)
+//@TransactionManagement(TransactionManagementType.CONTAINER)
 public class BaseDao implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	@Resource(shareable = true)
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2470841392919888320L;
+	@Resource(/*shareable = true*/)
 	private UserTransaction userTransaction;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION, properties = { @PersistenceProperty(name = "javax.persistence.sharedCache.mode", value = "ENABLE_SELECTIVE") }, unitName = "ERPPU")
-	public EntityManager entityManager;
-	@PersistenceContext(type=PersistenceContextType.TRANSACTION, properties = { @PersistenceProperty(name = "javax.persistence.sharedCache.mode", value = "ENABLE_SELECTIVE") }, unitName = "SMALLPU")
-	public EntityManager entityManagerSmall;
-	public EntityTransaction transacao;
+	private EntityManager entityManager;
+	private EntityManager entityManagerSmall;
+	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU1")
+	private EntityManager entityManagerSmall_1;
+	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU2")
+	private EntityManager entityManagerSmall_2;
+	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU3")
+	private EntityManager entityManagerSmall_3;	
+	private EntityTransaction transacao;
 	private boolean manualTransaction = false;
+	@Inject private GerLoginBean loginBean;
+
+	
+	
+	public BaseDao() {
+		super();
+		//CreateEm();
+	}
 
 	public UserTransaction getUserTransaction() {
 		manualTransaction = true;
@@ -68,7 +95,20 @@ public class BaseDao implements Serializable {
 	}
 
 	public EntityManager getEntityManagerSmall() {
+		if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
+			entityManagerSmall = entityManagerSmall_1;
+		}else{
+			entityManagerSmall = entityManagerSmall_3;			
+		}		
 		return entityManagerSmall;
+	}
+
+	public GerLoginBean getLoginBean() {
+		return loginBean;
+	}
+
+	public void setLoginBean(GerLoginBean loginBean) {
+		this.loginBean = loginBean;
 	}
 
 	private void beginTransaction() {
@@ -200,16 +240,16 @@ public class BaseDao implements Serializable {
 			// userTransaction.begin();
 			if (obj instanceof DevEntityObject) {
 				Object objRepl = entityObjectSyncImpl(false, (DevEntityObject) obj);
-				Object id = entityManagerSmall.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(objRepl);
+				Object id = getEntityManagerSmall().getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(objRepl);
 				if (id != null) {
 					if (clearCache) {
-						entityManagerSmall.getEntityManagerFactory().getCache().evict(objRepl.getClass(), id);
+						getEntityManagerSmall().getEntityManagerFactory().getCache().evict(objRepl.getClass(), id);
 					}
-					objRepl = entityManagerSmall.find(objRepl.getClass(), id);
+					objRepl = getEntityManagerSmall().find(objRepl.getClass(), id);
 				} else {
-					objRepl = entityManagerSmall.merge(objRepl);
-					entityManagerSmall.flush();
-					entityManagerSmall.refresh(objRepl);
+					objRepl = getEntityManagerSmall().merge(objRepl);
+					getEntityManagerSmall().flush();
+					getEntityManagerSmall().refresh(objRepl);
 				}
 				entityObjectImportSyncConverter(objRepl, (DevEntityObject) obj, true);
 			}
@@ -702,9 +742,9 @@ public class BaseDao implements Serializable {
 				// entityManager.persist(obj);
 				if (obj.getEntityClass().getCanonicalClassName() != null) {
 					Object objRepl = entityObjectSyncImpl(false, obj);
-					entityManagerSmall.persist(objRepl);
-					entityManagerSmall.flush();
-					entityManagerSmall.refresh(objRepl);
+					getEntityManagerSmall().persist(objRepl);
+					getEntityManagerSmall().flush();
+					getEntityManagerSmall().refresh(objRepl);
 				}
 				// entityManager.flush();
 				// entityManager.refresh(obj);
@@ -719,9 +759,9 @@ public class BaseDao implements Serializable {
 				if (obj.getEntityClass().getCanonicalClassName() != null) {
 					CreateEm();
 					Object objRepl = entityObjectSyncImpl(false, obj);
-					objRepl = entityManagerSmall.merge(objRepl);
-					entityManagerSmall.flush();
-					entityManagerSmall.refresh(objRepl);
+					objRepl = getEntityManagerSmall().merge(objRepl);
+					getEntityManagerSmall().flush();
+					getEntityManagerSmall().refresh(objRepl);
 				}
 
 				// userTransaction.commit();
@@ -755,7 +795,7 @@ public class BaseDao implements Serializable {
 			// obj = entityManager.merge(obj);
 			// entityManager.remove(obj);
 			if (obj.getEntityClass().getCanonicalClassName() != null) {
-				entityManagerSmall.remove(entityObjectSync(obj));
+				getEntityManagerSmall().remove(entityObjectSync(obj));
 			}
 			// userTransaction.commit();
 		} catch (Exception e) {
@@ -802,7 +842,7 @@ public class BaseDao implements Serializable {
 					for (int i = 0; i < fields.length; i++) {
 						Field field = fields[i];
 						if (field.isAnnotationPresent(Id.class)) {
-							if (!cols.contains(field.getName())) {
+							if (!cols.contains(field.getName().toLowerCase())) {
 								cols.add(field.getName());
 								orderBy = "order by t.".concat(field.getName()).concat(" desc");
 							}
@@ -813,6 +853,13 @@ public class BaseDao implements Serializable {
 						if (i > 0) {
 							sql.append(",");
 						}
+						for (int j = 0; j< fields.length; j++) {
+							Field field = fields[j];
+							if(field.getName().equalsIgnoreCase(col)){
+								col = field.getName();
+								break;
+							}
+						}						
 						sql.append("t.");
 						sql.append(col);
 					}
@@ -822,7 +869,7 @@ public class BaseDao implements Serializable {
 				sql.append(" t ");
 				sql.append(orderBy);
 
-				TypedQuery<Object> query = entityManagerSmall.createQuery(sql.toString(), clazz);
+				TypedQuery<Object> query = getEntityManagerSmall().createQuery(sql.toString(), clazz);
 				Date iniQuerySmall1 = new Date();
 				objectListSmall = query.getResultList();
 				if (!cols.isEmpty()) {
@@ -845,9 +892,9 @@ public class BaseDao implements Serializable {
 				}
 				// System.err.println("Time QuerySmall 1 "+className.getName()+": "+(new
 				// Date().getTime()-iniQuerySmall1.getTime()));
-				CriteriaBuilder criteriaBuilderSmall = entityManagerSmall.getCriteriaBuilder();
+				CriteriaBuilder criteriaBuilderSmall = getEntityManagerSmall().getCriteriaBuilder();
 				if (refresh) {
-					entityManagerSmall.getEntityManagerFactory().getCache().evict(clazz);
+					getEntityManagerSmall().getEntityManagerFactory().getCache().evict(clazz);
 				}
 				CriteriaQuery criteriaQuerySmall = criteriaBuilderSmall.createQuery(clazzType);
 				Root fromSmall = criteriaQuerySmall.from(clazz);
@@ -858,7 +905,7 @@ public class BaseDao implements Serializable {
 				selectSmall.orderBy(criteriaBuilderSmall.desc(fromSmall.get("registro")));
 				// Predicate where1Small =
 				// criteriaBuilderSmall.equal(path2Small, className.getName());
-				TypedQuery<DevEntityObject> typedQuerySmall = entityManagerSmall.createQuery(selectSmall);
+				TypedQuery<DevEntityObject> typedQuerySmall = getEntityManagerSmall().createQuery(selectSmall);
 				if (refresh) {
 					typedQuerySmall.setHint("javax.persistence.cache.storeMode", "REFRESH");
 				}
@@ -973,9 +1020,9 @@ public class BaseDao implements Serializable {
 
 				}
 				if (refresh && objRepl != null) {
-					entityManagerSmall.flush();
-					objRepl = entityManagerSmall.merge(objRepl);
-					entityManagerSmall.refresh(objRepl);
+					getEntityManagerSmall().flush();
+					objRepl = getEntityManagerSmall().merge(objRepl);
+					getEntityManagerSmall().refresh(objRepl);
 				}
 			}
 
@@ -1082,8 +1129,10 @@ public class BaseDao implements Serializable {
 			e.printStackTrace();
 		}
 	}
-
 	public void CreateEm() {
+
+	}
+	public void CreateEm2() {
 		try {
 			// entityManagerSmall.setProperty("javax.persistence.jdbc.driver",
 			// "org.firebirdsql.jdbc.FBDriver");
@@ -1101,6 +1150,88 @@ public class BaseDao implements Serializable {
 			// "?roleName=myrole");
 			// EntityManager entityManager = emf.createEntityManager();
 			// return entityManager;
+			if(!loginBean.getJndiMap().containsKey(loginBean.getInstantiatesSiteContract().getContract().getContractId().toString())){
+				SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
+				//SimpleNamingContext dd = new SimpleNamingContext();
+				//dd.unbind("java:comp/env/jdbc/small");//getEnvironment().containsKey("java:comp/env/jdbc/small");
+	            // Create initial context				
+				ComboPooledDataSource ds = new ComboPooledDataSource();
+				ds.setDriverClass("org.firebirdsql.jdbc.FBDriver"); // etc. for uid, password, url
+				if(loginBean.getInstantiatesSiteContract().getContract().getContractId().equals("1733")){
+					ds.setJdbcUrl("jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB?encoding=NONE");					
+				}else{
+					ds.setJdbcUrl("jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALLAgua na Boca_old.GDB?encoding=NONE");	
+				}
+				ds.setUser("SYSDBA");
+				ds.setPassword("masterkey");			
+				builder.bind( "java:comp/env/jdbc/small" , ds );
+				loginBean.getJndiMap().put(loginBean.getInstantiatesSiteContract().getContract().getContractId().toString(), ds.getJdbcUrl());
+				//builder.getCurrentContextBuilder();
+				try {
+					builder.activate();							
+				} catch (java.lang.IllegalStateException e) {
+					Logger.getLogger(BaseDao.class.getName()).log(Level.SEVERE, null, e.getMessage());
+				}
+			}
+		} catch (Throwable e) {
+			e.printStackTrace();
+			// return null;
+		}
+	}
+
+	public void CreateEm3() {
+		try {
+			// entityManagerSmall.setProperty("javax.persistence.jdbc.driver",
+			// "org.firebirdsql.jdbc.FBDriver");
+			// entityManagerSmall.setProperty("javax.persistence.jdbc.url",
+			// "jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB)");
+			// entityManagerSmall.setProperty("javax.persistence.jdbc.url",
+			// "jdbc:firebirdsql:algoboss.zapto.org/3050:D:\\Documents\\@PESSOAL\\ERP\\integração small\\SMALL.GDB");
+			// entityManagerSmall.setProperty("javax.persistence.jdbc.user",
+			// "SYSDBA");
+			// entityManagerSmall.setProperty("javax.persistence.jdbc.password","masterkey");
+			// EntityManagerFactory emf =
+			// javax.persistence.Persistence.createEntityManagerFactory("SMALLPU",properties);
+			// properties.put("javax.persistence.jdbc.url",
+			// "jdbc:firebirdsql://localhost:3050/" + DBpath +
+			// "?roleName=myrole");
+			// EntityManager entityManager = emf.createEntityManager();
+			// return entityManager;
+			if(!loginBean.getJndiMap().containsKey(loginBean.getInstantiatesSiteContract().getContract().getContractId().toString())){
+				//SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
+				//SimpleNamingContext dd = new SimpleNamingContext();
+				//dd.unbind("java:comp/env/jdbc/small");//getEnvironment().containsKey("java:comp/env/jdbc/small");
+	            // Create initial context
+	            //System.setProperty(Context.INITIAL_CONTEXT_FACTORY,"org.apache.naming.java.javaURLContextFactory");
+	            //System.setProperty(Context.URL_PKG_PREFIXES,"org.apache.naming");  				
+			      InitialContext ic = new InitialContext();
+			      //try {
+			    	  //ic.createSubcontext("java:");
+			    	  //ic.createSubcontext("java:/comp");
+			    	  //ic.createSubcontext("java:/comp/env");
+			    	  //ic.createSubcontext("java:/comp/env/jdbc");
+				//} catch (javax.naming.NamingException e) {
+					// TODO: handle exception
+				//}
+			    //DataSource ds=  (DataSource)ic.lookupLink("java:/small");				
+				ComboPooledDataSource ds = new ComboPooledDataSource("java:/small");
+				ds.setDriverClass("org.firebirdsql.jdbc.FBDriver"); // etc. for uid, password, url
+				if(loginBean.getInstantiatesSiteContract().getContract().getContractId().equals("1733")){
+					ds.setJdbcUrl("jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB?encoding=NONE");					
+				}else{
+					ds.setJdbcUrl("jdbc:firebirdsql:127.0.0.1/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALLAgua na Boca_old.GDB?encoding=NONE");	
+				}
+				ds.setUser("SYSDBA");
+				ds.setPassword("masterkey");			
+				ic.rebind( "java:/small" , ds );
+				//loginBean.getJndiMap().put(loginBean.getInstantiatesSiteContract().getContract().getContractId().toString(), ds.getJdbcUrl());
+				//builder.getCurrentContextBuilder();
+				try {
+					//builder.activate();							
+				} catch (java.lang.IllegalStateException e) {
+					Logger.getLogger(BaseDao.class.getName()).log(Level.SEVERE, null, e.getMessage());
+				}
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			// return null;
@@ -1109,7 +1240,7 @@ public class BaseDao implements Serializable {
 	
 	public void clearEntityManager(){
 		entityManager.getEntityManagerFactory().getCache().evictAll();
-		entityManagerSmall.getEntityManagerFactory().getCache().evictAll();
+		getEntityManagerSmall().getEntityManagerFactory().getCache().evictAll();
 	}
 
 }

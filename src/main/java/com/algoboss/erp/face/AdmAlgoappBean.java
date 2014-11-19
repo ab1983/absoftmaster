@@ -19,11 +19,11 @@ import static com.algoboss.erp.face.GenericBean.sendEmail;
 
 import com.algoboss.erp.util.AlgodevUtil;
 import com.algoboss.erp.util.ComponentFactory;
+import com.algoboss.erp.util.LayoutFieldsFormat;
 import com.algoboss.erp.util.report.PDFExporter;
 import com.algoboss.erp.util.report.PDFExporter2;
 import com.algoboss.erp.validations.LoginValidator;
-import com.algoboss.integration.small.face.LayoutFieldsFormat;
-import com.algoboss.integration.small.face.SmallUtil;
+import com.algoboss.integration.small.business.SmallUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -612,10 +612,31 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		String[] keys = keysStr.split(";");
 		String[] vals = valsStr.split(";");
 		Map<Object, Object> map = new HashMap<Object, Object>();
+		String field1 = "";
+		String criteria = "";
+		String field2 = "";
+		String[] classArray = className.split("\\]|\\[|\\|");
+		if(classArray.length>1){
+			className = classArray[0];
+			field1 = classArray[1];
+			criteria = classArray[2];
+			field2 = classArray[3];
+		}
 		List<DevEntityObject> list = doBeanList(className);
 		try {
 			if (list != null) {
 				for (DevEntityObject devEntityObject : list) {
+					String field1Value = Objects.toString($(className + "." + field1, devEntityObject).getVal(),"");
+					if(criteria.equals("contains")){
+						if(!field1Value.contains(field2)){
+							continue;
+						}
+					}
+					if(criteria.equals("equals")){
+						if(!field1Value.equals(field2)){
+							continue;
+						}
+					}					
 					Object keyMap = devEntityObject;
 					Object valMap = devEntityObject;
 					String valStr = "";

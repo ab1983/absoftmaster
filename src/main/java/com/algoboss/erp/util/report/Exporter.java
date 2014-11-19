@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.el.MethodExpression;
+import javax.el.PropertyNotFoundException;
 import javax.el.ValueExpression;
 import javax.faces.component.EditableValueHolder;
 import javax.faces.component.UIColumn;
@@ -34,119 +35,122 @@ import org.primefaces.component.datatable.DataTable;
 
 public abstract class Exporter {
 
-    protected enum ColumnType {
+	protected enum ColumnType {
 
-        HEADER("header"),
-        FOOTER("footer");
-        private final String facet;
+		HEADER("header"), FOOTER("footer");
+		private final String facet;
 
-        ColumnType(String facet) {
-            this.facet = facet;
-        }
+		ColumnType(String facet) {
+			this.facet = facet;
+		}
 
-        public String facet() {
-            return facet;
-        }
+		public String facet() {
+			return facet;
+		}
 
-        @Override
-        public String toString() {
-            return facet;
-        }
-    };
+		@Override
+		public String toString() {
+			return facet;
+		}
+	};
 
-    public abstract void export(FacesContext facesContext, DataTable table,
-            String outputFileName, boolean pageOnly, boolean selectionOnly,
-            String encodingType, MethodExpression preProcessor,
-            MethodExpression postProcessor) throws IOException;
+	public abstract void export(FacesContext facesContext, DataTable table, String outputFileName, boolean pageOnly, boolean selectionOnly, String encodingType, MethodExpression preProcessor, MethodExpression postProcessor) throws IOException;
 
-    protected List<UIColumn> getColumnsToExport(UIData table) {
-        List<UIColumn> columns = new ArrayList<UIColumn>();
-        int columnIndex = -1;
+	protected List<UIColumn> getColumnsToExport(UIData table) {
+		List<UIColumn> columns = new ArrayList<UIColumn>();
+		int columnIndex = -1;
 
-        for (UIComponent child : table.getChildren()) {
-            if (child instanceof UIColumn) {
-                UIColumn column = (UIColumn) child;
-                columnIndex++;
+		for (UIComponent child : table.getChildren()) {
+			if (child instanceof UIColumn) {
+				UIColumn column = (UIColumn) child;
+				columnIndex++;
 
-                columns.add(column);
-            }
-        }
+				columns.add(column);
+			}
+		}
 
-        return columns;
-    }
+		return columns;
+	}
 
-    protected boolean hasColumnFooter(List<UIColumn> columns) {
-        for (UIColumn column : columns) {
-            if (column.getFooter() != null) {
-                return true;
-            }
-        }
+	protected boolean hasColumnFooter(List<UIColumn> columns) {
+		for (UIColumn column : columns) {
+			if (column.getFooter() != null) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    protected String exportValue(FacesContext context, UIComponent component) {
+	protected String exportValue(FacesContext context, UIComponent component) {
 
-        if (component instanceof HtmlCommandLink) {  //support for PrimeFaces and standard HtmlCommandLink
-            HtmlCommandLink link = (HtmlCommandLink) component;
-            Object value = link.getValue();
+		if (component instanceof HtmlCommandLink) { // support for PrimeFaces
+													// and standard
+													// HtmlCommandLink
+			HtmlCommandLink link = (HtmlCommandLink) component;
+			Object value = link.getValue();
 
-            if (value != null) {
-                return String.valueOf(value);
-            } else {
-                //export first value holder
-                for (UIComponent child : link.getChildren()) {
-                    if (child instanceof ValueHolder) {
-                        return exportValue(context, child);
-                    }
-                }
+			if (value != null) {
+				return String.valueOf(value);
+			} else {
+				// export first value holder
+				for (UIComponent child : link.getChildren()) {
+					if (child instanceof ValueHolder) {
+						return exportValue(context, child);
+					}
+				}
 
-                return "";
-            }
-        } else if (component instanceof ValueHolder) {
+				return "";
+			}
+		} else if (component instanceof ValueHolder) {
 
-            if (component instanceof EditableValueHolder) {
-                Object submittedValue = ((EditableValueHolder) component).getSubmittedValue();
-                if (submittedValue != null) {
-                    return submittedValue.toString();
-                }
-            }
+			if (component instanceof EditableValueHolder) {
+				Object submittedValue = ((EditableValueHolder) component).getSubmittedValue();
+				if (submittedValue != null) {
+					return submittedValue.toString();
+				}
+			}
 
-            ValueHolder valueHolder = (ValueHolder) component;
-            Object value = valueHolder.getValue();
-            if (value == null) {
-                return "";
-            }
+			ValueHolder valueHolder = (ValueHolder) component;
+			Object value = valueHolder.getValue();
+			if (value == null) {
+				return "";
+			}
 
-            //first ask the converter
-            if (valueHolder.getConverter() != null) {
-                return valueHolder.getConverter().getAsString(context, component, value);
-            } //Try to guess
-            else {
-                ValueExpression expr = component.getValueExpression("value");
-                if (expr != null) {
-                    Class<?> valueType = expr.getType(context.getELContext());
-                    if (valueType != null) {
-                        Converter converterForType = context.getApplication().createConverter(valueType);
+			// first ask the converter
+			if (valueHolder.getConverter() != null) {
+				return valueHolder.getConverter().getAsString(context, component, value);
+			} // Try to guess
+			else {
+				ValueExpression expr = component.getValueExpression("value");
+				if (expr != null) {
+					try {
+						Class<?> valueType = expr.getType(context.getELContext());
+						if (valueType != null) {
+							Converter converterForType = context.getApplication().createConverter(valueType);
 
-                        if (converterForType != null) {
-                            return converterForType.getAsString(context, component, value);
-                        }
-                    }
-                }
-            }
+							if (converterForType != null) {
+								return converterForType.getAsString(context, component, value);
+							}
+						}
+					} catch (PropertyNotFoundException e) {
+						// TODO: handle exception
+					}
+				}
+			}
 
-            //No converter found just return the value as string
-            return value.toString();
-        } else {
-            //This would get the plain texts on UIInstructions when using Facelets
-            String value = component.toString();
+			// No converter found just return the value as string
+			return value.toString();
+		} else {
+			// This would get the plain texts on UIInstructions when using
+			// Facelets
+			String value = component.toString();
 
-            if (value != null) {
-                return value.trim();
-            } else {
-                return "";
-            }
-        }
-    }
+			if (value != null) {
+				return value.trim();
+			} else {
+				return "";
+			}
+		}
+	}
 }

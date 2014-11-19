@@ -529,7 +529,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
     public void updateEntityObject() {
         try {
             //setEntity(entitySelected);
-            entityObjectList = baseDao.findEntityObjectByClass(entity, getSiteIdList(), startDate, endDate, true);
+            entityObjectList = baseDao.findEntityObjectByClass(entity,new ArrayList<String>(), getSiteIdList(), startDate, endDate, true);
             updateReport();
             generateXml();            	
         } catch (Throwable ex) {
@@ -1528,7 +1528,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             cEnd.add(Calendar.MONTH, +3);
             
             try {
-            entityObjectList = baseDao.findEntityObjectByClass(entity, getSiteIdList(), cIni.getTime(), cEnd.getTime(), true);
+            entityObjectList = baseDao.findEntityObjectByClass(entity, new ArrayList<String>(),getSiteIdList(), cIni.getTime(), cEnd.getTime(), true);
             updateReport();
             //super.doBeanList();
             //Class.forName("org.firebirdsql.jdbc.FBDriver");

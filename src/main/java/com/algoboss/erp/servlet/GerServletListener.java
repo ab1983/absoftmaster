@@ -78,7 +78,7 @@ public class GerServletListener extends ManualCDILookup implements ServletContex
         		 ref.add(new StringRefAddr("user", "SYSDBA"));
         		 ref.add(new StringRefAddr("password", "masterkey"));
         				 Context ctx = new InitialContext();
-							ctx.bind("jdbc/smalldyn", ref);
+							//ctx.bind("jdbc/smalldyn", ref);
 					} catch (NamingException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

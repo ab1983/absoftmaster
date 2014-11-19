@@ -1,4 +1,4 @@
-package com.algoboss.integration.small.face;
+package com.algoboss.integration.small.business;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,15 +27,20 @@ public class SmallUtil {
 
 		// totalCalc(obj);
 	}
-
+	public static void produtoCalc(AdmAlgoappBean app) {
+		produtoTotalCalcImpl(app,false);
+	}
 	public static void produtoTotalCalc(AdmAlgoappBean app) {
+		produtoTotalCalcImpl(app,false);
+	}
+	public static void produtoTotalCalcImpl(AdmAlgoappBean app,boolean precoRecalc) {
 		try {
 			DevEntityObject obj = app.getBean();
 			if (obj != null && obj.getEntityClass().getName().equals("1236_venda")) {
 				// volumesCalc(obj);
 				DevEntityObject objChild = app.getChildBean();
 				if(objChild!=null && !objChild.getEntityPropertyValueList().isEmpty()){
-					if(!putProdutoTotal(objChild)){
+					if(!putProdutoTotal(app, objChild)){
 						return;
 					}
 				}else{
@@ -49,8 +54,10 @@ public class SmallUtil {
 				Double total = 0d;
 				Double pesoLiquido = 0d;	
 				for (DevEntityObject devEntityObject : objChildList) {
-					precoProdutoGenImpl(app,devEntityObject,false);
-					putProdutoTotal(devEntityObject);
+					if(precoRecalc){
+						precoProdutoGenImpl(app,devEntityObject,false);						
+					}
+					putProdutoTotal(app,devEntityObject);
 					volumes++;
 					Object totalObj = devEntityObject.getPropObj("produtos.total").getPropertyValue();
 					if (totalObj != null) {
@@ -63,28 +70,31 @@ public class SmallUtil {
 				}
 				obj.getPropObj("volumes").setPropertyValue(volumes);
 				obj.getPropObj("total").setPropertyValue(BigDecimal.valueOf(total).setScale(2, RoundingMode.HALF_UP).doubleValue());
+				obj.getPropObj("pesoliqui").setPropertyValue(BigDecimal.valueOf(pesoLiquido).setScale(2, RoundingMode.HALF_UP).doubleValue());
 				//obj.getPropObj("desconto").setPropertyValue(BigDecimal.valueOf(valorDesconto).setScale(2, RoundingMode.HALF_UP).doubleValue());
-				//obj.getPropObj("pesoliqui").setPropertyValue(BigDecimal.valueOf(pesoLiquido).setScale(2, RoundingMode.HALF_UP).doubleValue());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private static boolean putProdutoTotal(DevEntityObject objChild) {
+	private static boolean putProdutoTotal(AdmAlgoappBean app, DevEntityObject objChild) {
 		//DevEntityObject obj = app.getBean();
 		Double quantidade = (Double) objChild.getProp("produtos.quantidade");
 		Double unitario = (Double) objChild.getProp("produtos.unitario");
 		if (quantidade == null || unitario == null) {
 			return false;
 		}		
-		//Object codigo = objChild.getProp("produtos.codigo");
-		//DevEntityObject produto = SmallUtil.getProduto(codigo, app);
-		//Double peso = (Double) produto.getProp("peso");
+		Object codigo = objChild.getProp("produtos.codigo");
+		DevEntityObject produto = SmallUtil.getProduto(codigo, app);
+		Double peso = (Double) produto.getProp("peso");
+		if(peso==null){
+			peso = 0d;
+		}
 		Double totalProduto = BigDecimal.valueOf(quantidade * unitario).setScale(2, RoundingMode.HALF_UP).doubleValue();
-		//Double pesoProduto = BigDecimal.valueOf(quantidade * peso).setScale(2, RoundingMode.HALF_UP).doubleValue();
+		Double pesoProduto = BigDecimal.valueOf(quantidade * peso).setScale(2, RoundingMode.HALF_UP).doubleValue();
 		objChild.getPropObj("produtos.total").setPropertyValue(totalProduto);	
-		//objChild.getPropObj("produtos.peso").setPropertyValue(pesoProduto);
+		objChild.getPropObj("produtos.peso").setPropertyValue(pesoProduto);
 		return true;
 	}
 
@@ -109,14 +119,14 @@ public class SmallUtil {
 			DevEntityObject obj = app.getBean();
 			if (obj != null && obj.getEntityClass().getName().equals("1236_venda")) {
 				//DevEntityObject objChild = app.getChildBean();
-				Object transportadora = obj.getProp("transporta");
-				if (!Objects.toString(transportadora, "").isEmpty()) {
+				Object placa = obj.getProp("placa");
+				if (!Objects.toString(placa, "").isEmpty()) {
 					List<DevEntityObject> transportadoras = app.doBeanList("1236_transpor");
 					for (DevEntityObject devEntityObject : transportadoras) {
 						Object nomeTransportadora = devEntityObject.getProp("nome");
-						Object placa = devEntityObject.getProp("placa");
-						if (nomeTransportadora!=null && nomeTransportadora.equals(transportadora)) {
-							obj.getPropObj("placa").setVal(placa);
+						Object placaTmp = devEntityObject.getProp("placa");
+						if (placaTmp!=null && placaTmp.equals(placa)) {
+							obj.getPropObj("transporta").setVal(nomeTransportadora);
 							break;
 						}
 					}
@@ -145,18 +155,52 @@ public class SmallUtil {
 					obj.getPropObj("marca").setPropertyValue("Volumes");
 					obj.getPropObj("frete12").setPropertyValue("0");
 					
-					obj.getPropObj("tipopreco").setPropertyValue("PREÇO1");
+					obj.getPropObj("identificador1").setPropertyValue("PREÇO1");
 					Date now = new Date();
 					obj.getPropObj("emissao").setPropertyValue(now);
 					obj.getPropObj("saidad").setPropertyValue(now);
 					obj.getPropObj("saidah").setPropertyValue(new SimpleDateFormat("HH:mm:ss").format(now));
+					obj.getPropObj("volumes").setPropertyValue(0d);
+					obj.getPropObj("total").setPropertyValue(0d);
+					obj.getPropObj("pesoliqui").setPropertyValue(0d);						
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
+	public static void numeroOsGen(AdmAlgoappBean app) {
+		try {
+			DevEntityObject obj = app.getBean();
+			if (obj != null && obj.getEntityClass().getName().equals("1236_ordemservico")) {
+				Object numero = obj.getPropObj("numero").getPropertyValue();
+				if (Objects.toString(numero, "").isEmpty()) {
+					
+					Object nextnumeroos = null;
+					try {
+						nextnumeroos = app.getBaseDao().getEntityManagerSmall().createNativeQuery("SELECT GEN_ID(G_NUMEROOS, 0 ) FROM RDB$DATABASE where not exists(select NUMERO from OS WHERE NUMERO LIKE '%'||(GEN_ID(G_NUMEROOS, 0 )));").getSingleResult();
+					} catch (NoResultException e) {
+						nextnumeroos = app.getBaseDao().getEntityManagerSmall().createNativeQuery("SELECT NEXT VALUE FOR G_NUMEROOS FROM RDB$DATABASE;").getSingleResult().toString();
+					}
+					obj.getPropObj("numero").setPropertyValue(String.format ("%010d", Integer.valueOf(nextnumeroos.toString())));
+					//obj.getPropObj("especie").setPropertyValue("Caixa");
+					//obj.getPropObj("marca").setPropertyValue("Volumes");
+					//obj.getPropObj("frete12").setPropertyValue("0");
+					
+					//obj.getPropObj("tipopreco").setPropertyValue("PREÇO1");
+					Date now = new Date();
+					obj.getPropObj("data").setPropertyValue(now);
+					obj.getPropObj("hora").setPropertyValue(new SimpleDateFormat("HH:mm").format(now));
+					obj.getPropObj("datapro").setPropertyValue(now);
+					obj.getPropObj("horapro").setPropertyValue(new SimpleDateFormat("HH:mm").format(now));
+					obj.getPropObj("situacao").setPropertyValue("AGENDADA");
+					obj.getPropObj("identifi1").setPropertyValue("Interno");				
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public static void precoProdutoGen(AdmAlgoappBean app) {
 		precoProdutoGenImpl(app,app.getChildBean(), true);
 	}
@@ -169,7 +213,7 @@ public class SmallUtil {
 				Object codigo = objChild.getProp("produtos.codigo");
 				if (!Objects.toString(codigo, "").isEmpty()) {
 					DevEntityObject devEntityObject = SmallUtil.getProduto(codigo, app);
-					Object tipoPreco = obj.getPropObj("tipopreco").getVal();
+					Object tipoPreco = obj.getPropObj("identificador1").getVal();
 					
 					Double preco;
 					if (tipoPreco == null || tipoPreco.equals("PREÇO1")) {
@@ -198,26 +242,30 @@ public class SmallUtil {
 		}
 	}
 	
-	private static DevEntityObject getProduto(Object codigo,AdmAlgoappBean app){
+	public static DevEntityObject getProduto(Object codigo,AdmAlgoappBean app){
 		DevEntityObject devEntityObjectReturn = null;
-		List<DevEntityObject> produtos = app.doBeanList("1236_estoque");
-		for (DevEntityObject devEntityObject : produtos) {
-			if (devEntityObject.getProp("codigo").equals(codigo)) {
-				devEntityObjectReturn = devEntityObject;
-				break;
-			}
-		}	
+		if(codigo!=null){
+			List<DevEntityObject> produtos = app.doBeanList("1236_estoque");
+			for (DevEntityObject devEntityObject : produtos) {
+				if (codigo.equals(devEntityObject.getProp("codigo"))) {
+					devEntityObjectReturn = devEntityObject;
+					break;
+				}
+			}	
+		}
 		return devEntityObjectReturn;
 	}
-	private static DevEntityObject getCliente(Object codigo,AdmAlgoappBean app){
+	public static DevEntityObject getCliente(Object codigo,AdmAlgoappBean app){
 		DevEntityObject devEntityObjectReturn = null;
-		List<DevEntityObject> clientes = app.doBeanList("1236_clifor");
-		for (DevEntityObject devEntityObject : clientes) {
-			if (devEntityObject.getProp("nome").equals(codigo)) {
-				devEntityObjectReturn = devEntityObject;
-				break;
+		if(codigo!=null){
+			List<DevEntityObject> clientes = app.doBeanList("1236_clifor");
+			for (DevEntityObject devEntityObject : clientes) {
+				if (codigo.equals(devEntityObject.getProp("nome"))) {
+					devEntityObjectReturn = devEntityObject;
+					break;
+				}
 			}
-		}	
+		}
 		return devEntityObjectReturn;
 	}
 }

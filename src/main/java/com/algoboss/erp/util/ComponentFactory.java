@@ -57,7 +57,6 @@ import com.algoboss.erp.entity.DevReportFieldOptions;
 import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.face.AdmAlgodevBean;
 import com.algoboss.erp.face.BaseBean;
-import com.algoboss.integration.small.face.LayoutFieldsFormat;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -737,7 +736,7 @@ public class ComponentFactory {
 				UIComponent childAux = findComponentByClassName("javax.faces.component.UISelectItem", inputCloned);
 				UIComponent childAux2 = findComponentByClassName("javax.faces.component.UISelectItems", inputCloned);
 				inputCloned.getChildren().remove(childAux2);
-				String[] strList = configMap.get("list").split("\r\n");
+				String[] strList = AlgodevUtil.formatDescription(configMap.get("list")).split(",");
 				for (int j = 0; j < strList.length; j++) {
 					String string = strList[j];
 					UIComponent childCloned = ComponentFactory.componentClone(childAux, false);
