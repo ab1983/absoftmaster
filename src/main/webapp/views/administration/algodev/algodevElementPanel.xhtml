@@ -30,7 +30,7 @@
         <tr><td>#{msg['commandButton']}:</td></tr>
         <tr><td><p:commandButton styleClass="ui-algo-element  ui-algo-element-value ui-commandButton" value="Button" immediate="true"/> </td></tr>
         <tr><td>#{msg['commandLink']}:</td></tr>
-        <tr><td><p:commandLink styleClass="ui-algo-element  ui-algo-element-value" value="Link" immediate="true"/> </td></tr>
+        <tr><td><p:commandLink styleClass="ui-algo-element  ui-algo-element-value ui-commandLink" value="Link" immediate="true"/> </td></tr>
         <tr><td>#{msg['tabView']}:</td></tr>
         <tr><td><p:tabView styleClass="ui-algo-element ui-algo-element-container"><p:tab title="Tab1"/></p:tabView></td></tr>
         <tr><td>#{msg['panel']}:</td></tr>
@@ -39,8 +39,6 @@
         <tr><td><p:fieldset binding="#{fieldsetElement}" styleClass="ui-algo-element ui-algo-element-container data-form" legend="Fieldset"></p:fieldset></td></tr>
         <tr><td>#{msg['dataTable']}:</td></tr>
         <tr><td><p:dataTable binding="#{dataTableElement}" var="item" selectionMode="single" styleClass="ui-algo-element ui-algo-element-container data-list" emptyMessage="#{msg['emptyMessage']}">
-        <tr><td>#{msg['scrollPanel']}:</td></tr>
-        <tr><td><p:scrollPanel styleClass="ui-algo-element ui-algo-element-container ui-scrollPanel"/></td></tr>        
         <p:ajax event="rowEdit" listener="#{app.doSaveItem(item)}" update="@form"/>
         <f:facet name="header">List</f:facet> <f:facet name="footer"><p:commandLink immediate="true" value="Export" oncomplete="(window.exportTableDlg!==undefined?exportTableDlg.show():'');"></p:commandLink></f:facet>
         <p:column headerText="headerText">
@@ -56,6 +54,8 @@
                               </p:cellEditor>
                         	<p:rowEditor />
                         </p:column></p:dataTable></td></tr>                                                                                                      
+        <tr><td>#{msg['scrollPanel']}:</td></tr>
+        <tr><td><p:scrollPanel styleClass="ui-algo-element ui-algo-element-container ui-scrollPanel"/></td></tr>        
         <tr><td>#{msg['dataGrid']}:</td></tr>
         <tr><td><p:dataGrid var="item" styleClass="ui-algo-element ui-algo-element-container data-grid" emptyMessage="#{msg['emptyMessage']}"><f:facet name="header">Grid</f:facet> <f:facet name="footer"><p:commandLink immediate="true" value="Export" oncomplete="(window.exportTableDlg!==undefined?exportTableDlg.show():'');"></p:commandLink></f:facet><p:column headerText="headerText"><h:outputText value="" /><p:commandLink value="" actionListener="#{app.doEdit(item)}" immediate="true" update="@form"></p:commandLink></p:column></p:dataGrid></td></tr>                                                                                                      
         <tr><td>#{msg['carousel']}:</td></tr>

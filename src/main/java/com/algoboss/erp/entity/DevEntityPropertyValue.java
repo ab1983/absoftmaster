@@ -167,7 +167,7 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
 						}            			
             			//obj = propertyValue;     
             		}else if (entityPropertyDescriptor.getPropertyType().equalsIgnoreCase("INTEGER")){
-            			obj = Integer.valueOf(propertyValue).intValue();
+            			obj = Double.valueOf(propertyValue).intValue();
             			//obj = propertyValue;     
             		}else{
             			obj = propertyValue;                	
@@ -280,7 +280,16 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
 	
 	public void setStr(Object obj) {
 		setVal(obj);
-	}	    
+	}	 
+	
+	public Object getRead() {
+		return getStr();
+	}
+	
+	public void setRead(Object obj) {
+		//READ ONLY
+	}		
+	
     public String internalPropertyValue(){
     	return propertyValue;
     }

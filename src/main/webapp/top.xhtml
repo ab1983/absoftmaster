@@ -11,7 +11,7 @@
         </script>
         <div class="barratop-index ui-state-active" style="width: 99%;float: right;margin-left: 90px;">
             <!--p:commandButton id="dynaButton" value="Inicial" type="button"/--> 
-            <div style="float: right;width: 100%;height: 30px;position: relative;margin-right: 40px;margin-left: 90px;">
+            <div style="float: right;width: 100%;height: 30px;position: relative;margin-right: 80px;margin-left: 90px;">
                 <table style="width: 100%;">
                     <tr>
                         <td style="width: 120px;">
@@ -30,7 +30,7 @@
             </div>
         </div> 
         <p:commandButton rendered="true" id="configBtn" styleClass="ui-state-highlight" icon="ui-icon ui-icon-home" style="left: 0px;position: absolute;padding: 0px;margin: 0px;margin-left: 15px;top:0;margin-top: 0px;padding-top: 5px;height: 30px;"/>
-        <p:graphicImage style="right: 0px;position: absolute;padding: 0px;margin: 0px;margin-right: 15px;top:0;margin-top: 0px;padding-top: 0px;height: 38px;" value="#{gerLoginBean.user.contract.systemLogo}" />          
+        <p:graphicImage style="right: 0px;position: absolute;padding: 0px;margin: 0px;margin-left: 2px;margin-right: 8px;top:0;margin-top: 0px;padding-top: 0px;max-height: 38px;max-width:100px;" value="#{gerLoginBean.user.contract.systemLogo}" cache="false"  />          
         <p:overlayPanel for="configBtn" showEvent="mouseoverx" dismissable="true" widgetVar="configMenuMsgWv" appendToBody="true" hideEffect="blind" >
             <h:outputLabel value="Menu Atualizado! Clique aqui para acessar."/>
         </p:overlayPanel>
@@ -47,7 +47,7 @@
                                             <p:separator /> 
                                             <p:menuitem value="Personalizar"  onclick="configDlg.show();" styleClass="actionMenuItem"/>  
                                             <p:separator /> 
-                                            <p:menuitem value="Atualizar" ajax="false" url="/f/index.xhtml" styleClass="actionMenuItem"/>                                               
+                                            <p:menuitem value="Atualizar" ajax="false" action="/f/index.xhtml" styleClass="actionMenuItem"/>                                               
                                         </p:menu>                                    
                                     </td>
                                 </tr>
@@ -235,7 +235,17 @@
             }
         </script>
         <!--/p:menuButton-->         
+    </h:form>
+    <h:form>
         <p:poll id="updateActiveSession" interval="60"   
-                listener="#{gerLoginBean.updateActiveSession}" />     
+                listener="#{gerLoginBean.updateActiveSession(gerLoginBean.session.id)}" update="@form"/>  
+            <p:dialog header="Conexão Expirada" modal="true" closable="false" widgetVar="sessionExpiredWv" resizable="false">
+                <a href="#{request.contextPath}/f/login.xhtml">
+                    <p:button rendered="true" style="width: 100px;" value="Reconectar"/>
+                </a>
+            </p:dialog>
+            <script>
+                //var idSessionExpired = window.setTimeout('sessionExpiredWv.show()',65000);
+            </script>   
     </h:form>
 </html>

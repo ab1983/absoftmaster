@@ -4,15 +4,19 @@
  */
 package com.algoboss.erp.face;
 
+import static com.algoboss.erp.util.ComponentFactory.getProperty;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -32,10 +36,12 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.naming.InitialContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -48,8 +54,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
+import net.sf.jasperreports.engine.JRResultSetDataSource;
 import net.sf.jasperreports.engine.JasperRunManager;
 import net.sf.jasperreports.engine.data.JRXmlDataSource;
 
@@ -71,10 +79,14 @@ import com.algoboss.erp.entity.DevReportFieldContainer;
 import com.algoboss.erp.entity.DevReportFieldOptions;
 import com.algoboss.erp.entity.DevReportFieldOptionsMap;
 import com.algoboss.erp.entity.DevReportRequirement;
+import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.entity.SecAuthorization;
 import com.algoboss.erp.entity.SecUserAuthorization;
 import com.algoboss.erp.util.AlgoUtil;
+import com.algoboss.erp.util.AlgodevUtil;
 import com.algoboss.erp.util.ComponentFactory;
+import com.algoboss.erp.util.LayoutFieldsFormat;
+import com.algoboss.erp.util.ComponentFactory.AppType;
 import com.algoboss.integration.small.face.FinReportBean;
 
 /**
@@ -120,6 +132,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
     private Map<String, Map<String, Object>> fieldOptionsValMap = new LinkedHashMap<String, Map<String, Object>>();
     private Date startDate;
     private Date endDate;
+    private String param1;
 
     /**
      * Creates a new instance of TipoDespesaBean
@@ -149,7 +162,15 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
         this.endDate = endDate;
     }
 
-    public String getHtml() {
+    public String getParam1() {
+		return param1;
+	}
+
+	public void setParam1(String param1) {
+		this.param1 = param1;
+	}
+
+	public String getHtml() {
         return html;
     }
 
@@ -322,9 +343,9 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             for (int i = 0; i < ent.getEntityPropertyDescriptorParentList().size(); i++) {
                 DevEntityPropertyDescriptor propParent = ent.getEntityPropertyDescriptorParentList().get(i);
                 if (propParent.getEntityClassParent() != null) {
-                    if (propParent.getPropertyType().equals("ENTITYCHILDREN")) {
-                        //break;
+                    if (propParent.getPropertyType().equals("ENTITYCHILDREN") && propParent.getEntityClassParent().getName().equals(parentNode)) {
                         propParentAux = propParent;
+                        break;
                     }
                     if (propParent.getPropertyClass() != null && propParent.getPropertyClass().getEntityPropertyDescriptorParentList().size() > i) {
                         DevEntityPropertyDescriptor propParent2 = propParent.getPropertyClass().getEntityPropertyDescriptorParentList().get(i);
@@ -399,7 +420,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
     }
 
     public void setAlgoContainer(UIComponent algoContainer) throws Throwable {
-        if (elements != null) {
+        if (elements != null && algoContainer!=null) {
             algoContainer.getChildren().clear();
             algoContainer.getChildren().addAll(elements);
         }
@@ -495,16 +516,59 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                 }
             }
             initBean();
-            if (bean != null) {
-                entity = bean.getEntityClass();
-                entitySelected = entity;
-                //setEntity(entity);
-                reportDeserializer();
-            }
+            updateFormFilter();
             formRendered = false;
         } catch (Throwable ex) {
             Logger.getLogger(AdmAlgoreportBean.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public void updateFormFilter(){
+        if (bean != null) {
+            entity = bean.getEntityClass();
+            entitySelected = entity;
+            DevEntityClass entFilter = new DevEntityClass("filter");
+            entFilter.setLabel("Filtro:");
+            for (DevReportFieldOptions devReportFieldOptions : LayoutFieldsFormat.getContainerOptions(bean.getFieldContainerList(), "fil", entitySelected)) {
+    			if(devReportFieldOptions.getEntityPropertyDescriptor()==null){
+    				DevReportFieldOptionsMap fieldOptionsMap = LayoutFieldsFormat.loadOpt(devReportFieldOptions, "head");
+    				Object value = fieldOptionsMap.getOptionsValue();
+    				String type = fieldOptionsMap.getOptionsType();
+    				String name = devReportFieldOptions.getName();
+    				if(value!=null){
+    					entityPropertyDescriptor = new DevEntityPropertyDescriptor();
+    					entityPropertyDescriptor.setPropertyName(name);
+    					entityPropertyDescriptor.setPropertyLabel(value.toString());
+    					entityPropertyDescriptor.setPropertyType(type);
+		                if (!entFilter.getEntityPropertyDescriptorList().contains(entityPropertyDescriptor)) {
+		                	entFilter.getEntityPropertyDescriptorList().add(entityPropertyDescriptor);
+		                }
+    				}
+    			}
+            }
+            UIComponent tocloned = ComponentFactory.findComponentByStyleClass("ui-algo-element ui-algo-element-container ui-panel", BaseBean.algoPalette);
+            UIComponent clonedContainer = ComponentFactory.componentClone(tocloned, false); 
+            UIComponent cloned = ComponentFactory.componentClone(tocloned, false);  
+            clonedContainer.getChildren().add(cloned);
+            ComponentFactory.updateElementProperties(clonedContainer, Collections.singletonMap("header", ""));
+            //app.setAlgoContainerView(cloned);
+            DevRequirement req = new DevRequirement();
+            req.setEntityClass(entFilter);
+            DevEntityObject entObj = new DevEntityObject();
+            entObj.setEntityClass(entFilter);
+            UIComponent container = cloned;
+            app.setBean(entObj);
+            createByConstructor(Collections.singletonMap("dataform", "true"), container, elementsContainerMap, req, entFilter);
+            //cloned.getChildren().clear();
+            //cloned.getChildren().addAll(elementsContainerMap.get("form"));
+            //app.getAlgoContainerView().getChildren().clear();
+            app.setAlgoContainerView(cloned);
+            app.generateElementsContainerMap(req);
+            app.doForm();
+            //ComponentFactory.updateElementProperties(comp3, mapParam);
+            //setEntity(entity);
+            reportDeserializer();
+        }    	
     }
 
     @Override
@@ -525,13 +589,40 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
         } finally {
         }
     }
+    private void createByConstructor(Map map, UIComponent compTarget, Map<String,List<UIComponent>> elementsContainerMap, DevRequirement bean, DevEntityClass entity) {
+ 		elementsContainerMap.clear();
+         UIComponent elementPanel = BaseBean.algoPalette;
+         UIComponent cloned = null;
+         try {
+         	LayoutFieldsFormat.onConstruction(bean);
+             if (map.containsKey("dataform") && !String.valueOf(map.get("dataform")).isEmpty()) {
+                 compTarget.getChildren().clear();
+                 if (cloned == null) {
+                     cloned = ComponentFactory.findComponentByStyleClass("ui-algo-element-container data-form", elementPanel);
+                     cloned = ComponentFactory.componentClone(cloned, false);
+                     AlgodevUtil.updateChildren(compTarget.getChildren(), cloned);
+                     setContainerPage("form");
+                 }
+                 cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.get(bean.getInterfaceType())).getComponentCreated();
+                 //elements.clear();
+                 //elements.addAll(compTarget.getChildren());
+                 AlgodevUtil.generateElementsContainerMap(elementsContainerMap, bean);
+                 updateContainerPage();
+                 cloned = null;
+             }          
+         } catch (Throwable ex) {
+             Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
+         }
+     }
 
     public void updateEntityObject() {
         try {
             //setEntity(entitySelected);
-            entityObjectList = baseDao.findEntityObjectByClass(entity,new ArrayList<String>(), getSiteIdList(), startDate, endDate, true);
-            updateReport();
-            generateXml();            	
+            if(bean.getReportDatasource()==null){
+            	entityObjectList = baseDao.findEntityObjectByClass(entity,new ArrayList<String>(), Collections.singletonList(site.getInstantiatesSiteId()), startDate, endDate, true);
+            	updateReport();
+            	generateXml();            	            	
+            }
         } catch (Throwable ex) {
             Logger.getLogger(AdmAlgoreportBean.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -1050,7 +1141,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                         paramMap.put("value", "");
                         ComponentFactory.updateElementProperties(cloned, paramMap);
                         label.getChildren().add(cloned);
-                        updateChildren(elements, label);
+                        AlgodevUtil.updateChildren(elements, label);
                         //algoContainer.getChildren().add(cloned);
                     }
                 } catch (Throwable ex) {
@@ -1171,7 +1262,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             entitySelected = entity;
             //setEntity(entity);
             reportDeserializer();
-            updateEntityObject();         
+            updateEntityObject();                     	
             //updateReport();
             entityNodeSelected = entity;
             entityClassNodeList.clear();
@@ -1223,6 +1314,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             if (msgStr.isEmpty()) {
                 //generateElementsContainerMap();
                 reportSerializer();
+                LayoutFieldsFormat.onConstruction(bean);
                 bean.setEntityClass(getEntity());
                 bean.getService().setMainAddress("#{algoRep.indexBeanRep()}");
                 bean.getService().setModule("REP");
@@ -1292,20 +1384,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
         }
     }
 
-    private void updateChildren(List<UIComponent> children, UIComponent comp) throws Throwable {
-        boolean notFound = true;
-        for (int i = 0; i < children.size(); i++) {
-            UIComponent compAux = children.get(i);
-            if (compAux.getId().equals(comp.getId())) {
-                children.set(i, comp);
-                notFound = false;
-                break;
-            }
-        }
-        if (notFound) {
-            children.add(comp);
-        }
-    }
+
 
     public void updateElement() {
         try {
@@ -1528,8 +1607,6 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             cEnd.add(Calendar.MONTH, +3);
             
             try {
-            entityObjectList = baseDao.findEntityObjectByClass(entity, new ArrayList<String>(),getSiteIdList(), cIni.getTime(), cEnd.getTime(), true);
-            updateReport();
             //super.doBeanList();
             //Class.forName("org.firebirdsql.jdbc.FBDriver");
             //String url = "jdbc:firebirdsql:algomaster.zapto.org/3050:C:\\Program Files (x86)\\SmallSoft\\Small Commerce\\SMALL.GDB";
@@ -1538,20 +1615,48 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             ServletContext context = (ServletContext) fc.getExternalContext().getContext();
             HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
             File relatorioJasper = new File(context.getRealPath(bean.getReportFile()));
-            JRXmlDataSource jrxmlds = new JRXmlDataSource(generateXml(),"/"+AlgoUtil.normalizerName(bean.getReportRequirementName())+"/item");
-            jrxmlds.setDatePattern("yyyy/MM/dd HH:mm:ss");
-            jrxmlds.setTimeZone("GMT-3:00");
-            jrxmlds.setLocale(Locale.forLanguageTag("pt-BR"));
             // parâmetros, se houver
             Map params = new HashMap();
-            params.put("P_START_DATE", startDate);
-            params.put("P_END_DATE", endDate);
+            List<DevEntityPropertyValue> propValList = app.getBean().getEntityPropertyValueList();
+            for (DevEntityPropertyValue devEntityPropertyValue : propValList) {
+            	params.put(devEntityPropertyValue.getEntityPropertyDescriptor().getPropertyName(), devEntityPropertyValue.getVal());
+			}
             params.put(JRParameter.REPORT_LOCALE, Locale.forLanguageTag("pt-BR")/*FacesContext.getCurrentInstance().getExternalContext().getRequestLocale()*/);
             params.put(JRParameter.REPORT_TIME_ZONE, TimeZone.getTimeZone("GMT-3:00"));
             byte[] bytes = null;
+            JRDataSource jrds = null;
+            FacesContext ctx = FacesContext.getCurrentInstance();
+            if(bean.getReportDatasource()==null){
+            	entityObjectList = baseDao.findEntityObjectByClass(entity, new ArrayList<String>(),getSiteIdList(), cIni.getTime(), cEnd.getTime(), true);
+            	updateReport();
+	            JRXmlDataSource jrxmlds = new JRXmlDataSource(generateXml(),"/"+AlgoUtil.normalizerName(bean.getReportRequirementName())+"/item");
+	            jrxmlds.setDatePattern("yyyy/MM/dd HH:mm:ss");
+	            jrxmlds.setTimeZone("GMT-3:00");
+	            jrxmlds.setLocale(Locale.forLanguageTag("pt-BR"));
+	            jrds = jrxmlds;
+	            bytes = JasperRunManager.runReportToPdf(relatorioJasper.getPath(), params, jrds);
+            }else{
+            	Connection conn = baseDao.getConnectionSmall();
+            	if(conn!=null){
+            		bytes = JasperRunManager.runReportToPdf(relatorioJasper.getPath(), params, conn);            		
+            	}else{
+                    //Collection<Object[]> componentList = new HashSet<Object[]>();
+                    String msgStr = "";
+                    msgStr = "Não foi possível obter conexão com o banco de dados. Verifique se o acesso está disponível.";
+                    ctx.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, msgStr, ""));
+            	}
+			      //try {
+			    	  //ic.createSubcontext("java:");
+			    	  //ic.createSubcontext("java:/comp");
+			    	  //ic.createSubcontext("java:/comp/env");
+			    	  //ic.createSubcontext("java:/comp/env/jdbc");
+				//} catch (javax.naming.NamingException e) {
+					// TODO: handle exception
+				//}
+            	
+            	//JRResultSetDataSource jrrsds = new JRResultSetDataSource();
+            }
 
-                bytes =
-                        JasperRunManager.runReportToPdf(relatorioJasper.getPath(), params, jrxmlds);
             if (bytes != null && bytes.length > 0) {
                 try {
                     // Envia o relatório em formato PDF para o browser

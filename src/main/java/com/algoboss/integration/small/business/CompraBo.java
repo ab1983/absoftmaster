@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
 import javax.persistence.NoResultException;
 
 import com.algoboss.erp.entity.DevEntityClass;
@@ -24,11 +22,7 @@ import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.face.AdmAlgoappBean;
 import com.algoboss.erp.util.AlgoUtil;
 
-public class PreVendaBo {
-	public static void preRender(AdmAlgoappBean app) {
-
-		// totalCalc(obj);
-	}
+public class CompraBo {
 
 	public static void produtoCalc(AdmAlgoappBean app) {
 		produtoTotalCalcImpl(app, false);
@@ -41,7 +35,7 @@ public class PreVendaBo {
 	public static void produtoTotalCalcImpl(AdmAlgoappBean app, boolean precoRecalc) {
 		try {
 			DevEntityObject obj = app.getBean();
-			if (obj != null && obj.getEntityClass().getName().equals("1236_venda")) {
+			if (obj != null && obj.getEntityClass().getName().equals("1236_compra")) {
 				// volumesCalc(obj);
 				DevEntityObject objChild = app.getChildBean();
 				if (objChild != null && !objChild.getEntityPropertyValueList().isEmpty()) {
@@ -58,6 +52,9 @@ public class PreVendaBo {
 				Integer volumes = 0;
 				Double total = 0d;
 				Double pesoLiquido = 0d;
+				Double totalIcms = 0d;
+				Double totalIpi = 0d;
+				Double totalBaseIcms = 0d;
 				for (DevEntityObject devEntityObject : objChildList) {
 					if (precoRecalc) {
 						precoProdutoGenImpl(app, devEntityObject, false);
@@ -72,10 +69,25 @@ public class PreVendaBo {
 					if (pesoLiquidoObj != null) {
 						pesoLiquido += (Double) pesoLiquidoObj;
 					}
+					Object ipiObj = devEntityObject.getPropObj("produtos.vipi").getPropertyValue();
+					if (ipiObj != null) {
+						totalIpi += (Double) ipiObj;
+					}					
+					Object icmsObj = devEntityObject.getPropObj("produtos.vicms").getPropertyValue();
+					if (icmsObj != null) {
+						totalIcms += (Double) icmsObj;
+						if((Double) icmsObj>0){
+							totalBaseIcms += (Double) totalObj;
+						}
+					}					
 				}
 				obj.getPropObj("volumes").setPropertyValue(volumes);
 				obj.getPropObj("total").setPropertyValue(BigDecimal.valueOf(total).setScale(2, RoundingMode.HALF_UP).doubleValue());
+				obj.getPropObj("mercadoria").setPropertyValue(BigDecimal.valueOf(total).setScale(2, RoundingMode.HALF_UP).doubleValue());
 				obj.getPropObj("pesoliqui").setPropertyValue(BigDecimal.valueOf(pesoLiquido).setScale(2, RoundingMode.HALF_UP).doubleValue());
+				obj.getPropObj("icms").setPropertyValue(BigDecimal.valueOf(totalIcms).setScale(2, RoundingMode.HALF_UP).doubleValue());
+				obj.getPropObj("baseicm").setPropertyValue(BigDecimal.valueOf(totalBaseIcms).setScale(2, RoundingMode.HALF_UP).doubleValue());
+				obj.getPropObj("ipi").setPropertyValue(BigDecimal.valueOf(totalIpi).setScale(2, RoundingMode.HALF_UP).doubleValue());
 				// obj.getPropObj("desconto").setPropertyValue(BigDecimal.valueOf(valorDesconto).setScale(2,
 				// RoundingMode.HALF_UP).doubleValue());
 			}
@@ -97,35 +109,27 @@ public class PreVendaBo {
 		if (peso == null) {
 			peso = 0d;
 		}
+		Double icms = (Double) objChild.getProp("produtos.icm",0d);
+		Double ipi = (Double) objChild.getProp("produtos.ipi",0d);
 		Double totalProduto = BigDecimal.valueOf(quantidade * unitario).setScale(2, RoundingMode.HALF_UP).doubleValue();
 		Double pesoProduto = BigDecimal.valueOf(quantidade * peso).setScale(2, RoundingMode.HALF_UP).doubleValue();
+		Double totalIcms = BigDecimal.valueOf(totalProduto * icms/100d).setScale(2, RoundingMode.HALF_UP).doubleValue();
+		Double totalIpi = BigDecimal.valueOf(totalProduto * ipi/100d).setScale(2, RoundingMode.HALF_UP).doubleValue();
+		objChild.getPropObj("produtos.base").setPropertyValue(100d);
 		objChild.getPropObj("produtos.total").setPropertyValue(totalProduto);
 		objChild.getPropObj("produtos.peso").setPropertyValue(pesoProduto);
+		objChild.getPropObj("produtos.vicms").setPropertyValue(totalIcms);
+		objChild.getPropObj("produtos.vipi").setPropertyValue(totalIpi);
+		objChild.getPropObj("produtos.fornecedor").setPropertyValue(app.getBean().getProp("fornecedor"));
 		return true;
 	}
 
-	public static void descontoCliente(AdmAlgoappBean app) {
+	public static void onChangeTransportadoraPlaca(AdmAlgoappBean app) {
 		try {
 			DevEntityObject obj = app.getBean();
-			if (obj != null && obj.getEntityClass().getName().equals("1236_venda")) {
+			if (obj != null && obj.getEntityClass().getName().equals("1236_compra")) {
 				// DevEntityObject objChild = app.getChildBean();
-				Object cliente = obj.getProp("cliente");
-				DevEntityObject clienteObj = SmallUtil.getCliente(cliente, app);
-				if (clienteObj != null) {
-					obj.getPropObj("duplicatas").setVal(Objects.toString(clienteObj.getProp("identificador1"), "").split(Pattern.quote("/")).length);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void setTransportadoraPlaca(AdmAlgoappBean app) {
-		try {
-			DevEntityObject obj = app.getBean();
-			if (obj != null && obj.getEntityClass().getName().equals("1236_venda")) {
-				// DevEntityObject objChild = app.getChildBean();
-				Object placa = obj.getProp("placa");
+				Object placa = obj.getProp("descricao3");
 				DevEntityObject veiculo = SmallUtil.getVeiculo(placa, app);
 				if (veiculo != null) {
 					obj.getPropObj("transporta").setVal(veiculo.getProp("nome"));
@@ -136,40 +140,60 @@ public class PreVendaBo {
 		}
 	}
 
-	public static void numeroNfGen(AdmAlgoappBean app) {
+	public static void onNew(AdmAlgoappBean app) {
 		try {
 			DevEntityObject obj = app.getBean();
-			if (obj != null && obj.getEntityClass().getName().equals("1236_venda")) {
-				Object numeronf = obj.getPropObj("numeronf").getPropertyValue();
-				if (Objects.toString(numeronf, "").isEmpty()) {
-
-					Object nextnumeronf = 0;
-					try {
-						try {
-							nextnumeronf = app.getBaseDao().getEntityManagerSmall().createNativeQuery("SELECT GEN_ID(G_SERIE1, 0 )||'001' FROM RDB$DATABASE where not exists(select NUMERONF from VENDAS WHERE NUMERONF LIKE '%'||(GEN_ID(G_SERIE1, 0 ))||'001') and GEN_ID(G_SERIE1, 0 ) != 0;").getSingleResult();
-						} catch (NoResultException e) {
-							nextnumeronf = app.getBaseDao().getEntityManagerSmall().createNativeQuery("SELECT NEXT VALUE FOR G_SERIE1 FROM RDB$DATABASE;").getSingleResult().toString().concat("001");
-						}						
-					} catch (Exception e) {
-						String msgTmp = "PreVendaBo: error to generate numeronf. "+e.getMessage();
-						System.err.println(msgTmp);
-						FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msgTmp, "");
-						FacesContext.getCurrentInstance().addMessage(null, msg);						
-					}
-					obj.getPropObj("numeronf").setPropertyValue(String.format("%012d", Long.valueOf(nextnumeronf.toString())));
-					obj.getPropObj("especie").setPropertyValue("Caixa");
-					obj.getPropObj("marca").setPropertyValue("Volumes");
-					obj.getPropObj("frete12").setPropertyValue("0");
-
-					obj.getPropObj("identificador1").setPropertyValue("PREÇO1");
-					Date now = new Date();
-					obj.getPropObj("emissao").setPropertyValue(now);
-					obj.getPropObj("saidad").setPropertyValue(now);
-					obj.getPropObj("saidah").setPropertyValue(new SimpleDateFormat("HH:mm:ss").format(now));
-					obj.getPropObj("volumes").setPropertyValue(0d);
-					obj.getPropObj("total").setPropertyValue(0d);
-					obj.getPropObj("pesoliqui").setPropertyValue(0d);
+			if (obj != null && obj.getEntityClass().getName().equals("1236_compra")) {
+				Date now = new Date();
+				obj.getPropObj("emissao").setPropertyValue(now);
+				obj.getPropObj("saidad").setPropertyValue(now);
+				obj.getPropObj("saidah").setPropertyValue(new SimpleDateFormat("HH:mm:ss").format(now));
+				obj.getPropObj("volumes").setPropertyValue(0d);
+				obj.getPropObj("total").setPropertyValue(0d);
+				obj.getPropObj("pesoliqui").setPropertyValue(0d);
+				obj.getPropObj("especie").setPropertyValue("Caixa");
+				obj.getPropObj("marca").setPropertyValue("Volumes");		
+				obj.getPropObj("modelo").setPropertyValue("55");	
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void onBlurNumeroNf(AdmAlgoappBean app) {
+		try {
+			DevEntityObject obj = app.getBean();
+			if (obj != null && obj.getEntityClass().getName().equals("1236_compra")) {
+				Long numeronf;
+				try {
+					numeronf = Long.valueOf(obj.getProp("numeronf", "0").toString());					
+				} catch (NumberFormatException e) {
+					numeronf = 0L;
 				}
+				obj.getPropObj("numeronf").setPropertyValue(String.format("%012d",numeronf));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}	
+	
+	public static void onChangeProduto(AdmAlgoappBean app) {
+		try { 
+			DevEntityObject obj = app.getBean();
+			if (obj != null && obj.getEntityClass().getName().equals("1236_compra")) {
+				DevEntityObject objChild = app.getChildBean();
+				Object nomeFornecedor = obj.getProp("fornecedor");
+				DevEntityObject fornecedor = SmallUtil.getCliente(nomeFornecedor, app);
+				if (fornecedor != null) {
+					Object nomeOperacao = obj.getProp("operacao");
+					DevEntityObject operacao = SmallUtil.getOperacao(nomeOperacao, app);
+					if (operacao != null) {
+						Object uf = fornecedor.getProp("estado");
+						objChild.getPropObj("icm").setVal(operacao.getProp(Objects.toString(uf,"").toLowerCase() ));
+					}
+				}
+
+				precoProdutoGen(app);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -183,27 +207,26 @@ public class PreVendaBo {
 	public static void precoProdutoGenImpl(AdmAlgoappBean app, DevEntityObject objChild, boolean totalCalc) {
 		try {
 			DevEntityObject obj = app.getBean();
-			if (obj != null && obj.getEntityClass().getName().equals("1236_venda")) {
+			if (obj != null && obj.getEntityClass().getName().equals("1236_compra")) {
 				// DevEntityObject objChild = app.getChildBean();
 				Object codigo = objChild.getProp("produtos.codigo");
 				if (!Objects.toString(codigo, "").isEmpty()) {
 					DevEntityObject devEntityObject = SmallUtil.getProduto(codigo, app);
-					Object tipoPreco = obj.getPropObj("identificador1").getVal();
+					// Object tipoPreco =
+					// obj.getPropObj("identificador1").getVal();
 
-					Double preco;
-					if (tipoPreco == null || tipoPreco.equals("PREÇO1")) {
-						preco = (Double) devEntityObject.getProp("preco");
-					} else {
-						preco = (Double) AlgoUtil.toNumber(devEntityObject.getProp("livre2"));
-					}
+					Double preco = (Double) devEntityObject.getProp("preco");
+
 					if (preco == null) {
 						preco = 0d;
 					}
-					DevEntityObject clienteObj = SmallUtil.getCliente(obj.getProp("cliente"), app);
-					Number desconto = AlgoUtil.toNumber(clienteObj != null ? clienteObj.getProp("identificador2") : null);
+					// DevEntityObject clienteObj =
+					// SmallUtil.getCliente(obj.getProp("cliente"), app);
+					// Number desconto = AlgoUtil.toNumber(clienteObj != null ?
+					// clienteObj.getProp("identificador2") : null);
 					// Double valorDesconto = total *
 					// (desconto!=null?desconto.doubleValue()/100d:0d);
-					objChild.getPropObj("unitario").setVal(BigDecimal.valueOf(preco * (desconto != null ? 1 - desconto.doubleValue() / 100d : 1d)).setScale(2, RoundingMode.HALF_UP).doubleValue());
+					objChild.getPropObj("unitario").setVal(BigDecimal.valueOf(preco).setScale(2, RoundingMode.HALF_UP).doubleValue());
 					objChild.getPropObj("descricao").setVal(devEntityObject.getProp("descricao"));
 
 					// objChild.getPropObj("peso").setVal(devEntityObject.getProp("peso"));

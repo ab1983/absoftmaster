@@ -45,4 +45,7 @@ public class AlgoUtil {
 	 } 
 	return obj;
 }
+ public static String extractName(String normalizedName){
+	 return AlgoUtil.normalizerName(normalizedName.substring(normalizedName.indexOf("_")+1));
+ }
 }

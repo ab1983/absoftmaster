@@ -17,11 +17,11 @@
         var typeExp = "form";
         var teste669 = null;
     </script>
-    <f:view contentType="text/html" >
+    <f:view contentType="text/html" >    
         <h:form binding="#{admAlgorepContainerForm}"  styleClass="ui-algo-container" prependId="false" onsubmit="javascript:return false">
 
-            <p:panel style="width: 960px;">
-                <h:panelGrid columns="2">
+            <p:panel style="width: 960px;"  binding="#{app.algoContainerView}">
+                <!--h:panelGrid columns="2">
                     <h:panelGroup>
                         Período de:
                         <p:outputLabel value="#{algoRep.startDate}">
@@ -31,21 +31,32 @@
                             <f:convertDateTime pattern="#{msg['calendar.pattern']}"/>
                         </p:outputLabel><p:commandButton id="dateSelectBtn" icon="ui-icon-search"/>
                     </h:panelGroup>
-                    <p:panel rendered="true" binding="#{algoRepContainerBind}" style="#{(algoRep.algoContainer==null or algoRep.algoContainer.getChildren().isEmpty())?'display:none':''}" styleClass="ui-algo-container" id="algoRepContainer">
+                    < p:panel rendered="true" binding="#{algoRepContainerBind}" style="#{(algoRep.algoContainer==null or algoRep.algoContainer.getChildren().isEmpty())?'display:none':''}" styleClass="ui-algo-container" id="algoRepContainer">
                         <h:outputText value="Sem Filtro"/>
                     </p:panel>
-                </h:panelGrid>
+                </h:panelGrid-->
             </p:panel>
-            <p:overlayPanel for="dateSelectBtn" dismissable="false" style="height: 250px;">
-                Customizado: <p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" value="#{algoRep.startDate}" />à<p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" value="#{algoRep.endDate}"/>
-                <br/>
                 <p:commandButton rendered="#{algoRep.bean.reportFile==null or algoRep.formRendered}" actionListener="#{algoRep.updateEntityObject()}" oncomplete="updateCurrentForm();updateElementProperty()"  icon="ui-icon-circle-check"/>
                 <h:commandLink rendered="#{algoRep.bean.reportFile!=null and !algoRep.formRendered}" target="_blank" actionListener="#{algoRep.doPdfReport}">
                     <p:button widgetVar="downloadBtnWv1" value="#{msg.list}"  
                               icon="ui-icon-search">  
                     </p:button>                                    
-                </h:commandLink>                      
-            </p:overlayPanel>
+                </h:commandLink>    
+            <!-- p:overlayPanel for="dateSelectBtn" dismissable="false" style="height: 250px;">
+            	<table>
+	            	<tr>
+	            	<td>Customizado:</td>
+	            	<td><p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" value="#{algoRep.startDate}" />à<p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" value="#{algoRep.endDate}"/></td>
+	            	</tr>
+	            	<tr>
+	            	<td>Parâmetro1:</td>
+	            	<td><p:inputText value="#{algoRep.param1}"></p:inputText></td>
+	            	</tr>            	
+                </table>
+                  
+            </p:overlayPanel-->
+        <f:event type="preRenderComponent" listener="#{(app.setAlgoContainer(app.algoContainerView))}"/>
+        <f:phaseListener binding="#{app.getPhaseListenerImpl()}" /> 
             <p:scrollPanel  rendered="#{algoRep.bean.reportFile==null or algoRep.formRendered}" style="width: 960px;height: 400px;" styleClass="ui-algo-container" id="algoRepContainer2">
                 <h:outputText escape="false" value="#{algoRep.html}"/>
                 <div><script type="text/javascript">
@@ -61,8 +72,7 @@
             <p:droppable id="algoContainerDrop1" rendered="false" scope="ui-algo" activeStyleClass="ui-state-active" hoverStyleClass="ui-state-highlight" for="algoRepContainer" tolerance="fit" accept=".ui-panel-content .ui-algo-element" binding="#{algoContainerDropBind}" onDrop="(function(event, ui) {
                 handleDrop(event, ui);
             })"></p:droppable>      
-            <f:event type="preRenderComponent" rendered="true" listener="#{(algoRep.setAlgoContainer(algoRepContainerBind))}"/>
-            <f:event type="preRenderComponent" rendered="true" listener="#{(algoRep.setAlgoPalette(algoRepPaletteBind))}"/>
+            <f:event type="preRenderComponent" rendered="true" listener="#{(algoRep.setAlgoContainer(algoRepContainerBind))}"/>            
             <p:remoteCommand  rendered="false" name="updateCurrentConteiner" immediate="true" update="@(.containerPage)">
                 <f:setPropertyActionListener value="#{algoRepContainerBind}" target="#{algoRep.algoContainer}" />                            
                 <f:setPropertyActionListener value="#{algoRepPaletteBind}" target="#{algoRep.algoPalette}" />      
@@ -393,9 +403,6 @@
                     <p:commandButton value="#{msg['build']}" icon="ui-icon-newwin" onclick="prepareConfigDlg.show();" immediate="true"/>                 
                     <p:commandButton value="#{msg['exclude']}" rendered="#{algoRep.bean.reportRequirementId!=null}" icon="ui-icon-trash" update="@(.openProjectDlg)" immediate="true" action="#{algoRep.doBeanRemove()}" onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();updateMenu();"/>                 
                     <p:commandButton value="#{msg['run']}" rendered="#{algoRep.bean.reportRequirementId!=null}" action ="#{app.indexBeanNewWin(algoRep.autorizationUserIdTemp)}" icon="ui-icon-newwin" immediate="true" update=":basePanel"/>                 
-                    <p:panel binding="#{algoRepPaletteBind}" style="display: none;" id="repElementPanel" styleClass="elementPanel" toggleable="true" header="#{msg['elementPallete']}" collapsed="true">
-                        <ui:include src="../algodev/algodevElementPanel.xhtml"/>
-                    </p:panel>
 
                     <br/><br/>
                 </h:panelGroup>

@@ -22,13 +22,13 @@ public class OrdemServicoBo {
 				Object numero = obj.getPropObj("numero").getPropertyValue();
 				if (Objects.toString(numero, "").isEmpty()) {
 					
-					Object nextnumeroos = null;
+					Object nextnumeroos = 0;
 					try {
 						nextnumeroos = app.getBaseDao().getEntityManagerSmall().createNativeQuery("SELECT GEN_ID(G_NUMEROOS, 0 ) FROM RDB$DATABASE where not exists(select NUMERO from OS WHERE NUMERO LIKE '%'||(GEN_ID(G_NUMEROOS, 0 ))) and GEN_ID(G_NUMEROOS, 0 ) != 0;").getSingleResult();
 					} catch (NoResultException e) {
 						nextnumeroos = app.getBaseDao().getEntityManagerSmall().createNativeQuery("SELECT NEXT VALUE FOR G_NUMEROOS FROM RDB$DATABASE;").getSingleResult().toString();
 					}
-					obj.getPropObj("numero").setPropertyValue(String.format ("%010d", Integer.valueOf(nextnumeroos.toString())));
+					obj.getPropObj("numero").setPropertyValue(String.format ("%010d", Long.valueOf(nextnumeroos.toString())));
 					//obj.getPropObj("especie").setPropertyValue("Caixa");
 					//obj.getPropObj("marca").setPropertyValue("Volumes");
 					//obj.getPropObj("frete12").setPropertyValue("0");

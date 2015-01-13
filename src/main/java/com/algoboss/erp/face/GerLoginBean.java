@@ -15,7 +15,9 @@ import com.algoboss.erp.entity.AdmServiceModuleContract;
 import com.algoboss.erp.entity.SecAuthorization;
 import com.algoboss.erp.entity.SecUser;
 import com.algoboss.erp.entity.SecUserAuthorization;
+
 import static com.algoboss.erp.face.GenericBean.sendEmail;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,8 +28,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
@@ -40,8 +44,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpSession;
-import org.primefaces.model.menu.DefaultMenuItem;
 
+import org.primefaces.model.menu.DefaultMenuItem;
 import org.primefaces.model.menu.DefaultMenuModel;
 import org.primefaces.model.menu.DefaultSubMenu;
 import org.primefaces.model.menu.MenuElement;
@@ -97,6 +101,10 @@ public class GerLoginBean implements Serializable {
 
     public MenuModel getModel() {
         if (model == null) {
+        	if(user.getContract()!=null){
+        		baseBean.setTitle(user.getContract().getSystemName());
+        		themeSwitcherBean.setTheme(user.getContract().getSystemTheme());        		
+        	}
             doAuthorization();
         }
         return model;
@@ -226,6 +234,24 @@ public class GerLoginBean implements Serializable {
 		this.jndiMap = jndiMap;
 	}
 
+	public boolean isActiveSession() {
+		return activeSession;
+	}
+
+	public void setActiveSession(boolean activeSession) {
+		this.activeSession = activeSession;
+	}
+
+	public List<Long> getModuleIdList() {
+		//moduleIdList = (List<Long>) session.getAttribute("moduleIdList");
+		return moduleIdList;
+	}
+
+	public void setModuleIdList(List<Long> moduleIdList) {
+		//getSession().setAttribute("moduleIdList", new ArrayList<Long>());
+		this.moduleIdList = moduleIdList;
+	}
+
 	public void doSendQuestionsOrSuggestions() {
         try {
             List<String[]> destin = new ArrayList<String[]>();
@@ -244,10 +270,11 @@ public class GerLoginBean implements Serializable {
     }
 
     public String doLogin() {
+    	removeActiveSession();
         try {
             //loginBean = getFacadeWithJNDI(GerLoginBean.class);
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
-            HttpSession session = (HttpSession) context.getSession(false);
+            HttpSession session = (HttpSession) context.getSession(true);
             System.out.println("Timeout:" + session.getMaxInactiveInterval());
         } catch (Exception e) {
             e.printStackTrace();
@@ -265,16 +292,15 @@ public class GerLoginBean implements Serializable {
                 return null;
             } else {
                 ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
-                prepareSession();
-                session.setAttribute("moduleIdList", new ArrayList<Long>());
-                moduleIdList = (List<Long>) session.getAttribute("moduleIdList");
+                prepareSession();                
+                setModuleIdList(new ArrayList<Long>());
+                doAuthorization();
                 if (user.getContract() != null && user.getContract().getContractId() != null) {
                     baseBean.setTitle(user.getContract().getSystemName());
                     themeSwitcherBean.setTheme(user.getContract().getSystemTheme());
                     doInstatiatesSite();
                     if (user.getContract().getServiceHomePage() != null) {
                         //userAuthorizationList = user.getUserAuthorizationList();
-                        doAuthorization();
                         for (SecUserAuthorization userAuth : userAuthorizationList) {
                             AdmServiceContract serviceContract = userAuth.getServiceContract();
                             //serviceContract.setHitCounter(serviceContract.getHitCounter() + 1);
@@ -299,10 +325,11 @@ public class GerLoginBean implements Serializable {
                 }
 
                 this.userLogged = true;
-                session.setAttribute("lastTime", new Date().getTime());
-                //TODO REVISAR checkActiveSession();
+                getSession().setAttribute("lastTime", new Date().getTime());
+                //TODO REVISAR 
+                checkActiveSession();
                 //doAuthorization();
-                return "/f/index.xhtml";
+                return "/f/index.xhtml?faces-redirect=true";
             }
         } else {
             user = new SecUser();
@@ -316,13 +343,17 @@ public class GerLoginBean implements Serializable {
 
     public String doLogout() {
         removeActiveSession();
+        baseDao.clearEntityManager();
         this.user = new SecUser();
         this.userLogged = false;
         this.model = null;
-        session.invalidate();
-        session = null;
-        baseDao.clearEntityManager();
-        return "/f/login.xhtml";
+        if(session!=null){
+	        session.invalidate();
+	        session = null;
+        }else{
+        	return "/";
+        }
+        return "/f/login.xhtml?faces-redirect=true";
     }
 
     private HttpSession prepareSession() {
@@ -665,11 +696,15 @@ public class GerLoginBean implements Serializable {
         return session;
     }
 
-    public void updateActiveSession() {
-        Long lastTime = (Long) session.getAttribute("lastTime");
-        if (new Date().getTime() - lastTime < updateTime * 60) {
-            session.setAttribute("activeSession", true);
-        }
+    public void updateActiveSession(String sessionId) {
+    	if(sessionId.equals(session.getId())){    		
+	        Long lastTime = (Long) session.getAttribute("lastTime");
+	        if (new Date().getTime() - lastTime < updateTime * 60) {
+	            session.setAttribute("activeSession", true);
+	        }
+    	}else{
+    		doLogout();
+    	}
     }
     private long updateTime = 60 * 1000;
 
@@ -681,12 +716,16 @@ public class GerLoginBean implements Serializable {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
+            	String sessionId = session.getId();
                 session.setAttribute("activeSession", true);
                 if (user.getContract() != null) {
                     while (userLogged) {
                         try {
                             Thread.sleep(updateTime * 2);
-                            boolean activeSession = session != null ? (Boolean) session.getAttribute("activeSession") : false;
+                            if(session == null || !sessionId.equals(session.getId())){
+                            	return;
+                            }
+                            boolean activeSession = session != null ? Boolean.valueOf(Objects.toString(session.getAttribute("activeSession"),"false")) : false;
                             if (activeSession) {
                                 session.setAttribute("activeSession", false);
                             } else {
@@ -694,14 +733,20 @@ public class GerLoginBean implements Serializable {
                             }
                         } catch (InterruptedException ex) {
                             Logger.getLogger(GerLoginBean.class.getName()).log(Level.SEVERE, null, ex);
+                            break;
                         } catch (java.lang.IllegalStateException ex) {
-                            System.out.println("Exception: " + ex.getMessage());
+                            System.out.println("Exception in checkActiveSession: " + ex.getMessage());
+                            break;
                         }
                     }
                     try {
+                    	removeActiveSession();
                         if (session != null) {
-                            removeActiveSession();
-                            session.invalidate();
+                        	try {
+                        		session.invalidate();								
+							} catch (java.lang.IllegalStateException e) {
+								System.out.println("Exception in checkActiveSession2: " + e.getMessage());
+							}
                             session = null;
                         }
                     } catch (Exception e) {
@@ -746,13 +791,15 @@ public class GerLoginBean implements Serializable {
                 List<AdmServiceModuleContract> moduleList = getUser().getContract().getServiceModuleContractList();
                 for (int i = 0; i < moduleList.size(); i++) {
                     AdmServiceModuleContract module = moduleList.get(i);
-                    moduleIdList = (List<Long>) session.getAttribute("moduleIdList");
+                    moduleIdList = getModuleIdList();
                     if (moduleIdList != null && moduleIdList.contains(module.getServiceModuleContractId())) {
                         try {
                             module = (AdmServiceModuleContract) baseDao.findByObj(module);
-                            module.setCurrentAmount(module.getCurrentAmount() - 1);
-                            baseDao.save(module);
-                            moduleIdList.remove(module.getServiceModuleContractId());
+                            if(module.getCurrentAmount()>0){
+                            	module.setCurrentAmount(module.getCurrentAmount() - 1);
+                            	baseDao.save(module);
+                            	moduleIdList.remove(module.getServiceModuleContractId());                            	
+                            }
                         } catch (Throwable ex) {
                             Logger.getLogger(GenericBean.class.getName()).log(Level.SEVERE, null, ex);
                         }

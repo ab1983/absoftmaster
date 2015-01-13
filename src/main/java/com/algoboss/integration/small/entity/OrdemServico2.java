@@ -24,8 +24,8 @@ import javax.persistence.Temporal;
  * @author Agnaldo
  */
 @NamedQueries({
-    @NamedQuery(name = "findAllOrdemServico",
-            query = "select t from OrdemServico t")
+    @NamedQuery(name = "findAllOrdemServico2",
+            query = "select t from OrdemServico2 t")
 })
 @Entity
 @Table(name = "OS")
@@ -33,8 +33,8 @@ public class OrdemServico2 implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @SequenceGenerator(name = "OrdemServico", sequenceName = "G_OS", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "OrdemServico")
+    @SequenceGenerator(name = "OrdemServico2", sequenceName = "G_OS", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "OrdemServico2")
     @Column(name = "registro")
     private Long registro;
     @Temporal(javax.persistence.TemporalType.DATE)

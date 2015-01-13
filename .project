@@ -3,6 +3,8 @@
 	<name>AB</name>
 	<comment></comment>
 	<projects>
+		<project>Mojarra</project>
+		<project>jboss-jsf-api_2.1_spec-2.0.1.final-sources</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

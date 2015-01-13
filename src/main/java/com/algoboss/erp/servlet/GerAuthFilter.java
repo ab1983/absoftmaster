@@ -4,11 +4,6 @@
  */
 package com.algoboss.erp.servlet;
 
-import com.algoboss.erp.dao.AdmContractDao;
-import com.algoboss.erp.entity.AdmContract;
-import com.algoboss.erp.entity.SecUser;
-import com.algoboss.erp.face.GerLoginBean;
-import com.algoboss.erp.face.SecUserBean;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -17,12 +12,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.faces.application.ResourceHandler;
 import javax.inject.Inject;
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.algoboss.erp.dao.AdmContractDao;
+import com.algoboss.erp.entity.AdmContract;
+import com.algoboss.erp.entity.SecUser;
+import com.algoboss.erp.face.GerLoginBean;
+import com.algoboss.erp.face.SecUserBean;
 
 /**
  * @author Agnaldo
@@ -86,9 +93,21 @@ public class GerAuthFilter implements Filter {
                         //res.setDateHeader("Last-Modified", System.currentTimeMillis() - 2419200000L); // 1 month in past.
                         //res.setHeader("Cache-Control", "public"); // Secure caching
                     }
-                    chain.doFilter(request, response);
+                    if(url.contains("/login.xhtml") && req.getParameterMap().isEmpty()){
+                    	if(!req.getSession().isNew()){
+                    		req.getSession().invalidate();
+                    		//req.getSession(true);                    		
+                    	}
+                    }
+                    chain.doFilter(request, response);                    	
                 } else {
-                    res.sendRedirect(loginUrl);
+                	if(url.contains("/index.xhtml")){
+                        response.getWriter().print(xmlPartialRedirectToPage(req, "/"));
+                        response.flushBuffer();
+                	}else{
+                		req.getSession().invalidate();                		
+                		res.sendRedirect(loginUrl);                		
+                	}
                     //chain.doFilter(request, response);
                 }
             }
@@ -114,7 +133,13 @@ public class GerAuthFilter implements Filter {
             t.printStackTrace();
         }
     }
-
+    private String xmlPartialMsgReconect(HttpServletRequest request, String page) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version='1.0' encoding='UTF-8'?>");
+        sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\"><script>alert('oi')</script></html>");
+        return sb.toString();
+    }
+    
     private String xmlPartialRedirectToPage(HttpServletRequest request, String page) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version='1.0' encoding='UTF-8'?>");

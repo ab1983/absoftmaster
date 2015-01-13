@@ -273,7 +273,9 @@ public class AdmContractBean extends GenericBean<AdmContract> {
     @Override
     public void doBeanSave() {
         try {
-            bean.setRepresentative(loginBeany.getUser().getRepresentative());
+        	if(bean.getRepresentative()==null){
+        		bean.setRepresentative(loginBeany.getUser().getRepresentative());        		
+        	}
             bean.getCompanyList().add(company);
             user.setContract(bean);
             user.setAdministrator(true);

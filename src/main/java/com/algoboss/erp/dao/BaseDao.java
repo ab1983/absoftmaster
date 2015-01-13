@@ -7,6 +7,7 @@ package com.algoboss.erp.dao;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -56,14 +57,14 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @author Agnaldo
  */
 @Stateless
-//@TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionManagement(TransactionManagementType.CONTAINER)
 public class BaseDao implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2470841392919888320L;
-	@Resource(/*shareable = true*/)
+	@Resource(shareable = true)
 	private UserTransaction userTransaction;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION, properties = { @PersistenceProperty(name = "javax.persistence.sharedCache.mode", value = "ENABLE_SELECTIVE") }, unitName = "ERPPU")
 	private EntityManager entityManager;
@@ -73,7 +74,9 @@ public class BaseDao implements Serializable {
 	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU2")
 	private EntityManager entityManagerSmall_2;
 	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU3")
-	private EntityManager entityManagerSmall_3;	
+	private EntityManager entityManagerSmall_3;
+	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU4")
+	private EntityManager entityManagerSmall_4;	
 	private EntityTransaction transacao;
 	private boolean manualTransaction = false;
 	@Inject private GerLoginBean loginBean;
@@ -95,13 +98,46 @@ public class BaseDao implements Serializable {
 	}
 
 	public EntityManager getEntityManagerSmall() {
-		if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
-			entityManagerSmall = entityManagerSmall_1;
-		}else{
-			entityManagerSmall = entityManagerSmall_3;			
-		}		
-		return entityManagerSmall;
+		try {
+			if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
+				entityManagerSmall = entityManagerSmall_1;
+			}else if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1766){
+				entityManagerSmall = entityManagerSmall_2;
+			}else  if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1765){
+				entityManagerSmall = entityManagerSmall_3;			
+			}else  if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1767){
+				entityManagerSmall = entityManagerSmall_4;			
+			}else {
+				entityManagerSmall = entityManagerSmall_1;			
+			}	
+			return entityManagerSmall;			
+		} catch (Exception e) {
+			return null;
+		}
 	}
+	
+
+	public Connection getConnectionSmall() {
+		try {
+			InitialContext ic = new InitialContext();
+			Connection conn=  null;		
+			DataSource ds = null;
+			if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
+				ds = (DataSource)ic.lookupLink("java:/small1");		
+			}else if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1766){
+				ds = (DataSource)ic.lookupLink("java:/small2");	
+			}else if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1765){
+				ds = (DataSource)ic.lookupLink("java:/small3");	
+			}else if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1767){
+				ds = (DataSource)ic.lookupLink("java:/small4");	
+			}else{
+				ds = (DataSource)ic.lookupLink("java:/small1");	
+			}		
+			return ds.getConnection();			
+		} catch (Exception e) {
+			return null;
+		}
+	}	
 
 	public GerLoginBean getLoginBean() {
 		return loginBean;
@@ -701,7 +737,35 @@ public class BaseDao implements Serializable {
 			return objectList;
 		}
 	}
+	public Long findEntityObjectSeqnum(String resultClass, Long siteId) {
+		Throwable t = null;
+		long seqnum = 0L;
+		try {
+			if (siteId != null) {
+				System.out.println(resultClass);
+				// entityManager = JpaUtil.getEntityManager();
+				// transacao = entityManager.getTransaction();
+				// transacao.begin();
+				// Object ob =
+				// entityManager.createQuery("select t from PurSolicitation t").getSingleResult();
+				seqnum = (Long) entityManager.createQuery("select max(t.seqnum) from DevEntityObject t where t.instantiatesSite.instantiatesSiteId = ?1 and t.entityClass.name = ?2").setParameter(1, siteId).setParameter(2, resultClass).getSingleResult();
 
+			}
+
+			// transacao.commit();
+		} catch (Exception e) {
+			t = e;
+			// e.printStackTrace();
+			seqnum = 0L;
+			// transacao.rollback();
+		} finally {
+			// if (entityManager != null && entityManager.isOpen()) {
+			// entityManager.close();
+			// }
+			return seqnum + 1;
+		}
+
+	}
 	public String generateEntityName(String entityClassName) {
 		Throwable t = null;
 		String entityName = entityClassName;
@@ -1239,8 +1303,15 @@ public class BaseDao implements Serializable {
 	}
 	
 	public void clearEntityManager(){
-		entityManager.getEntityManagerFactory().getCache().evictAll();
-		getEntityManagerSmall().getEntityManagerFactory().getCache().evictAll();
+		try {
+			entityManager.getEntityManagerFactory().getCache().evictAll();
+			EntityManager emSmall = getEntityManagerSmall();
+			if(emSmall!=null){
+				emSmall.getEntityManagerFactory().getCache().evictAll();			
+			}
+		} catch (javax.persistence.PersistenceException e) {
+			// TODO: handle exception
+		} 
 	}
 
 }

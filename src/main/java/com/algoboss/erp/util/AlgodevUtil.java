@@ -4,6 +4,7 @@
  */
 package com.algoboss.erp.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -13,8 +14,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIComponentBase;
 
 import com.algoboss.erp.entity.DevComponentContainer;
 import com.algoboss.erp.entity.DevEntityClass;
@@ -22,7 +26,10 @@ import com.algoboss.erp.entity.DevEntityObject;
 import com.algoboss.erp.entity.DevEntityPropertyDescriptor;
 import com.algoboss.erp.entity.DevEntityPropertyDescriptorConfig;
 import com.algoboss.erp.entity.DevPrototypeComponentChildren;
+import com.algoboss.erp.entity.DevPrototypeComponentProperty;
+import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.face.AdmAlgoappBean;
+import com.algoboss.erp.face.AdmAlgodevBean;
 import com.algoboss.integration.small.business.SmallUtil;
 
 /**
@@ -30,6 +37,7 @@ import com.algoboss.integration.small.business.SmallUtil;
  * @author Agnaldo
  */
 public class AlgodevUtil {
+	public static UIComponent elementPanel;
 	public static Map<String, String> dictionary = new HashMap<>();
 	public static List<DevEntityClass> entityClassList = new ArrayList<DevEntityClass>();
 	public static Map<String, DevEntityClass> entityClassMap = new LinkedHashMap<String, DevEntityClass>();
@@ -37,7 +45,7 @@ public class AlgodevUtil {
 	private static void generateEntityClassMap() {
 		for (Iterator iterator = entityClassList.iterator(); iterator.hasNext();) {
 			DevEntityClass devEntityClass = (DevEntityClass) iterator.next();
-			entityClassMap.put(devEntityClass.getName(), devEntityClass);
+			entityClassMap.put(AlgoUtil.normalizerName(devEntityClass.getName().substring(devEntityClass.getName().indexOf("_")+1)), devEntityClass);
 		}
 	}
 
@@ -48,7 +56,7 @@ public class AlgodevUtil {
 		for (int i = 0; i < charArray.length; i++) {
 			char c = charArray[i];
 			String cStr = "";
-			if (c == ';' || c == ',' || c == '.' || c == '\n' || c == '\t' || c == '\r') {
+			if (c == ';' || c == ',' || /*c == '.' ||*/ c == '\n' || c == '\t' || c == '\r') {
 				if (!isString) {
 					continue;
 				}
@@ -299,6 +307,7 @@ public class AlgodevUtil {
 		dictionary = new HashMap();
 		dictionary.put("STRING", "");
 		dictionary.put("STRING:[length=long]", "_");
+		dictionary.put("STRING:[length=short]", "");
 		dictionary.put("INTEGER", "+");
 		dictionary.put("FLOAT", "$");
 		dictionary.put("DATE", "%");
@@ -402,4 +411,59 @@ public class AlgodevUtil {
 		}
 		return result;
 	}
+	
+    public static void updateChildren(List<UIComponent> children, UIComponent comp) throws Throwable {
+        boolean notFound = true;
+        for (int i = 0; i < children.size(); i++) {
+            UIComponent compAux = children.get(i);
+            if (compAux.getId().equals(comp.getId())) {
+                children.set(i, comp);
+                notFound = false;
+                break;
+            }
+        }
+        if (notFound) {
+            children.add(comp);
+        }
+    }
+    public static void generateElementsContainerMap(Map<String, List<UIComponent>> elementsContainerMap, DevRequirement bean) {
+        try {
+        	List<DevComponentContainer> componentContainerList = bean.getComponentContainerList();
+        	List<DevComponentContainer> componentContainerListAux = new ArrayList<DevComponentContainer>();
+            for (Map.Entry<String, List<UIComponent>> object : elementsContainerMap.entrySet()) {
+                String object1 = object.getKey();
+                List<UIComponent> elementList = object.getValue();
+                List<DevPrototypeComponentChildren> children = new ArrayList<DevPrototypeComponentChildren>();
+                for (int i = 0; i < elementList.size(); i++) {
+                    UIComponent comp = elementList.get(i);
+                    Field f2 = UIComponentBase.class.getDeclaredField("pdMap");
+                    f2.setAccessible(true);
+                    List<DevPrototypeComponentProperty> property = ComponentFactory.componentSerializer(f2, comp, null, false);
+                    children.add(new DevPrototypeComponentChildren(comp.getClass().getName(), property));
+                }
+                DevComponentContainer componentContainer = null;
+                for (DevComponentContainer devComponentContainer : componentContainerList) {
+                    if (devComponentContainer.getName().equals(object1)) {
+                        //devComponentContainer.getPrototypeComponentChildrenList().clear();
+                        devComponentContainer.setPrototypeComponentChildrenList(children);
+                        componentContainer = devComponentContainer;
+                        break;
+                    }
+                }
+                if (componentContainer == null) {
+                    componentContainer = new DevComponentContainer();
+                    componentContainer.setName(object1);
+                    componentContainer.setPrototypeComponentChildrenList(children);
+                    //bean.getComponentContainerList().add(componentContainer);
+                }
+                componentContainerListAux.add(componentContainer);
+                elementsContainerMap.put(componentContainer.getName(), AlgodevUtil.generateComponentList(componentContainer));
+            }
+            bean.setComponentContainerList(componentContainerListAux);
+        } catch (Throwable ex) {
+            Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+        }
+    }
+    
 }

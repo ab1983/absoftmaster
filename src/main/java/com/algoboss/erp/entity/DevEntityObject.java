@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import javax.persistence.*;
 
+import com.algoboss.erp.dao.BaseDao;
 import com.algoboss.erp.face.GerLoginBean;
 
 /**
@@ -88,15 +89,22 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
         return hasValue;
     }
     public DevEntityPropertyValue getPropObj(String propName) {	
-        return $(this.getEntityClass().getName()+"."+propName);
+    	DevEntityPropertyValue prop = $(this.getEntityClass().getName()+"."+propName);
+    	return prop!=null && prop.getEntityPropertyDescriptor()!=null?prop:null;
     }
-    
     public Object getProp(String propName) {
+    	return getProp(propName,null);
+    }    
+    public Object getProp(String propName, Object defaultValue) {
     	DevEntityPropertyValue propObj = getPropObj(propName);
     	if(propObj==null){
     		throw new IllegalArgumentException("Property "+propName+" not found in "+this.getEntityClass().getName()+".");
     	}
-        return getPropObj(propName).getVal();
+        Object value = getPropObj(propName).getVal();
+        if(value == null){
+        	value = defaultValue;
+        }
+        return value;
     }
 
     public String $date(String attr, String format) {
@@ -145,6 +153,14 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
     
     private void loadProperties(DevEntityObject entObj, List<DevEntityPropertyDescriptor> entityPropertyDescriptorList){
     	if(entObj!=null){
+    		if(entObj.getObjectParentId()!=null){
+    			DevEntityPropertyValue value = new DevEntityPropertyValue();
+    			DevEntityPropertyDescriptor prop = new DevEntityPropertyDescriptor();
+    			prop.setPropertyType("INTEGER");
+    			value.setEntityPropertyDescriptor(prop);    			
+    			value.setPropertyValue(entObj.getObjectParentId());
+    			entObj.entityPropertyValueMap.put("objectParent", value);    			
+    		}
 	        for (DevEntityPropertyDescriptor prop : entityPropertyDescriptorList) {
 	            DevEntityPropertyValue value = null;
 	            if(!entObj.entityPropertyValueMap.containsKey(prop.getPropertyName())){
@@ -190,7 +206,19 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
         }
         return null;
     }
+
     
+    public Long getId() {
+        return entityObjectId;
+    }  
+
+    public Long getObjectParentId() {
+    	Long parentId = null;
+    	if(propertyParent!=null){
+    		parentId = propertyParent.getObjectParent().getId();
+    	}
+        return parentId;
+    }    
     
     public Long getEntityObjectId() {
         return entityObjectId;
@@ -299,7 +327,23 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
 	@Override
 	public void updateProperty() {
         this.setUser(getFacadeWithJNDI(GerLoginBean.class).getUser());
-		super.updateProperty();
+        if (this.instantiatesSite == null) {
+        	this.setInstantiatesSite(getFacadeWithJNDI(GerLoginBean.class).getInstantiatesSiteContract());
+            /*try {
+                BaseDao dao = getFacadeWithJNDI(BaseDao.class);
+				this.setInstantiatesSite((AdmInstantiatesSite)dao.findByObj(getFacadeWithJNDI(GerLoginBean.class).getInstantiatesSiteContract(), true));
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+        }
+        if (this.seqnum == null) {
+            this.setSeqnum(getFacadeWithJNDI(BaseDao.class).findEntityObjectSeqnum(this.entityClass.getName(), this.instantiatesSite.getInstantiatesSiteId()));
+            DevEntityPropertyValue prop = getPropObj("seqnum");
+            if(prop!=null){
+            	prop.setPropertyValue(this.seqnum);            	
+            }
+        }  
 	}
     
     

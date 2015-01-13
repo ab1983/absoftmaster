@@ -1,8 +1,14 @@
 package com.algoboss.integration.small.entity;
 
 import java.io.Serializable;
-import javax.persistence.*;
-import java.math.BigDecimal;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedQuery;
+import javax.persistence.SequenceGenerator;
 
 
 /**
@@ -10,19 +16,20 @@ import java.math.BigDecimal;
  * 
  */
 @Entity
-@NamedQuery(name="Itens002.findAll", query="SELECT i FROM Itens002 i")
+@NamedQuery(name = "Itens002.findAll", query = "SELECT i FROM Itens002 i")
 public class Itens002 implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@SequenceGenerator(name = "Itens002", sequenceName = "g_Itens002", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "Itens002")
 	private String registro;
 
-	@Column(name="aliq_cofins")
-	private BigDecimal aliqCofins;
+	@Column(name = "aliq_cofins")
+	private double aliqCofins;
 
-	@Column(name="aliq_pis")
-	private BigDecimal aliqPis;
+	@Column(name = "aliq_pis")
+	private double aliqPis;
 
 	private double base;
 
@@ -30,13 +37,13 @@ public class Itens002 implements Serializable {
 
 	private String codigo;
 
-	@Column(name="cst_icms")
+	@Column(name = "cst_icms")
 	private String cstIcms;
 
-	@Column(name="cst_ipi")
+	@Column(name = "cst_ipi")
 	private String cstIpi;
 
-	@Column(name="cst_pis_cofins")
+	@Column(name = "cst_pis_cofins")
 	private String cstPisCofins;
 
 	private double custo;
@@ -67,17 +74,17 @@ public class Itens002 implements Serializable {
 
 	private double unitario;
 
-	private BigDecimal vbc;
+	private double vbc;
 
-	private BigDecimal vbcst;
+	private double vbcst;
 
-	private BigDecimal vicms;
+	private double vicms;
 
-	private BigDecimal vicmsst;
+	private double vicmsst;
 
-	private BigDecimal vipi;
+	private double vipi;
 
-	private BigDecimal vpreco;
+	private double vpreco;
 
 	public Itens002() {
 	}
@@ -90,19 +97,19 @@ public class Itens002 implements Serializable {
 		this.registro = registro;
 	}
 
-	public BigDecimal getAliqCofins() {
+	public double getAliqCofins() {
 		return this.aliqCofins;
 	}
 
-	public void setAliqCofins(BigDecimal aliqCofins) {
+	public void setAliqCofins(double aliqCofins) {
 		this.aliqCofins = aliqCofins;
 	}
 
-	public BigDecimal getAliqPis() {
+	public double getAliqPis() {
 		return this.aliqPis;
 	}
 
-	public void setAliqPis(BigDecimal aliqPis) {
+	public void setAliqPis(double aliqPis) {
 		this.aliqPis = aliqPis;
 	}
 
@@ -266,51 +273,51 @@ public class Itens002 implements Serializable {
 		this.unitario = unitario;
 	}
 
-	public BigDecimal getVbc() {
+	public double getVbc() {
 		return this.vbc;
 	}
 
-	public void setVbc(BigDecimal vbc) {
+	public void setVbc(double vbc) {
 		this.vbc = vbc;
 	}
 
-	public BigDecimal getVbcst() {
+	public double getVbcst() {
 		return this.vbcst;
 	}
 
-	public void setVbcst(BigDecimal vbcst) {
+	public void setVbcst(double vbcst) {
 		this.vbcst = vbcst;
 	}
 
-	public BigDecimal getVicms() {
+	public double getVicms() {
 		return this.vicms;
 	}
 
-	public void setVicms(BigDecimal vicms) {
+	public void setVicms(double vicms) {
 		this.vicms = vicms;
 	}
 
-	public BigDecimal getVicmsst() {
+	public double getVicmsst() {
 		return this.vicmsst;
 	}
 
-	public void setVicmsst(BigDecimal vicmsst) {
+	public void setVicmsst(double vicmsst) {
 		this.vicmsst = vicmsst;
 	}
 
-	public BigDecimal getVipi() {
+	public double getVipi() {
 		return this.vipi;
 	}
 
-	public void setVipi(BigDecimal vipi) {
+	public void setVipi(double vipi) {
 		this.vipi = vipi;
 	}
 
-	public BigDecimal getVpreco() {
+	public double getVpreco() {
 		return this.vpreco;
 	}
 
-	public void setVpreco(BigDecimal vpreco) {
+	public void setVpreco(double vpreco) {
 		this.vpreco = vpreco;
 	}
 

@@ -5,7 +5,12 @@
 package com.algoboss.erp.entity;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -136,9 +141,20 @@ public class AdmContract implements Serializable {
     }
 
     public void setSystemLogo(String systemLogo) {    	
-    	if(systemLogo!=null && new File(systemLogo).exists()){
-    		this.systemLogo = systemLogo;    		
-    	}   
+    	try {
+    		if(systemLogo.isEmpty()){
+    			this.systemLogo = null;
+    		}
+			if(systemLogo!=null && (new File(systemLogo).exists()  || ((HttpURLConnection)new URL(systemLogo).openConnection()).getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND)){
+				this.systemLogo = systemLogo;    		
+			}
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}   
     }
     
     public List<AdmCompany> getCompanyList() {

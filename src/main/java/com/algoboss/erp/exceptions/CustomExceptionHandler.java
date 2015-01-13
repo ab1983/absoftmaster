@@ -19,9 +19,12 @@ import javax.faces.context.Flash;
 import javax.faces.event.ExceptionQueuedEvent;
 import javax.faces.event.ExceptionQueuedEventContext;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.algoboss.erp.face.GerLoginBean;
+import com.sun.faces.util.Util;
 
 /**
  *
@@ -43,6 +46,7 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
     @Override
     public void handle() throws FacesException {
+    	loadLogin();
         Iterator iterator = getUnhandledExceptionQueuedEvents().iterator();
 
         while (iterator.hasNext()) {
@@ -64,31 +68,48 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
                 NavigationHandler navigationHandler = fc.getApplication().getNavigationHandler();
                 
-                navigationHandler.handleNavigation(fc, null, "error?faces-redirect=true");
+                
 
                 try {
-                    if (throwable.getMessage()==null && fc.getExternalContext() != null) {
+                    if (fc.getExternalContext() != null && (throwable.getMessage()==null || "null source".contains(throwable.getMessage()))) {
                         //fc.getExternalContext().redirect("/f/error.xhtml");
-                        navigationHandler.handleNavigation(fc, null, "/f/login.xhtml?faces-redirect=true");
+                    	HttpServletRequest req = (HttpServletRequest) fc.getExternalContext().getRequest();
+                    	//req.getSession().invalidate();
+                    	//req.getSession(true);
+                    	//navigationHandler.handleNavigation(fc, null, "/f/login.xhtml?faces-redirect=true");
+                    	HttpServletResponse res = (HttpServletResponse) fc.getExternalContext().getResponse();
+                    	res.sendRedirect(req.getContextPath() + "/f/login.xhtml");
+                    	return;
+                    }else{
+                    	navigationHandler.handleNavigation(fc, null, "error?faces-redirect=true");
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(CustomExceptionHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 fc.renderResponse();
             }catch(javax.enterprise.context.ContextNotActiveException ex){
-                ExternalContext contextExt = FacesContext.getCurrentInstance().getExternalContext();
-                contextExt.getFlash().clear();
-                FacesContext.getCurrentInstance().getViewRoot().getChildren().clear();
-                //loginBean.getSessionTimeout()
-            	throw new IllegalStateException("javax.enterprise.context.ContextNotActiveException in Custom Exception.");
+            	//FacesContext.getCurrentInstance().getApplication().getELResolver().getValue(FacesContext.getCurrentInstance().getELContext(), null, "#{gerLoginBean}");
+            	
+                //ExternalContext contextExt = FacesContext.getCurrentInstance().getExternalContext();
+                //contextExt.getFlash().clear();
+                //FacesContext.getCurrentInstance().getApplication().getViewHandler().initView(FacesContext.getCurrentInstance());
+                //Util.getStateManager(FacesContext.getCurrentInstance()).
+                //FacesContext.getCurrentInstance().getViewRoot().getChildren().clear();
+            	//throw new IllegalStateException("javax.enterprise.context.ContextNotActiveException in Custom Exception.",ex);
+            	//throw new IllegalStateException("javax.enterprise.context.ContextNotActiveException in Custom Exception.",ex);
             }catch (Throwable ex) {            
                 Logger.getLogger(CustomExceptionHandler.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
+            	//loginBean.doLogout();
                 iterator.remove();
             }
         }
 
         // Let the parent handle the rest
         getWrapped().handle();
+    }
+    
+    private void loadLogin(){
+    	loginBean = FacesContext.getCurrentInstance().getApplication().evaluateExpressionGet(FacesContext.getCurrentInstance(), "#{gerLoginBean}", GerLoginBean.class);
     }
 }

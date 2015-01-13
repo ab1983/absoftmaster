@@ -7,7 +7,7 @@
     <p:remoteCommand immediate="true" name="removeEntityNode" action="#{admAlgodevBean.removeEntityNode()}" /> 
     <p:outputPanel id="configPanel" styleClass="configPanel">
         <p:outputPanel styleClass="entityDlg">
-            <p:dialog rendered="#{admAlgodevBean.entity=='null' || (admAlgodevBean.entityPropertyDescriptor.propertyType!=null and 'ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.contains(admAlgodevBean.entityPropertyDescriptor.propertyType))}" widgetVar="entityClassListDlg" styleClass="configDlg" header="#{msg['selectClass']}" resizable="false" dynamic="false" width="400" height="300" closable="false" visible="true">
+            <p:dialog rendered="#{admAlgodevBean.entity=='null' || admAlgodevBean.entity.entityPropertyDescriptorList.isEmpty() || (admAlgodevBean.entityPropertyDescriptor.propertyType!=null and 'ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.contains(admAlgodevBean.entityPropertyDescriptor.propertyType))}" widgetVar="entityClassListDlg" styleClass="configDlg" header="#{msg['selectClass']}" resizable="false" dynamic="false" width="400" height="300" closable="false" visible="true">
                 <p:dataTable rowKey="#{entity.entityClassId}" value="#{admAlgodevBean.entityClassList}" var="entity" selectionMode="single" selection="#{admAlgodevBean.entityNodeSelected}" style="width: 300px;"  scrollable="true"  scrollWidth="300px" scrollHeight="200">
                     <p:column filterBy="#{entity.label!=null?entity.label:entity.name}" filterMatchMode="contains">  
                         <f:facet name="header">  
@@ -131,7 +131,8 @@
         </f:facet>     
         <p:focus for="entityLabel"/>       
         <p:remoteCommand  name="configEntity" action="#{admAlgodevBean.editEntityNode()}" update="@(.entityDlg)"/>
-        <p:remoteCommand  name="selectConfigEntity" process="@(.itemPanel)" actionListener="#{(admAlgodevBean.cancelEditItem())}" update="@(.configPanel)" oncomplete="entityClassListDlg.show();buttonApplyEntityProp.jq.show();buttonApplyEntityClas.jq.hide();"/>        
+        <p:remoteCommand  name="selectConfigEntity" process="@(.itemPanel)" actionListener="#{(admAlgodevBean.cancelEditItem())}" update="@(.configPanel)" oncomplete="entityClassListDlg.show();buttonApplyEntityProp.jq.show();buttonApplyEntityClas.jq.hide();"/>
+        <p:remoteCommand  name="selectConfigEntityClass" process="@(.itemPanel)" actionListener="#{(admAlgodevBean.cancelEditItem())}" update="@(.configPanel)" oncomplete="entityClassListDlg.show();buttonApplyEntityProp.jq.hide();buttonApplyEntityClas.jq.show();"/>        
         <div id="entityDlgDiv">
             <p:outputPanel styleClass="entityPanel" binding="#{entityPanel}">
                 <p:dialog rendered="#{admAlgodevBean.actualConstructorTabIndex == 1}"  widgetVar="entityClassConfigDlg" styleClass="entityConfigPanel" header="#{msg['configuration']}" resizable="false" dynamic="true" width="300" height="150" closable="true" visible="false">
@@ -234,7 +235,7 @@
                 </p:fieldset>
                 <p:commandButton styleClass="elementPropertyApply entityPanel" rendered="#{admAlgodevBean.entityClassNodeList.size()>1}" value="#{msg['apply']}" action="#{admAlgodevBean.applyEntityNode()}" update="@(.entityDlg)" oncomplete="(#{admAlgodevBean.entityClassNodeList.size()}==1?updateProjectProperty():'')"/>
                 <p:commandButton styleClass="elementPropertyApply entityPanel" rendered="#{admAlgodevBean.entity.entityClassId!=null}" value="#{msg['exclude']}" action="#{admAlgodevBean.doEntityRemove(admAlgodevBean.entity)}" update="@(.entityDlg)"/>
-                <p:commandButton styleClass="elementPropertyApply entityPanel" widgetVar="cancelEntityBtn" value="#{msg['cancel']}" action="#{admAlgodevBean.removeEntityNode()}" update="@(.entityDlg)"/>
+                <p:commandButton styleClass="elementPropertyApply entityPanel" widgetVar="cancelEntityBtn" value="#{msg['cancel']}" action="#{admAlgodevBean.removeEntityNode()}" update="@(.entityDlg)" oncomplete="#{admAlgodevBean.entityClassNodeList.size() le 1?'$(document).ready(function() {selectConfigEntityClass();})':''}"/>
                 <p:remoteCommand name="updateEntity" update="@(.entityDlg)"/>
                 <p:remoteCommand name="updateConfigPanel" update="@(.configGrid)" immediate="true" actionListener="#{admAlgodevBean.resetForm('tabView:'.concat(createProjectForm.id).concat(':tabViewConfig:configPanel'))}"/>
             </p:outputPanel>

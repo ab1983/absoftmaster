@@ -1,7 +1,9 @@
 package com.algoboss.integration.small.entity;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -16,6 +18,8 @@ public class Estoque implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+    @SequenceGenerator(name = "Estoque", sequenceName = "g_estoque", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "Estoque")		
 	private String registro;
 
 	@Column(name="aliq_cofins_entrada")

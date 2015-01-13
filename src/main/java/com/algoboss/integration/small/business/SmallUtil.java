@@ -268,4 +268,31 @@ public class SmallUtil {
 		}
 		return devEntityObjectReturn;
 	}
+	public static DevEntityObject getVeiculo(Object placa,AdmAlgoappBean app){
+		DevEntityObject devEntityObjectReturn = null;
+		if (!Objects.toString(placa, "").isEmpty()) {
+			List<DevEntityObject> transportadoras = app.doBeanList("1236_transpor");
+			for (DevEntityObject devEntityObject : transportadoras) {
+				if (placa.equals(devEntityObject.getProp("placa"))) {
+					devEntityObjectReturn = devEntityObject;
+					break;
+				}
+			}
+		}
+		return devEntityObjectReturn;
+	}
+	public static DevEntityObject getOperacao(Object nomeOperacao, AdmAlgoappBean app) {
+		DevEntityObject devEntityObjectReturn = null;
+		if (!Objects.toString(nomeOperacao, "").isEmpty()) {
+			List<DevEntityObject> cfops = app.doBeanList("1236_icm");
+			for (DevEntityObject devEntityObject : cfops) {
+				if (nomeOperacao.equals(devEntityObject.getProp("nome"))) {
+					devEntityObjectReturn = devEntityObject;
+					break;
+				}
+			}
+		}
+		return devEntityObjectReturn;
+	}
+	
 }

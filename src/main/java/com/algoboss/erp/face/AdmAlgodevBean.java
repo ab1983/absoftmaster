@@ -197,7 +197,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                 entityPropertyDescriptor.setEntityPropertyDescriptorConfigList(entityPropertyDescriptorConfigList);
             }
             entityPropertyDescriptor = new DevEntityPropertyDescriptor();
-            entityPropertyDescriptorConfigList = new ArrayList<DevEntityPropertyDescriptorConfig>();
+            entityPropertyDescriptorConfigList = null;
         }
     }
 
@@ -259,6 +259,15 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
         if (!entityClassNodeList.isEmpty()) {
             propertyTypeNodeMap.remove(entityClassNodeList.size());
             entityClassNodeList.remove(entityClassNodeList.size() - 1);
+        }
+        if(entityClassNodeList.isEmpty()){
+            entity = new DevEntityClass();
+            entitySelected = entity;
+            entityPropertyDescriptorConfigList = null;
+            entityClassNodeList.clear();
+            propertyTypeNodeMap.clear();
+            actualServiceDescription = "";
+            entityClassNodeList.add(entity);            
         }
         entityPropertyDescriptor = new DevEntityPropertyDescriptor();
     }
@@ -364,6 +373,9 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
             entitySelected = entity;
             setPropertySelectedListCollection(entity.getEntityPropertyDescriptorList());
             setPropertySelectedFormCollection(entity.getEntityPropertyDescriptorList());
+            if(!entityClassNodeList.isEmpty()){
+            	entityClassNodeList.set(entityClassNodeList.size()-1,entity);
+            }
             //algoRep.setEntity(entity);
         }
         this.entity = entity;
@@ -391,7 +403,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
 
     public void setEntityPropertyDescriptor(DevEntityPropertyDescriptor entityPropertyDescriptor) {
         this.entityPropertyDescriptor = entityPropertyDescriptor;
-        entityPropertyDescriptorConfigList = new ArrayList<DevEntityPropertyDescriptorConfig>();
+        entityPropertyDescriptorConfigList = null;
     }
 
     public UIComponent getAlgoContainer() {
@@ -469,10 +481,10 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                 UIComponent container = elementSelected.getParent();
                 if (container.getId().equals(compTarget.getId())) {
                     removeElement(elementSelected);
-                    updateChildren(elements, cloned);
+                    AlgodevUtil.updateChildren(elements, cloned);
                 } else {
                     container.getChildren().remove(elementSelected);
-                    updateChildren(container.getChildren(), cloned);
+                    AlgodevUtil.updateChildren(container.getChildren(), cloned);
                 }
                 //cloned.setId(elementSelected.getId());
                 elementSelected = cloned;
@@ -608,7 +620,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
         entity = new DevEntityClass();
         entitySelected = entity;
         entityPropertyDescriptor = new DevEntityPropertyDescriptor();
-        entityPropertyDescriptorConfigList = new ArrayList<DevEntityPropertyDescriptorConfig>();
+        entityPropertyDescriptorConfigList = null;
         entityClassNodeList.clear();
         propertyTypeNodeMap.clear();
         entityNodeSelected = entity;
@@ -653,7 +665,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
 	            entity = bean.getEntityClass();
 	            entitySelected = entity;
 	            entityNodeSelected = entity;
-	            entityPropertyDescriptorConfigList.clear();
+	            entityPropertyDescriptorConfigList = null;
 	            entityClassNodeList.clear();
 	            propertyTypeNodeMap.clear();
 	            actualServiceDescription = bean.getService().getDescription();
@@ -758,7 +770,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
             }
 
             if (autorizationCheck() && msgStr.isEmpty()) {
-                generateElementsContainerMap(elementsContainerMap, bean);
+                AlgodevUtil.generateElementsContainerMap(elementsContainerMap, bean);
                 //this.bean.setFieldContainerList(algoRep.getFieldContainerList());
                 bean.setEntityClass(entity);
                 bean.getService().setMainAddress("#{app.indexBean()}");
@@ -843,46 +855,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
         }
     }
 
-    private void generateElementsContainerMap(Map<String, List<UIComponent>> elementsContainerMap, DevRequirement bean) {
-        try {
-        	List<DevComponentContainer> componentContainerList = bean.getComponentContainerList();
-        	List<DevComponentContainer> componentContainerListAux = new ArrayList<DevComponentContainer>();
-            for (Map.Entry<String, List<UIComponent>> object : elementsContainerMap.entrySet()) {
-                String object1 = object.getKey();
-                List<UIComponent> elementList = object.getValue();
-                List<DevPrototypeComponentChildren> children = new ArrayList<DevPrototypeComponentChildren>();
-                for (int i = 0; i < elementList.size(); i++) {
-                    UIComponent comp = elementList.get(i);
-                    Field f2 = UIComponentBase.class.getDeclaredField("pdMap");
-                    f2.setAccessible(true);
-                    List<DevPrototypeComponentProperty> property = ComponentFactory.componentSerializer(f2, comp, null, false);
-                    children.add(new DevPrototypeComponentChildren(comp.getClass().getName(), property));
-                }
-                DevComponentContainer componentContainer = null;
-                for (DevComponentContainer devComponentContainer : componentContainerList) {
-                    if (devComponentContainer.getName().equals(object1)) {
-                        //devComponentContainer.getPrototypeComponentChildrenList().clear();
-                        devComponentContainer.setPrototypeComponentChildrenList(children);
-                        componentContainer = devComponentContainer;
-                        break;
-                    }
-                }
-                if (componentContainer == null) {
-                    componentContainer = new DevComponentContainer();
-                    componentContainer.setName(object1);
-                    componentContainer.setPrototypeComponentChildrenList(children);
-                    //bean.getComponentContainerList().add(componentContainer);
-                }
-                componentContainerListAux.add(componentContainer);
-                elementsContainerMap.put(componentContainer.getName(), AlgodevUtil.generateComponentList(componentContainer));
-            }
-            bean.setComponentContainerList(componentContainerListAux);
-        } catch (Throwable ex) {
-            Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-        }
-    }
-
+ 
     public void onSort() {
         try {
 
@@ -953,13 +926,13 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                 }
                 if (compTargetElementContainer != null) {
                     cloned = ComponentFactory.componentClone(comp3, false);
-                    updateChildren(compTargetElementContainer.getChildren(), cloned);
+                    AlgodevUtil.updateChildren(compTargetElementContainer.getChildren(), cloned);
 
                     if (cloned != null) {
                         ComponentFactory.updateElementProperties(f2, cloned, map, elementPropertiesSelected);
                     }
                     if (elementContainerClientId.contains("algoContainer")) {
-                        updateChildren(elements, cloned);
+                    	AlgodevUtil.updateChildren(elements, cloned);
                     } else {
                         UIComponent parentContainer = compTargetElementContainer.getParent();
                         compTargetElementContainer = ComponentFactory.componentClone(compTargetElementContainer, true);
@@ -968,7 +941,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                         }
                         parentContainer.getChildren().add(compTargetElementContainer);
                         removeElement(comp3);
-                        updateChildren(elements, compTargetElementContainer);
+                        AlgodevUtil.updateChildren(elements, compTargetElementContainer);
                     }
                     createByConstructor(map, cloned, compTarget);
 
@@ -996,7 +969,9 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
     				//String[] strArray = stringToArray(je.getAsJsonArray().get(0).getAsString());
     				entity = AlgodevUtil.arrayToEntity(je,entity);
     				entity.setLabel(bean.getRequirementName());
-    				entityClassNodeList.add(entity);
+    				if(!entityClassNodeList.contains(entity)){
+    					entityClassNodeList.add(entity);    					
+    				}
     				//entity = entitySelected;
     				
     				propertySelectedListCollection.addAll(entity.getEntityPropertyDescriptorList());
@@ -1083,22 +1058,22 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
     	createByConstructor(map, cloned, compTarget, elementsContainerMap, bean, entity, propertySelectedFormCollection,  propertySelectedListCollection);
     }
     private void createByConstructor(Map map, UIComponent cloned, UIComponent compTarget, Map<String,List<UIComponent>> elementsContainerMap, DevRequirement bean, DevEntityClass entity, List<DevEntityPropertyDescriptor> propertySelectedFormCollection, List<DevEntityPropertyDescriptor> propertySelectedListCollection) {
-		LayoutFieldsFormat.create(bean);
 		elementsContainerMap.clear();
         UIComponent elementPanel = algoPalette;
         try {
+        	LayoutFieldsFormat.onConstruction(bean);
             if (map.containsKey("dataform") && !String.valueOf(map.get("dataform")).isEmpty()) {
                 compTarget.getChildren().clear();
                 if (cloned == null) {
                     cloned = ComponentFactory.findComponentByStyleClass("ui-algo-element-container data-form", elementPanel);
                     cloned = ComponentFactory.componentClone(cloned, false);
-                    updateChildren(compTarget.getChildren(), cloned);
+                    AlgodevUtil.updateChildren(compTarget.getChildren(), cloned);
                     setContainerPage("form");
                 }
                 cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.get(bean.getInterfaceType())).getComponentCreated();
                 //elements.clear();
                 //elements.addAll(compTarget.getChildren());
-                generateElementsContainerMap(elementsContainerMap, bean);
+                AlgodevUtil.generateElementsContainerMap(elementsContainerMap, bean);
                 updateContainerPage();
                 cloned = null;
             }          
@@ -1107,13 +1082,13 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                 if (cloned == null) {
                     cloned = ComponentFactory.findComponentByStyleClass("ui-algo-element-container data-list", elementPanel);
                     cloned = ComponentFactory.componentClone(cloned, false);
-                    updateChildren(compTarget.getChildren(), cloned);
+                    AlgodevUtil.updateChildren(compTarget.getChildren(), cloned);
                     setContainerPage("list");
                 }
                 cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.get(bean.getInterfaceType())).getComponentCreated();
                 //elements.clear();
                 //elements.addAll(compTarget.getChildren());
-                generateElementsContainerMap(elementsContainerMap, bean);
+                AlgodevUtil.generateElementsContainerMap(elementsContainerMap, bean);
                 updateContainerPage();
                 cloned = null;
             }
@@ -1121,7 +1096,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                 if (cloned == null) {
                     cloned = ComponentFactory.findComponentByStyleClass("ui-algo-element-container data-list", elementPanel);
                     cloned = ComponentFactory.componentClone(cloned, false);
-                    updateChildren(compTarget.getChildren(), cloned);
+                    AlgodevUtil.updateChildren(compTarget.getChildren(), cloned);
                     setContainerPage("list");
                     Map<String, Object> mapParam = new HashMap<String, Object>();
                     mapParam.put("styleClass", String.valueOf(getProperty(cloned, "styleClass")).replaceAll("data-list", "data-grid"));
@@ -1130,7 +1105,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                 cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.SUMM).getComponentCreated();
                 //elements.clear();
                 //elements.addAll(compTarget.getChildren());
-                generateElementsContainerMap(elementsContainerMap, bean);
+                AlgodevUtil.generateElementsContainerMap(elementsContainerMap, bean);
                 updateContainerPage();
                 cloned = null;
                 //compTarget.getChildren().clear();
@@ -1155,21 +1130,6 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
             this.actualConstructorTabIndex = actualConstructorTabIndex;
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    private void updateChildren(List<UIComponent> children, UIComponent comp) throws Throwable {
-        boolean notFound = true;
-        for (int i = 0; i < children.size(); i++) {
-            UIComponent compAux = children.get(i);
-            if (compAux.getId().equals(comp.getId())) {
-                children.set(i, comp);
-                notFound = false;
-                break;
-            }
-        }
-        if (notFound) {
-            children.add(comp);
         }
     }
 
@@ -1226,9 +1186,9 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
                     }
                     //container.getChildren().remove(elementSelected);
                     if (parentContainer.getId().equals(compTarget.getId())) {
-                        updateChildren(elements, cloned);
+                    	AlgodevUtil.updateChildren(elements, cloned);
                     } else {
-                        updateChildren(parentContainer.getChildren(), cloned);
+                    	AlgodevUtil.updateChildren(parentContainer.getChildren(), cloned);
                     }
                     compTarget.getChildren().clear();
                     compTarget.getChildren().addAll(elements);

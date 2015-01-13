@@ -35,6 +35,8 @@ public class DevRequirement implements Serializable, Cloneable {
     private String visibilitySharing;
     @Column(name = "requirement_style")
     private String requirementStyle;
+    @Column(name = "requirement_script")
+    private String requirementScript;    
     private Integer dataElementAmount;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "contract_id")
@@ -101,6 +103,14 @@ public class DevRequirement implements Serializable, Cloneable {
 
 	public void setRequirementStyle(String requirementStyle) {
 		this.requirementStyle = requirementStyle;
+	}
+
+	public String getRequirementScript() {
+		return requirementScript;
+	}
+
+	public void setRequirementScript(String requirementScript) {
+		this.requirementScript = requirementScript;
 	}
 
 	public Integer getDataElementAmount() {

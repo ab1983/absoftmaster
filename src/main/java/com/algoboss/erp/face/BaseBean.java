@@ -57,6 +57,8 @@ public class BaseBean implements Serializable {
 	private GenericBean actualBean;
 	private UIComponent tabView;
 	private boolean activeTabRemoved;
+	private boolean expandedWindow = false;
+	public static UIComponent algoPalette;
 
 	/**
 	 * Creates a new instance of CentroCustoBean
@@ -64,6 +66,14 @@ public class BaseBean implements Serializable {
 	public BaseBean() {
 		title = "Plataforma de Gerenciamento";
 		this.main();
+	}
+	
+    public static void setAlgoPalette(UIComponent algoPalette2) {
+        algoPalette = algoPalette2;
+    }
+    
+	public static UIComponent getAlgoPalette() {
+		return algoPalette;
 	}
 
 	public String getUrl() {
@@ -181,6 +191,14 @@ public class BaseBean implements Serializable {
 
 	public void setTabView(UIComponent tabView) {
 		this.tabView = tabView;
+	}	
+	
+	public boolean isExpandedWindow() {
+		return expandedWindow;
+	}
+
+	public void setExpandedWindow(boolean expandedWindow) {
+		this.expandedWindow = expandedWindow;
 	}
 
 	public void main() {

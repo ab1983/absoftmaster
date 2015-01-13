@@ -138,7 +138,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
     protected Boolean checkContract() {
         Boolean check = null;
         try {
-            if (type.getSuperclass().getDeclaredField("instantiatesSite") != null) {
+        	if (type.getSuperclass().getDeclaredField("instantiatesSite") != null) {
                 AdmInstantiatesSite currentSite = null;
                 if (site == null) {
                     site = loginBean.getInstantiatesSiteContract();                    
@@ -195,7 +195,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
             baseBean.setModule(String.valueOf(module.getServiceModuleContractId()));
             ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
             HttpSession session = (HttpSession) context.getSession(false);
-            List<Long> moduleIdList = (List<Long>) session.getAttribute("moduleIdList");// baseBean.getModuleIdList();
+            List<Long> moduleIdList = loginBean.getModuleIdList();//(List<Long>) session.getAttribute("moduleIdList");// baseBean.getModuleIdList();
             if (module.getServiceModuleContractId() != null && !moduleIdList.contains(module.getServiceModuleContractId())) {
                 try {
                     module = (AdmServiceModuleContract) baseDao.findByObj(module);

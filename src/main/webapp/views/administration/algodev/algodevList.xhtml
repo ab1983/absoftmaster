@@ -20,6 +20,11 @@
         }        
         function eventBean(call) {
         }        
+        function clearFormChanged(){        	
+        }
+        function eventBeanWait(call) {
+        	
+        }
     </script>
     <h:form binding="#{admAlgodevContainerForm}" styleClass="ui-algo-dev-form" prependId="false" onsubmit="javascript:return false">
         <p:panel binding="#{algoContainerBind}" style="width: 1024px;height: 450px;font-size:11px;" styleClass="ui-algo-container" id="algoContainer">
@@ -400,6 +405,10 @@
                     <p:panel binding="#{algoPaletteBind}" id="elementPanel" styleClass="elementPanel" toggleable="true" header="#{msg['elementPallete']}" collapsed="true">
                         <ui:include src="algodevElementPanel.xhtml"/>
                     </p:panel>
+                    <p:panel id="sourceCodeReq"  toggleable="true" header="#{msg['sourceCode']}" collapsed="true">
+                    	<p:commandButton value="Style"  icon="ui-icon-newwin"/>
+                        <p:commandButton value="Script"  icon="ui-icon-newwin" onclick="scriptDlg.show();"/>
+                    </p:panel>                    
                     <p:panel id="elementProperty" styleClass="elementProperty"  toggleable="true" header="#{msg['property']} #{admAlgodevBean.elementSelected.getClass().getSimpleName()}">
                         <h:panelGroup rendered="#{admAlgodevBean.elementPropertiesSelected.size()>0 or admAlgodevBean.elementSelected.childCount>0 or admAlgodevBean.elementSelected.facetCount>0}">
 
@@ -515,7 +524,16 @@
         </script>
         <!--p:hotkey bind="r" onsuccess="positionChange('left',+2);"/-->  
         <p:remoteCommand name="cleanUpApp" immediate="true" actionListener="#{admAlgodevBean.cleanUpApp()}" oncomplete="updateCurrentForm();"/>                 
-        <p:remoteCommand name="clearContainerPage" immediate="true" actionListener="#{admAlgodevBean.clearContainerPage()}" oncomplete="updateCurrentForm();"/>                         
+        <p:remoteCommand name="clearContainerPage" immediate="true" actionListener="#{admAlgodevBean.clearContainerPage()}" oncomplete="updateCurrentForm();"/>   
+        <p:dialog dynamic="true" widgetVar="scriptDlg" visible="false" header="Script" closable="true" style="height: 583px;max-height: 583px;min-height: 483px;  width: 988px;max-width: 1188px;" resizable="false">         
+            <p:panel>
+            <p:scrollPanel style="width: 1350px;max-width:1400px; height: 450px;" >
+            <p:inputTextarea style="width: 1850px;max-width:1900px; height: 450px;" cols="300" autoResize="true"   value="#{admAlgodevBean.bean.requirementScript}"  styleClass="no-upper"></p:inputTextarea>
+			</p:scrollPanel>
+			</p:panel>
+			<p:commandButton value="#{msg['save']}" process="@form" icon="ui-icon-document" oncomplete="scriptDlg.hide()">
+            </p:commandButton>              
+        </p:dialog>                               
     </h:form>
     <h:form binding="#{selectBeanForm}">
         <p:dialog widgetVar="openProjectDlg" styleClass="openProjectDlg" modal="true" dynamic="true" closable="false" style="height: 483px;max-height: 483px;min-height: 483px;  width: 758px;max-width: 758px;min-width: 758px;" resizable="false">
@@ -523,7 +541,13 @@
                 <h:panelGroup style="display: inline-block;width: 700px;" > <h:outputText value="#{msg['selectProject']}"/><span class="ui-state-highlight" style="display: inline-block;float:right;"><h:commandLink id="helpProj" style="float:right;" styleClass="ui-icon ui-icon-help" ></h:commandLink></span></h:panelGroup>
             </f:facet>            
             <p:dataTable value="#{admAlgodevBean.beanList}" var="item" selection="#{admAlgodevBean.bean}" selectionMode="single" rowKey="#{item.requirementId}" scrollable="true" scrollHeight="380" scrollWidth="700" tableStyle="width:680px;" style="width: 720px;">
-                <p:column width="40%">  
+                <p:column width="10%">  
+                    <f:facet name="header">  
+                        <h:outputText value="#{msg['code']}" />  
+                    </f:facet>  
+                    <h:outputText value="#{item.requirementId}" />                      
+                </p:column> 
+                <p:column width="30%">  
                     <f:facet name="header">  
                         <h:outputText value="#{msg['name']}" />  
                     </f:facet>  

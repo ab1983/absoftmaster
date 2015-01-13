@@ -4,7 +4,9 @@ import java.io.Serializable;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -30,7 +32,7 @@ public class Compra implements Serializable {
 
 	private double basesubsti;
 
-	private byte[] complemento;
+	private String complemento;
 
 	private double desconto;
 
@@ -67,7 +69,7 @@ public class Compra implements Serializable {
 
 	private String marca;
 
-	private byte[] mdestinxml;
+	private String mdestinxml;
 
 	private double mercadoria;
 
@@ -75,7 +77,7 @@ public class Compra implements Serializable {
 
 	private String nfeid;
 
-	private byte[] nfexml;
+	private String nfexml;
 
 	private String numeronf;
 
@@ -103,6 +105,10 @@ public class Compra implements Serializable {
 	private String vendedor;
 
 	private double volumes;
+	
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName="numeronf", name = "numeronf"/*,insertable=false,updatable=false*/)	
+	private List<Itens002> produtos = new ArrayList<Itens002>();	
 
 	public Compra() {
 	}
@@ -147,11 +153,11 @@ public class Compra implements Serializable {
 		this.basesubsti = basesubsti;
 	}
 
-	public byte[] getComplemento() {
+	public String getComplemento() {
 		return this.complemento;
 	}
 
-	public void setComplemento(byte[] complemento) {
+	public void setComplemento(String complemento) {
 		this.complemento = complemento;
 	}
 
@@ -291,11 +297,11 @@ public class Compra implements Serializable {
 		this.marca = marca;
 	}
 
-	public byte[] getMdestinxml() {
+	public String getMdestinxml() {
 		return this.mdestinxml;
 	}
 
-	public void setMdestinxml(byte[] mdestinxml) {
+	public void setMdestinxml(String mdestinxml) {
 		this.mdestinxml = mdestinxml;
 	}
 
@@ -323,11 +329,11 @@ public class Compra implements Serializable {
 		this.nfeid = nfeid;
 	}
 
-	public byte[] getNfexml() {
+	public String getNfexml() {
 		return this.nfexml;
 	}
 
-	public void setNfexml(byte[] nfexml) {
+	public void setNfexml(String nfexml) {
 		this.nfexml = nfexml;
 	}
 
@@ -434,5 +440,15 @@ public class Compra implements Serializable {
 	public void setVolumes(double volumes) {
 		this.volumes = volumes;
 	}
+
+	public List<Itens002> getProdutos() {
+		return produtos;
+	}
+
+	public void setProdutos(List<Itens002> produtos) {
+		this.produtos = produtos;
+	}
+	
+	
 
 }

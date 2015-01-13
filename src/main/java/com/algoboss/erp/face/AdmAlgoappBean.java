@@ -10,6 +10,7 @@ import com.algoboss.erp.entity.DevComponentContainer;
 import com.algoboss.erp.entity.DevEntityClass;
 import com.algoboss.erp.entity.DevEntityObject;
 import com.algoboss.erp.entity.DevEntityPropertyDescriptor;
+import com.algoboss.erp.entity.DevEntityPropertyDescriptorConfig;
 import com.algoboss.erp.entity.DevEntityPropertyValue;
 import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.entity.SecUser;
@@ -25,6 +26,7 @@ import com.algoboss.erp.util.report.PDFExporter2;
 import com.algoboss.erp.validations.LoginValidator;
 import com.algoboss.integration.small.business.SmallUtil;
 
+import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -52,10 +54,14 @@ import javax.faces.event.PhaseListener;
 import javax.faces.validator.ValidatorException;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 
+import org.apache.poi.hssf.util.HSSFColor.BROWN;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
@@ -103,7 +109,10 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	protected StreamedContent fileDownload;
 	protected Date startDate;
 	protected Date endDate;
-
+	protected Set<String> beanMapBrowserCached = new TreeSet<String>(); 
+	protected String idxBrowserCached = "";
+	ScriptEngineManager manager = new ScriptEngineManager();
+	ScriptEngine jsEngine = manager.getEngineByExtension("js");
 	public String $date(String attr, String format, DevEntityObject entObj) {
 		return entObj.$date(attr, format);
 	}
@@ -207,6 +216,14 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		this.fileDownload = fileDownload;
 	}
 
+	public String getIdxBrowserCached() {
+		return idxBrowserCached;
+	}
+
+	public void setIdxBrowserCached(String idxBrowserCached) {
+		this.idxBrowserCached = idxBrowserCached;
+	}
+
 	/**
 	 * Creates a new instance of TipoDespesaBean
 	 */
@@ -240,6 +257,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			endDate = c2.getTime();
 			long startTime1 = Calendar.getInstance().getTimeInMillis();
 			super.indexBeanNoList(nro);
+			initJsEngine();
 			long endTime1 = Calendar.getInstance().getTimeInMillis();
 			if(requirement.getInterfaceType().startsWith("list")){
 				doList();			
@@ -259,17 +277,33 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	@Override
 	public void indexBeanNewWin(Long nro) throws Throwable {
 		super.indexBeanNewWin(nro); // To change body of generated methods,
+		initJsEngine();
 		if(requirement.getInterfaceType().startsWith("list")){
 			doList();			
 		}else{
 			doForm();
 		}
 	}
-
+	private void initJsEngine(){
+		try {
+			jsEngine.put("app", this);
+			jsEngine.eval("importPackage(java.util);");
+			jsEngine.eval("importPackage(java.lang);");
+			jsEngine.eval("importPackage(java.math);");
+			if(requirement.getRequirementScript()!=null){
+				jsEngine.eval(requirement.getRequirementScript());								
+			}		
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	@Override
 	public void initBean() {
 		long startTime1 = Calendar.getInstance().getTimeInMillis();
 		try {
+			idxBrowserCached = "";
+			beanMapBrowserCached = new TreeSet<String>(); 
 			fileValue = null;
 			fileDownload = null;
 			elementPropertiesSelected = new TreeMap<String, Object>();
@@ -315,23 +349,29 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			}
 			if (service != null && service.getRequirement() != null) {
 				requirement = (DevRequirement) doBeanRefresh(service.getRequirement());
-				if (requirement != null) {
-					entity = requirement.getEntityClass();
-					List<DevComponentContainer> componentContainerList = requirement.getComponentContainerList();
-					for (DevComponentContainer devComponentContainer : componentContainerList) {
-						if(devComponentContainer.getPrototypeComponentChildrenList()!=null && !devComponentContainer.getPrototypeComponentChildrenList().isEmpty()){
-							elements = AlgodevUtil.generateComponentList(devComponentContainer);
-							elementsContainerMap.put(devComponentContainer.getName(), elements);							
-						}
-					}
-				}
+				generateElementsContainerMap(requirement);
 			}
 
 		} catch (Throwable ex) {
 			Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-
+	
+	public void generateElementsContainerMap(DevRequirement requirement) {
+		if (requirement != null) {
+			entity = requirement.getEntityClass();
+			List<DevComponentContainer> componentContainerList = requirement.getComponentContainerList();
+			for (DevComponentContainer devComponentContainer : componentContainerList) {
+				if(devComponentContainer.getPrototypeComponentChildrenList()!=null && !devComponentContainer.getPrototypeComponentChildrenList().isEmpty()){
+					//elements = AlgodevUtil.generateComponentList(devComponentContainer);
+					elementsContainerMap.put(devComponentContainer.getName(), AlgodevUtil.generateComponentList(devComponentContainer));							
+				}
+			}
+		}		
+	}
+	public void initBrowserCache(){
+		beanMapBrowserCached = new TreeSet<String>();
+	}
 	public UIComponent getAlgoContainer() {
 		/*
 		 * if(algoContainer!=null && algoContainer.getChildren().isEmpty() &&
@@ -388,7 +428,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 					toUpdate = true;
 				}
 			}*/else{
-				UIComponent tab = baseBean.getTabView().getChildren().get(baseBean.getContainerIndex());
+				UIComponent tab = baseBean.getTabView()!=null?baseBean.getTabView().getChildren().get(baseBean.getContainerIndex()):null;
 				UIComponent container = ComponentFactory.findComponentByStyleClass("ui-algo-container", tab);
 				if (container != null && container.getId().equals(algoContainerView.getId())) {
 					Map<String, Object> mapParam = new HashMap<String, Object>();
@@ -403,6 +443,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 
 	public void updateContainerPage() {
+		//idxBrowserCached = "";
 		fileValue = null;
 		fileDownload = null;
 		elements = elementsContainerMap.get(containerPage);
@@ -447,7 +488,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		beanList = findListByClass(entity);
 		bean = new DevEntityObject();
 		bean.setEntityClass(entity);	
-
+		//beanMapBrowserCached.clear();
 		// super.doBeanList(); //To change body of generated methods, choose
 		// Tools | Templates.
 	}
@@ -517,6 +558,10 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		doForm();
 	}
 
+	public void doSelect(DevEntityObject obj) {
+		bean = (DevEntityObject)doBeanRefresh(obj);
+	}	
+	
 	public void doCopy(DevEntityObject obj) {
 		bean = new DevEntityObject(obj);
 		doForm();
@@ -542,12 +587,14 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		childBean = obj;
 		doForm(container);
 	}
-
+	
+	public void doSelectChild(DevEntityObject obj) {
+		childBean = obj;
+	}
+	
 	public void setBeanSel(Object obj) {
 		doEdit((DevEntityObject) obj);
-		super.setBean((DevEntityObject) obj); // To change body of generated
-												// methods, choose Tools |
-												// Templates.
+		super.setBean((DevEntityObject) obj); 
 	}
 
 	public Object getBeanSel() {
@@ -589,6 +636,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			if (bean != null) {
 				super.doBeanSaveAndList(true, true, hasList, bean);					
 				bean.setEntityClass(entity);
+				//beanMapBrowserCached.clear();
 			}
 			if (hasList) {
 				doList();
@@ -609,20 +657,21 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		return beanMap(className, keysStr, "");
 	}
 	public Map beanMap(String className, String keysStr, String valsStr) {
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		String configValue = AlgodevUtil.formatDescription(className+";"+valsStr+";"+keysStr);
 		String[] keys = keysStr.split(";");
 		String[] vals = valsStr.split(";");
-		Map<Object, Object> map = new HashMap<Object, Object>();
 		String field1 = "";
 		String criteria = "";
 		String field2 = "";
-		String[] classArray = className.split("\\]|\\[|\\|");
+		String[] classArray = className.split("\\]|\\[|\\|",-1);
 		if(classArray.length>1){
 			className = classArray[0];
 			field1 = classArray[1];
 			criteria = classArray[2];
 			field2 = classArray[3];
-		}
-		List<DevEntityObject> list = doBeanList(className);
+		}		
+		List<DevEntityObject> list = doBeanList(className);	
 		try {
 			if (list != null) {
 				for (DevEntityObject devEntityObject : list) {
@@ -636,7 +685,12 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 						if(!field1Value.equals(field2)){
 							continue;
 						}
-					}					
+					}			
+					if(criteria.equals("lessThan")){
+						if(!(field1Value.compareTo(field2)<0)){
+							continue;
+						}
+					}						
 					Object keyMap = devEntityObject;
 					Object valMap = devEntityObject;
 					String valStr = "";
@@ -668,6 +722,38 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		boolean isCacheble = !keysStr.isEmpty() && !valsStr.isEmpty();
+		if(!beanMapBrowserCached.contains(className) || isInvalidUpdateContainer){
+			beanMapBrowserCached.add(className);
+			idxBrowserCached = idxBrowserCached.concat(isCacheble+";");
+		}else{
+			if(isCacheble){
+				List<Map.Entry<Object,Object>> listMapTmp = new ArrayList<Map.Entry<Object,Object>>();
+				for(Map.Entry<Object, Object> object : map.entrySet()){
+					listMapTmp.add(object);
+				}
+				for(DevEntityObject obj:new DevEntityObject[]{bean,childBean}){
+					DevEntityClass ent = 	obj.getEntityClass();			
+					List<DevEntityPropertyDescriptor> propList = ent.getEntityPropertyDescriptorList();
+					for (DevEntityPropertyDescriptor devEntityPropertyDescriptor : propList) {
+						List<DevEntityPropertyDescriptorConfig> propConfigList = devEntityPropertyDescriptor.getEntityPropertyDescriptorConfigList();
+						for (DevEntityPropertyDescriptorConfig devEntityPropertyDescriptorConfig : propConfigList) {
+							if(devEntityPropertyDescriptorConfig.getConfigName().equalsIgnoreCase("objectList") && AlgodevUtil.formatDescription(devEntityPropertyDescriptorConfig.getConfigValue()).equals(configValue)){
+								String field1Value = Objects.toString($(ent.getName() + "." + devEntityPropertyDescriptor.getPropertyName(), obj).getVal(),"");
+								for(Map.Entry<Object,Object> object : listMapTmp){
+									if(object.getValue().equals(field1Value)){
+										return Collections.singletonMap(object.getKey(), field1Value);
+									}
+								}
+							}
+						}
+					}
+				}
+				if(!listMapTmp.isEmpty()){
+					return Collections.singletonMap(listMapTmp.get(0).getKey(), listMapTmp.get(0).getValue());				
+				}
+			}	
 		}
 		return map;
 	}
@@ -1149,7 +1235,18 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 	public void eventBean(){
 		Map callMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();	
-		AlgodevUtil.event(callMap, this);	
+		try {
+			String call = String.valueOf(callMap.get("call"));
+			System.out.println("### EVENT CALL: "+call);
+			if(!call.contains(".")){
+				jsEngine.eval(call);				
+			}else{
+				AlgodevUtil.event(callMap, this);					
+			}
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 		//String listField = String.valueOf(map.get("list_field"));
 		//String targetField = String.valueOf(map.get("target_field"));
 	}

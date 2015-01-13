@@ -74,7 +74,7 @@ public class DevEntityPropertyDescriptor implements Serializable {
     }
     
     public void setPropertyName(String propertyName) {
-        if (this.propertyName == null && propertyName != null && !propertyName.isEmpty()) {
+        if ((this.propertyName == null && propertyName != null && !propertyName.isEmpty()) || (this.propertyClass!=null && AlgoUtil.extractName(this.propertyClass.getName()).equals(this.propertyName))) {
             this.propertyName = AlgoUtil.normalizerName(propertyName);
         }
     }
