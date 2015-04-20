@@ -29,11 +29,12 @@
 .ui-password{
     width: 150px !important;  
 }
-.ui-selectonemenu{
-    width: 190px !important;
+.ui-selectonemenu:not(.style){
+    width: 190px !important;;
+    /*width: 100% !important;*/
 }
 .ui-selectonemenu-label{
-    width: 150px !important;    
+    width: 100% !important;    
 }
 .ui-selectonemenu-trigger{
     width: 23px !important;  

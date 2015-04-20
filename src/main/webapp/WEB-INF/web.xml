@@ -8,6 +8,19 @@
     <description>ServletContextListener, HttpSessionListener, HttpSessionAttributeListener</description>
     <listener-class>com.algoboss.erp.servlet.GerServletListener</listener-class>
   </listener>
+  <!-- Add Support for Spring -->
+  <!-- 
+   -->
+  <listener>
+	<listener-class>
+		org.springframework.web.context.ContextLoaderListener
+	</listener-class>
+  </listener>
+  <listener>
+	<listener-class>
+		org.springframework.web.context.request.RequestContextListener
+	</listener-class>
+  </listener>  
   <servlet>
     <servlet-name>Faces Servlet</servlet-name>
     <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -16,7 +29,7 @@
   <servlet-mapping>
     <servlet-name>Faces Servlet</servlet-name>
     <url-pattern>/f/*</url-pattern>
-  </servlet-mapping>
+  </servlet-mapping>  
   <session-config>
     <session-timeout>30</session-timeout>
   </session-config>
@@ -39,6 +52,20 @@
     <param-name>javax.faces.FULL_STATE_SAVING_VIEW_IDS</param-name>
     <param-value>/index.xhtml,/login.xhtml</param-value>
   </context-param>
+  <context-param>
+    <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+    <param-value>client</param-value>
+  </context-param>
+ <context-param>
+    <param-name>javax.faces.PARTIAL_STATE_SAVING</param-name>
+    <param-value>false</param-value>
+</context-param> 
+  <!-- 
+   -->  
+   <context-param>
+	    <param-name>contextConfigLocation</param-name>
+	    <param-value>/WEB-INF/classes/applicationContextSmall.xml</param-value>
+	</context-param>  
   <filter>
     <filter-name>PrimeFaces FileUpload Filter</filter-name>
     <filter-class>

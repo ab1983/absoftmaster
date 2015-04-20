@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -97,12 +98,12 @@ import com.algoboss.integration.small.face.FinReportBean;
 @SessionScoped
 public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
 
-    private UIComponent algoContainer;
-    private UIComponent algoPalette;
-    private UIComponent elementSelected;
+    private transient UIComponent algoContainer;
+    private transient UIComponent algoPalette;
+    private transient UIComponent elementSelected;
     private List<UIComponent> childrenElementSelected = new ArrayList<UIComponent>();
     private Map<String, String[]> elementPropertiesSelected = new TreeMap<String, String[]>();
-    private List<UIComponent> elements = new ArrayList<UIComponent>();
+    private transient List<UIComponent> elements = new ArrayList<UIComponent>();
     private DevEntityClass entity;
     private List<DevEntityObject> entityObjectList = new ArrayList<DevEntityObject>();
     private DevEntityClass entityNodeSelected;
@@ -116,8 +117,8 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
     private String strUIComponentId;
     private String html = "<table><tr><td>teste</td></tr></table>";
     private List<Map<String,String>> reportMap = new ArrayList<Map<String,String>>();
-    @Inject
-    private AdmAlgoappBean app;
+    //@Inject
+    private AdmAlgoappBean app = new AdmAlgoappBean();
     @Inject
     private ObjectConverter objectConverter;
     private List<Map<String, Object>> fieldOptionsAll = new ArrayList<Map<String, Object>>();
@@ -557,14 +558,47 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             DevEntityObject entObj = new DevEntityObject();
             entObj.setEntityClass(entFilter);
             UIComponent container = cloned;
-            app.setBean(entObj);
-            createByConstructor(Collections.singletonMap("dataform", "true"), container, elementsContainerMap, req, entFilter);
-            //cloned.getChildren().clear();
-            //cloned.getChildren().addAll(elementsContainerMap.get("form"));
-            //app.getAlgoContainerView().getChildren().clear();
-            app.setAlgoContainerView(cloned);
-            app.generateElementsContainerMap(req);
-            app.doForm();
+            try {
+
+    			//if (!urlList.isEmpty() && urlList.get(containerIndex)[0].equals(subtitle)) {
+   
+    			//}            	
+
+				//app.indexBeanNoList(null);
+                app.setBean(entObj);
+                createByConstructor(Collections.singletonMap("dataform", "true"), container, elementsContainerMap, req, entFilter);
+                //cloned.getChildren().clear();
+                //cloned.getChildren().addAll(elementsContainerMap.get("form"));
+                //app.getAlgoContainerView().getChildren().clear();
+                app.setAlgoContainerViewWidget(cloned);
+                app.generateElementsContainerMap(req);
+                app.doForm();
+            	app.setSubtitle("report|filter|"+bean.getReportRequirementId());
+            	//app.setUrl("views/administration/algoreport/algoreportList.xhtml?report-filter="+bean.getReportRequirementId());
+    			String beansubtitle = "";
+    			boolean clonable = false;
+    			if (app != null) {
+    				clonable = Arrays.asList(app.getClass().getGenericInterfaces()).contains(Cloneable.class);
+    				beansubtitle = app.getSubtitle();
+    				if (!baseBean.getBeanLoadMap().containsKey(app.getSubtitle()) && clonable) {
+    					GenericBean actualBeanClone = app.getClass().newInstance();
+    					baseBean.copyObject(app, actualBeanClone);
+    					baseBean.getBeanLoadMap().put(beansubtitle, actualBeanClone);
+    				}else{
+    	 				GenericBean<Object> bean = baseBean.getBeanLoadMap().get(app.getSubtitle());
+        				if (bean != null) {
+        					if (bean instanceof GenericBean && !bean.getSubtitle().equals(beansubtitle) && clonable) {
+        						baseBean.resetObject(app);
+        						baseBean.copyObject(bean, app);
+        					}
+        				}
+    				}
+    			}               	
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
+         
             //ComponentFactory.updateElementProperties(comp3, mapParam);
             //setEntity(entity);
             reportDeserializer();
@@ -1619,7 +1653,9 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             Map params = new HashMap();
             List<DevEntityPropertyValue> propValList = app.getBean().getEntityPropertyValueList();
             for (DevEntityPropertyValue devEntityPropertyValue : propValList) {
-            	params.put(devEntityPropertyValue.getEntityPropertyDescriptor().getPropertyName(), devEntityPropertyValue.getVal());
+            	String key = devEntityPropertyValue.getEntityPropertyDescriptor().getPropertyName();
+            	Object value = devEntityPropertyValue.getVal();
+            	params.put(key, String.valueOf(value).isEmpty()?null:value);
 			}
             params.put(JRParameter.REPORT_LOCALE, Locale.forLanguageTag("pt-BR")/*FacesContext.getCurrentInstance().getExternalContext().getRequestLocale()*/);
             params.put(JRParameter.REPORT_TIME_ZONE, TimeZone.getTimeZone("GMT-3:00"));

@@ -6,10 +6,10 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:p="http://primefaces.org/ui"      
 >
-    <span style="position: fixed;bottom: 0;height: 20px;float:left;margin-right: 50px;" class="ui-widget-header barrabottom"> <span style="float:right;padding-right: 5px;">v.0.0.13 | Powered: Algo Boss - #{msg['copyright']}. | #{msg['contact']}: #{msg['contactNumber']} | <a href="mailto://atendimento@algoboss.com">Dúvidas ou Sugestões</a></span></span>
+    <span style="position: fixed;bottom: 0;height: 20px;float:left;margin-right: 50px;" class="ui-widget-header barrabottom"> <span style="float:right;padding-right: 5px;">v.0.0.13 | Powered: <a href="http://www.algoboss.com" target="_blank">Algoboss</a> - #{msg['copyright']}. | #{msg['contact']}: #{msg['contactNumber']} | <a href="mailto://atendimento@algoboss.com">Dúvidas ou Sugestões</a></span></span>
     <!--p:notificationBar autoDisplay="true" position="bottom" effect="slide" widgetVar="bar" style="height: 20px;width: 100%;padding: 5px;">  
     </p:notificationBar-->     
-    <h:form>
+    <h:form prependId="false">
 	    <p:panel rendered="#{baseBean.getAlgoPalette()==null}" binding="#{algoRepPaletteBind2}" style="display: none;" id="repElementPanel2" styleClass="elementPanel" toggleable="true" header="#{msg['elementPallete']}" collapsed="true">
 	        <ui:include src="views/administration/algodev/algodevElementPanel.xhtml"/>
 	    </p:panel>  

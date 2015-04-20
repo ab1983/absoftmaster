@@ -21,8 +21,11 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.application.ViewHandler;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.event.ComponentSystemEvent;
@@ -58,7 +61,9 @@ public class BaseBean implements Serializable {
 	private UIComponent tabView;
 	private boolean activeTabRemoved;
 	private boolean expandedWindow = false;
-	public static UIComponent algoPalette;
+	public static transient UIComponent algoPalette;
+	private transient Map<String,SessionUtilBean> appBeanMap = new HashMap<String,SessionUtilBean>();
+	private int tabId;
 
 	/**
 	 * Creates a new instance of CentroCustoBean
@@ -74,6 +79,14 @@ public class BaseBean implements Serializable {
     
 	public static UIComponent getAlgoPalette() {
 		return algoPalette;
+	}
+
+	public Map<String, SessionUtilBean> getAppBeanMap() {		
+		return this.appBeanMap;
+	}
+
+	public void setAppBeanMap(Map<String, SessionUtilBean> appBeanMap) {
+		this.appBeanMap = appBeanMap;
 	}
 
 	public String getUrl() {
@@ -136,6 +149,7 @@ public class BaseBean implements Serializable {
 					if (bean instanceof GenericBean && !bean.subtitle.equals(beansubtitle) && clonable) {
 						resetObject(actualBean);
 						copyObject(bean, actualBean);
+						actualBean.onReload();
 					}
 				}
 			}
@@ -190,9 +204,40 @@ public class BaseBean implements Serializable {
 	}
 
 	public void setTabView(UIComponent tabView) {
-		this.tabView = tabView;
-	}	
+		if(tabView!=null){
+			tabView.getChildren().clear();
+		}
+		this.tabView = tabView;	
+	}			
 	
+	public void refresh(){
+		UIComponent tabViewAlgoBoss = ComponentFactory.findComponentByStyleClass("tabViewAlgoBoss", FacesContext.getCurrentInstance().getViewRoot());
+		if(tabViewAlgoBoss != null){
+			tabViewAlgoBoss.getChildren().clear();
+		}		
+        FacesContext context = FacesContext.getCurrentInstance();
+        String viewId = context.getViewRoot().getViewId();
+        ViewHandler handler = context.getApplication().getViewHandler();
+        UIViewRoot root = handler.createView(context, viewId);
+        root.setViewId(viewId);
+        context.setViewRoot(root);					
+	}
+	
+	@PreDestroy
+	public void onDestroy(){
+		if(SessionUtilBean.elementsContainerMapByReqSession != null){
+			SessionUtilBean.elementsContainerMapByReqSession.remove(Thread.currentThread().getId());
+		}
+	}
+
+	public int getTabId() {
+		return tabId++;
+	}
+
+	public void setTabId(Integer tabId) {
+		//this.tabId = tabId;
+	}
+
 	public boolean isExpandedWindow() {
 		return expandedWindow;
 	}
@@ -502,7 +547,18 @@ public class BaseBean implements Serializable {
 			}
 		}
 	}
-
+	public static <T> T copyObject(T from) {
+		T to = null;;
+		try {
+			to = (T) from.getClass().newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		copyObject(from,to);
+		return to;
+	}
 	public static <T> void copyObject(T from, T to) {
 		for (Class obj = from.getClass(); !obj.equals(Object.class); obj = obj.getSuperclass()) {
 			// Percorrer campo por campo da classe...

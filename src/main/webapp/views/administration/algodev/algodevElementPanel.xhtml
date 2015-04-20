@@ -12,7 +12,7 @@
         <tr><td>#{msg['password']}:</td></tr>
         <tr><td><p:password styleClass="ui-algo-element  ui-algo-element-value ui-password"/></td></tr>
         <tr><td>#{msg['calendar']}:</td></tr>
-        <tr><td><p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" styleClass="ui-algo-element  ui-algo-element-value ui-calendar dateFormat"/></td></tr>
+        <tr><td><p:calendar locale="#{msg['calendar.locale']}" pattern="#{msg['calendar.pattern']}" showOn="button" navigator="true" styleClass="ui-algo-element  ui-algo-element-value ui-calendar dateFormat"/></td></tr>
         <tr><td>#{msg['spinner']}:</td></tr>
         <tr><td><p:spinner styleClass="ui-algo-element  ui-algo-element-value ui-integer ui-float"/></td></tr>
         <tr><td>#{msg['inputMask']}:</td></tr>
@@ -36,9 +36,9 @@
         <tr><td>#{msg['panel']}:</td></tr>
         <tr><td><p:panel styleClass="ui-algo-element ui-algo-element-container ui-panel" header="Panel"/></td></tr>
         <tr><td>#{msg['fieldSet']}:</td></tr>
-        <tr><td><p:fieldset binding="#{fieldsetElement}" styleClass="ui-algo-element ui-algo-element-container data-form" legend="Fieldset"></p:fieldset></td></tr>
+        <tr><td><p:fieldset styleClass="ui-algo-element ui-algo-element-container data-form" legend="Fieldset"></p:fieldset></td></tr>
         <tr><td>#{msg['dataTable']}:</td></tr>
-        <tr><td><p:dataTable binding="#{dataTableElement}" var="item" selectionMode="single" styleClass="ui-algo-element ui-algo-element-container data-list" emptyMessage="#{msg['emptyMessage']}">
+        <tr><td><p:dataTable var="item" selectionMode="single" styleClass="ui-algo-element ui-algo-element-container data-list" emptyMessage="#{msg['emptyMessage']}">
         <p:ajax event="rowEdit" listener="#{app.doSaveItem(item)}" update="@form"/>
         <f:facet name="header">List</f:facet> <f:facet name="footer"><p:commandLink immediate="true" value="Export" oncomplete="(window.exportTableDlg!==undefined?exportTableDlg.show():'');"></p:commandLink></f:facet>
         <p:column headerText="headerText">

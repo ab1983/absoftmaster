@@ -38,6 +38,8 @@ public class AdmCompany implements Serializable {
     private String homePage;
     private boolean inactive;
     private boolean hasSubsidiary;
+    @Column(name = "data_source")
+    private String dataSource;
 
     public Long getCode() {
         return code;
@@ -133,9 +135,17 @@ public class AdmCompany implements Serializable {
 
     public void setStateRegistration(String stateRegistration) {
         this.stateRegistration = stateRegistration;
-    }
+    }    
+    
+    public String getDataSource() {
+		return dataSource;
+	}
 
-    @Override
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	@Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;

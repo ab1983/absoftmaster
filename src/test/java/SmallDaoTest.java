@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-import com.algoboss.integration.small.dao.SmallDao;
+import com.algoboss.integration.small.dao.SmallDaoOld;
 import com.algoboss.integration.small.dao.SmallDaoImpl;
 import com.algoboss.integration.small.entity.OrdemServico2;
 import java.util.logging.Level;
@@ -22,7 +22,7 @@ import org.junit.Test;
  */
 public class SmallDaoTest {
     //@Inject
-    private SmallDao smallDao;
+    private SmallDaoOld smallDao;
     
     public SmallDaoTest() {
     }

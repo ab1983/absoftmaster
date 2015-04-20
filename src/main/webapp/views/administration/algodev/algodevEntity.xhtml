@@ -7,7 +7,7 @@
     <p:remoteCommand immediate="true" name="removeEntityNode" action="#{admAlgodevBean.removeEntityNode()}" /> 
     <p:outputPanel id="configPanel" styleClass="configPanel">
         <p:outputPanel styleClass="entityDlg">
-            <p:dialog rendered="#{admAlgodevBean.entity=='null' || admAlgodevBean.entity.entityPropertyDescriptorList.isEmpty() || (admAlgodevBean.entityPropertyDescriptor.propertyType!=null and 'ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.contains(admAlgodevBean.entityPropertyDescriptor.propertyType))}" widgetVar="entityClassListDlg" styleClass="configDlg" header="#{msg['selectClass']}" resizable="false" dynamic="false" width="400" height="300" closable="false" visible="true">
+            <p:dialog rendered="#{(admAlgodevBean.entity=='null' || admAlgodevBean.entity.entityPropertyDescriptorList.isEmpty() || (admAlgodevBean.entityPropertyDescriptor.propertyType!=null and 'ENTITYCLASS ENTITYCHILDREN ONEINTERNALOBJECT'.contains(admAlgodevBean.entityPropertyDescriptor.propertyType)))}" widgetVar="entityClassListDlg" styleClass="configDlg" header="#{msg['selectClass']}" resizable="false" dynamic="false" width="400" height="300" closable="false" visible="true">
                 <p:dataTable rowKey="#{entity.entityClassId}" value="#{admAlgodevBean.entityClassList}" var="entity" selectionMode="single" selection="#{admAlgodevBean.entityNodeSelected}" style="width: 300px;"  scrollable="true"  scrollWidth="300px" scrollHeight="200">
                     <p:column filterBy="#{entity.label!=null?entity.label:entity.name}" filterMatchMode="contains">  
                         <f:facet name="header">  

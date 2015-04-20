@@ -72,6 +72,7 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
                 try {
                     if (fc.getExternalContext() != null && (throwable.getMessage()==null || "null source".contains(throwable.getMessage()))) {
+                    	throwable.printStackTrace();
                         //fc.getExternalContext().redirect("/f/error.xhtml");
                     	HttpServletRequest req = (HttpServletRequest) fc.getExternalContext().getRequest();
                     	//req.getSession().invalidate();

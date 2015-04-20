@@ -6,9 +6,12 @@
        xmlns:p="http://primefaces.org/ui">  
     <p:commandButton  value="#{msg['list']}" icon="ui-icon-search" action="#{admContractBean.doBeanList()}"  immediate="true"  update="@form"> 
     </p:commandButton>
-    <p:focus for="admContractSystemName"/>
     <p:panel header="#{msg['registration']} #{msg['contract']}" style="width: 1300px;height: 470px;position: relative;">                      
-        <p:fieldset legend="Dados Contrato" style="width: 500px;float: left;height: 180px;">
+        
+    <p:tabView style="height:400px"  binding="#{contractFormTab}">
+    <p:tab title="Dados Contrato">
+    <p:focus for="admContractSystemName"/>
+        <p:fieldset style="width: 500px;height: 180px;">
             <h:panelGrid columns="2">
                 <h:outputText value="#{msg['systemName']}:"/>
                 <p:inputText value="#{admContractBean.bean.systemName}" id="admContractSystemName" required="true" requiredMessage="#{msg['systemName']} #{msg.required}."/>
@@ -32,10 +35,15 @@
                 <h:outputText value="#{msg['corporateName']}:"/>
                 <p:inputText value="#{admContractBean.company.corporateName}" required="true" requiredMessage="#{msg['corporateName']} #{msg.required}."/>
                 <h:outputText value="#{msg['registrationNumber']}:"/>
-                <p:inputMask mask="#{msg.corporateRegistrationMask}" value="#{admContractBean.company.registrationNumber}"  required="true" requiredMessage="#{msg['registrationNumber']} #{msg.required}."/>            
+                <p:inputMask mask="#{msg.corporateRegistrationMask}" value="#{admContractBean.company.registrationNumber}"  required="true" requiredMessage="#{msg['registrationNumber']} #{msg.required}."/>
+                <h:outputText value="Data Source:"/>
+                <p:inputText  styleClass="no-upper" value="#{admContractBean.company.dataSource}"/>            
+                            
             </h:panelGrid>
         </p:fieldset>
-        <p:fieldset legend="Localização" style="width: 500px;float: right;height: 180px;">
+        </p:tab>
+        <p:tab title="Localização">
+        <p:fieldset style="width: 500px;height: 180px;">
             <h:panelGrid columns="4">
                 <h:outputText value="#{msg['postalCode']}:"/>
                 <p:inputMask mask="#{msg.postalCodeMask}" value="#{admContractBean.company.location.postalcode}" required="true" requiredMessage="#{msg['postalCode']} #{msg.required}."/>                                   
@@ -51,10 +59,14 @@
                 <p:inputText value="#{admContractBean.company.location.state}" required="true" requiredMessage="#{msg['state']} #{msg.required}."/>                    
             </h:panelGrid>
         </p:fieldset>        
-        <p:fieldset legend="Usuário Administrador" style="width: 230px;float: left;height:170px;">
+        </p:tab>
+        <p:tab title="Usuário Administrador">
+        <p:fieldset style="width: 230px;height:170px;">
             <ui:include src="../../../contractAdmin.xhtml" rendered="false"/>
         </p:fieldset>                  
-        <p:fieldset style="width: 770px;float: right;height:170px; " styleClass="fsItem">
+        </p:tab>
+        <p:tab title="Funcionalidades">
+        <p:fieldset style="width: 770px;height:100%; " styleClass="fsItem">
             <!--h:form id="fsItem"-->
             <!--p:focus for="tipoDespesa" rendered="#{admContractBean.bean.gerFornecedor.fornecedorId != null}"/-->                     
             <f:facet name="legend">
@@ -63,7 +75,7 @@
                     <f:convertNumber type="number" pattern="#,##0.00"/>  
                 </h:outputText> 
             </f:facet>
-            <p:panelGrid id="itemPaneladmContractBeanserviceModuleContract" styleClass="itemPanel">
+            <p:panelGrid binding="#{itemPaneladmContractBeanserviceModuleContractUi}" id="itemPaneladmContractBeanserviceModuleContract" styleClass="itemPanel">
                 <p:row>
                     <p:column>#{msg.name}</p:column>
                     <p:column>#{msg.description}</p:column>
@@ -99,7 +111,7 @@
                     </p:column>
                 </p:row>                
             </p:panelGrid>
-            <p:dataTable emptyMessage="#{msg.emptyMessage}" var="itemDoc" value="#{admContractBean.bean.serviceModuleContractList}" scrollable="true" scrollHeight="60">
+            <p:dataTable emptyMessage="#{msg.emptyMessage}" var="itemDoc" value="#{admContractBean.bean.serviceModuleContractList}" scrollable="true" scrollHeight="200">
                 <p:column headerText="#{msg.name}">  
                     #{itemDoc.name} 
                 </p:column>  
@@ -115,7 +127,7 @@
 
                 </p:column>   
                 <p:column headerText="#{msg.action}" style="text-align: center;">  
-                    <p:commandLink action="#{admContractBean.startEditItem(contractForm.id)}" value="#{msg.edit}" immediate="true" update="@(.itemPanel)">
+                    <p:commandLink action="#{admContractBean.startEditItem(itemPaneladmContractBeanserviceModuleContractUi)}" value="#{msg.edit}" immediate="true" update="@(.itemPanel)">
                         <f:setPropertyActionListener target="#{admContractBean.serviceModuleContract}" value="#{itemDoc}"/>
                     </p:commandLink> |
                     <p:commandLink action="#{admContractBean.removeItem()}" value="#{msg.exclude}" immediate="true"  update="@form">
@@ -124,10 +136,7 @@
                 </p:column>                     
             </p:dataTable>
             <!--/h:form-->
-        </p:fieldset>        
-        
-        <p:commandButton value="#{msg['save']}" action="#{admContractBean.doBeanSave()}"  update="@form" style="bottom: 0px;position: absolute;"></p:commandButton>
-    </p:panel>
+        </p:fieldset>    
     <p:dialog widgetVar="serviceSelect" id="serviceSelect" header="Serviços Contratados no Módulo">
         <p:pickList id="admContractBeanpojoPickList" value="#{admContractBean.serviceFilter}" var="serviceFilterItem" effect="scale" 
                     itemValue="#{serviceFilterItem}" itemLabel="#{serviceFilterItem.name}"                                
@@ -138,5 +147,11 @@
             <p:ajax event="transfer" listener="#{admContractBean.onTransfer}" process="@this"/>   
 
         </p:pickList>         
-    </p:dialog>
+    </p:dialog>            
+        </p:tab>
+    </p:tabView>    
+        <p:commandButton value="#{msg['save']}" action="#{admContractBean.doBeanSave()}"  update="@form" style="bottom: 0px;position: absolute;"></p:commandButton>
+    </p:panel>
+
+    
 </html>

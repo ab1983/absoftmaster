@@ -4,18 +4,6 @@
  */
 package com.algoboss.erp.face;
 
-import com.algoboss.erp.dao.AdmInstantiatesSiteDao;
-import com.algoboss.erp.dao.BaseDao;
-import com.algoboss.erp.dao.UsuarioDao;
-import com.algoboss.erp.entity.AdmContract;
-import com.algoboss.erp.entity.AdmInstantiatesSite;
-import com.algoboss.erp.entity.AdmService;
-import com.algoboss.erp.entity.AdmServiceContract;
-import com.algoboss.erp.entity.AdmServiceModuleContract;
-import com.algoboss.erp.entity.SecAuthorization;
-import com.algoboss.erp.entity.SecUser;
-import com.algoboss.erp.entity.SecUserAuthorization;
-
 import static com.algoboss.erp.face.GenericBean.sendEmail;
 
 import java.io.Serializable;
@@ -51,12 +39,28 @@ import org.primefaces.model.menu.DefaultSubMenu;
 import org.primefaces.model.menu.MenuElement;
 import org.primefaces.model.menu.MenuModel;
 import org.primefaces.model.menu.Submenu;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.jsf.FacesContextUtils;
+
+import com.algoboss.erp.dao.AdmInstantiatesSiteDao;
+import com.algoboss.erp.dao.BaseDao;
+import com.algoboss.erp.dao.UsuarioDao;
+import com.algoboss.erp.entity.AdmCompany;
+import com.algoboss.erp.entity.AdmContract;
+import com.algoboss.erp.entity.AdmInstantiatesSite;
+import com.algoboss.erp.entity.AdmService;
+import com.algoboss.erp.entity.AdmServiceContract;
+import com.algoboss.erp.entity.AdmServiceModuleContract;
+import com.algoboss.erp.entity.SecAuthorization;
+import com.algoboss.erp.entity.SecUser;
+import com.algoboss.erp.entity.SecUserAuthorization;
+import com.algoboss.integration.face.DataSourceBean;
 
 /**
  *
  * @author Agnaldo
  */
-@Named
+@Named("gerLoginBean")
 @SessionScoped
 public class GerLoginBean implements Serializable {
 
@@ -82,6 +86,8 @@ public class GerLoginBean implements Serializable {
     private AdmContractBean contractBean;
     @Inject
     AdmAlgoappBean app;
+    @Inject
+    private DataSourceBean dataSource;
     private boolean activeSession = false;
     private HttpSession session;
     private List<Long> moduleIdList;
@@ -94,7 +100,7 @@ public class GerLoginBean implements Serializable {
     private Map<String, HashMap<String, Object>> fileDataBaseMap = new HashMap<String, HashMap<String, Object>>();
     private int sessionTimeout;
     private Map<String,String> jndiMap = new HashMap<String, String>();
-
+  
     public GerLoginBean() {
         user = new SecUser();
     }
@@ -250,7 +256,7 @@ public class GerLoginBean implements Serializable {
 	public void setModuleIdList(List<Long> moduleIdList) {
 		//getSession().setAttribute("moduleIdList", new ArrayList<Long>());
 		this.moduleIdList = moduleIdList;
-	}
+	}		
 
 	public void doSendQuestionsOrSuggestions() {
         try {
@@ -396,15 +402,29 @@ public class GerLoginBean implements Serializable {
                 AdmInstantiatesSite instantiatesSite = instantiatesSiteList.get(i);
                 if (instantiatesSite.getBusinessUnit() != null) {
                     instantiatesSiteBusinessUnit = instantiatesSite;
-                } else if (instantiatesSite.getSubsidiary() != null) {
+                } 
+                if (instantiatesSite.getSubsidiary() != null) {
                     instantiatesSiteSubsidiary = instantiatesSite;
-                } else if (instantiatesSite.getCompany() != null) {
+                } 
+                if (instantiatesSite.getCompany() != null) {
                     instantiatesSiteCompany = instantiatesSite;
-                } else if (instantiatesSite.getContract() != null) {
+                } 
+                if (instantiatesSite.getContract() != null) {
                     instantiatesSiteContract = instantiatesSite;
                 }
             }
+            if(instantiatesSiteContract!=null && instantiatesSiteContract.getContract()!=null){
+            	AdmCompany company =  instantiatesSiteContract.getContract().getCompanyList().get(0);
+            	instantiatesSiteContract.setCompany(company);
+            	instantiatesSiteCompany = instantiatesSiteContract;
+            	WebApplicationContext context =  FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());	
+            	//ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("applicationContextSmall.xml");
+			    
+            	dataSource = context.getBean(DataSourceBean.class);            	
+            	dataSource.setUrl(company.getDataSource());
+            }
         }
+        
     }
 
     public void doUpdateUser() {
@@ -626,9 +646,6 @@ public class GerLoginBean implements Serializable {
                     mm.addElement(me);
                     menuModelList.add(mm);
                 }
-            }
-            if(instantiatesSiteContract.getContract()!=null){
-            	baseDao.CreateEm();            
             }
         } catch (Throwable ex) {
             Logger.getLogger(GerMenuBean.class.getName()).log(Level.SEVERE, null, ex);

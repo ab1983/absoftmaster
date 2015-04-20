@@ -20,6 +20,7 @@ import com.algoboss.erp.entity.DevReportRequirement;
 import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.entity.SecAuthorization;
 import com.algoboss.erp.entity.SecUserAuthorization;
+import com.algoboss.erp.face.AdmAlgoBean.AppPhaseListener;
 import com.algoboss.erp.util.AlgoUtil;
 import com.algoboss.erp.util.AlgodevUtil;
 import com.algoboss.erp.util.ComponentFactory;
@@ -41,6 +42,9 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -49,6 +53,9 @@ import javax.faces.component.behavior.AjaxBehavior;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ComponentSystemEvent;
+import javax.faces.event.PhaseEvent;
+import javax.faces.event.PhaseId;
+import javax.faces.event.PhaseListener;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpSession;
@@ -62,25 +69,26 @@ import org.primefaces.model.TreeNode;
  * @author Agnaldo
  */
 @Named()
-@SessionScoped
-public class AdmAlgodevBean extends GenericBean<DevRequirement> {
+@RequestScoped
+public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
 
-    private UIComponent algoContainer;
-    private UIComponent algoPalette;
-    private UIComponent elementSelected;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5588079134602596750L;
+	private UIComponent algoContainer;
+    private transient UIComponent algoPalette;
+    private transient UIComponent elementSelected;
     private List<UIComponent> childrenElementSelected = new ArrayList<UIComponent>();
     private List<UIComponent> facetsElementSelected = new ArrayList<UIComponent>();
     private Map<String, String[]> elementPropertiesSelected = new TreeMap<String, String[]>();
     private List<UIComponent> elements = new ArrayList<UIComponent>();
-    private DevEntityClass entity;
     private DevEntityClass entityNodeSelected;
     private DevEntityPropertyDescriptor entityPropertyDescriptor;
     private List<DevEntityPropertyDescriptor> entityPropertyDescriptorList = new ArrayList<DevEntityPropertyDescriptor>();
     private List<DevEntityClass> entityClassNodeList = new ArrayList<DevEntityClass>();
     private Map<Integer, DevEntityPropertyDescriptor> propertyTypeNodeMap = new HashMap<Integer, DevEntityPropertyDescriptor>();    
     private Long autorizationUserIdTemp = null;
-    private String containerPage = "form";
-    private Map<String, List<UIComponent>> elementsContainerMap = new HashMap();
     private DevEntityClass entitySelected;
     private List<DevEntityPropertyDescriptor> propertySelectedListCollection;
     private List<DevEntityPropertyDescriptor> propertySelectedFormCollection;
@@ -91,8 +99,9 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
     private String actualServiceDescription;
     private List<DevEntityClass> propEntList;
     
-    @Inject
-    AdmAlgoreportBean algoRep;
+    //@Inject
+    AdmAlgoreportBean algoRep = new AdmAlgoreportBean();
+    AdmAlgoappBean algoApp = new AdmAlgoappBean();
 
     public Date getData() {
         return data;
@@ -111,11 +120,40 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
         super.type = DevRequirement.class;
         super.urlForm = "algodevForm.xhtml";
         super.subtitle = "Administração | Algodev | Projeto";
+        super.PREFIX_BEAN = "dev_";
         AlgodevUtil.translateCmd();
         initBean();
     }
 
-    public String getStrUIComponentId() {
+	@PostConstruct	
+	public void onConstruct(){
+		//Object actualBeanAux = baseBean.getActualBean(); 
+		//AdmAlgodevBean actualBean = null;
+		//if(actualBeanAux instanceof AdmAlgodevBean){
+			//actualBean = (AdmAlgodevBean)actualBeanAux;
+			setAppBean(getBeanKeyName());
+		//}
+
+		if(getAppBean() != null && getAppBean().getAppBean()!=null){
+			BaseBean.copyObject(getAppBean().getAppBean(), this);			
+		}
+		//updateContainerPage();
+	}
+	@PreDestroy
+	public void onDestroy(){
+		if(getAppBean()!=null){
+			getAppBean().setAppBean(BaseBean.copyObject(this));			
+		}
+	}    
+    	
+	
+    @Override
+	public String getBeanKeyName() {
+		// TODO Auto-generated method stub
+		return PREFIX_BEAN+"X";
+	}
+
+	public String getStrUIComponentId() {
         return strUIComponentId;
     }
 
@@ -129,22 +167,31 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
 
     public void setContainerPage(String containerPage) {
         this.containerPage = containerPage;
-        updateContainerPage();
-    }
-
-    public void updateContainerPage() {
-        elements = elementsContainerMap.get(containerPage);
+        //updateContainerPage();
     }
 
     public void clearContainerPage() {
         elements.clear();
     }
 
-    public Object[] doElementsConatainerList() {
-        return elementsContainerMap.keySet().toArray();
+    public Object[] doElementsContainerList() {
+        return getElementsContainerMap().keySet().toArray();
     }
+        
+	@Override
+	public void setBean(DevRequirement obj) {
+		// TODO Auto-generated method stub
+		super.setBean(obj);
+		requirement = obj;
+	}
 
-    public DevEntityClass getEntitySelected() {
+	@Override
+	public void updateContainerPage() {
+		// TODO Auto-generated method stub
+		super.updateContainerPage();
+	}
+
+	public DevEntityClass getEntitySelected() {
         return entitySelected;
     }
 
@@ -406,14 +453,10 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
         entityPropertyDescriptorConfigList = null;
     }
 
-    public UIComponent getAlgoContainer() {
-        return algoContainer;
-    }
-
     public void setAlgoContainer(UIComponent algoContainer) {
         if (elements != null && algoContainer!=null) {
-            algoContainer.getChildren().clear();
-            algoContainer.getChildren().addAll(elements);
+            //algoContainer.getChildren().clear();
+            //algoContainer.getChildren().addAll(elements);
         }
         this.algoContainer = algoContainer;
     }    
@@ -523,6 +566,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
             });
             t.start();
             algoRep.initBean();
+            algoApp.initBean();
             //Collection<Object[]> componentList = (HashSet<Object[]>) objIn.readObject();
         } catch (Throwable ex) {
             Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
@@ -671,12 +715,19 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
 	            actualServiceDescription = bean.getService().getDescription();
 	            algoRep.setFieldContainerList(bean.getFieldContainerList());
                 entityClassNodeList.add(entity);
+                requirement = bean;
+                /*
                 List<DevComponentContainer> componentContainerList = bean.getComponentContainerList();
                 for (DevComponentContainer devComponentContainer : componentContainerList) {
                     elements = AlgodevUtil.generateComponentList(devComponentContainer);
                     elementsContainerMap.put(devComponentContainer.getName(), elements);
                     containerPage = devComponentContainer.getName();
-                }
+                }*/
+                algoApp.setRequirement(requirement);
+                algoApp.generateElementsContainerMap(bean);
+                HttpSession session = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(true);
+                session.setAttribute("requirement", requirement);
+                //updateContainerPage();
                 //setAutorizationUserIdTemp();
                 updateTreeExpression();
             } catch (Throwable ex) {
@@ -1059,7 +1110,7 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
     }
     private void createByConstructor(Map map, UIComponent cloned, UIComponent compTarget, Map<String,List<UIComponent>> elementsContainerMap, DevRequirement bean, DevEntityClass entity, List<DevEntityPropertyDescriptor> propertySelectedFormCollection, List<DevEntityPropertyDescriptor> propertySelectedListCollection) {
 		elementsContainerMap.clear();
-        UIComponent elementPanel = algoPalette;
+        UIComponent elementPanel = BaseBean.getAlgoPalette();
         try {
         	LayoutFieldsFormat.onConstruction(bean);
             if (map.containsKey("dataform") && !String.valueOf(map.get("dataform")).isEmpty()) {
@@ -1266,4 +1317,59 @@ public class AdmAlgodevBean extends GenericBean<DevRequirement> {
             createPropertyNode(ent, node0);
         }
     }
+    
+	class AppPhaseListener implements PhaseListener{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 540211169676512128L;
+
+		@Override
+		public void beforePhase(PhaseEvent event) {
+			try {
+				
+			if (event.getPhaseId().equals(PhaseId.PROCESS_VALIDATIONS)) {
+				isInvalidUpdateContainer = true;
+			}
+			UIComponent algoContainerX = ComponentFactory.findComponentByStyleClass("ui-algo-container", FacesContext.getCurrentInstance().getViewRoot());
+			if(algoContainerX!=null){
+				if(event.getPhaseId().equals(PhaseId.RENDER_RESPONSE)){
+					updateContainerPage();		
+					
+				}
+				System.out.println("UI:"+algoContainerX.getId());
+				if(event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES)){
+					ComponentFactory.resetComponent();
+				}
+			}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("Before Executing " + event.getPhaseId() );
+		}
+
+		@Override
+		public void afterPhase(PhaseEvent event) {
+			try {
+				
+			if (event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES) || event.getPhaseId().equals(PhaseId.INVOKE_APPLICATION)) {
+				isInvalidUpdateContainer = false;
+			}
+			
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("After Executing " + event.getPhaseId());
+		}
+
+		@Override
+		public PhaseId getPhaseId() {
+			return PhaseId.ANY_PHASE;
+		}
+		
+	}
+	public PhaseListener getPhaseListener(){
+		return new AppPhaseListener();
+	}
+    
 }

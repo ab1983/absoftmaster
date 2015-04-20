@@ -14,6 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.application.ResourceHandler;
+import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,6 +32,7 @@ import com.algoboss.erp.entity.AdmContract;
 import com.algoboss.erp.entity.SecUser;
 import com.algoboss.erp.face.GerLoginBean;
 import com.algoboss.erp.face.SecUserBean;
+import com.algoboss.erp.util.ComponentFactory;
 
 /**
  * @author Agnaldo

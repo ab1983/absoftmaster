@@ -13,15 +13,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,12 +32,15 @@ import java.util.logging.Logger;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 import javax.faces.application.Application;
+import javax.faces.component.EditableValueHolder;
 import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
+import javax.faces.component.UIViewRoot;
 import javax.faces.component.behavior.ClientBehavior;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
+import javax.faces.context.PartialViewContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 import javax.faces.validator.FacesValidator;
@@ -377,7 +383,7 @@ public class ComponentFactory {
 				node = parentEntity;
 			}
 			String str = "#{app.beanListMap.get('" + String.valueOf(node).toLowerCase() + "')}";
-			String str3 = "#{app.beanListFilteredMap.get('" + String.valueOf(node).toLowerCase() + "')}";
+			String str3 = "#{app.beanListFilteredMap.get('" + String.valueOf(node).toLowerCase() + "').beanList}";
 			String str2 = "#{app.beanSel}";
 			Map<String, Object> mapParam = new HashMap<String, Object>();
 			mapParam.put("value", str);
@@ -940,6 +946,7 @@ public class ComponentFactory {
 			generateComponentStyleClassName(mapParam, "form", entitySelected, devEntityPropertyDescriptor, "input",styleClass);
 			Object readonly = LayoutFieldsFormat.loadOpt(fieldOptions, "readonly").getOptionsValue();
 			Object disabled = LayoutFieldsFormat.loadOpt(fieldOptions, "disabled").getOptionsValue();
+			
 			if(readonly!=null && disabled!=null){
 				mapParam.put("readonly", readonly.toString());
 				mapParam.put("disabled", disabled.toString());
@@ -962,7 +969,14 @@ public class ComponentFactory {
 			Object onkeyup = LayoutFieldsFormat.loadOpt(fieldOptions, "onkeyup").getOptionsValue();
 			if(onkeyup!=null){
 				mapParam.put("onkeyup", onkeyup.toString());
-			}				
+			}
+			Object style = LayoutFieldsFormat.loadOpt(fieldOptions, "style").getOptionsValue();
+			if(style!=null){
+				Object styleOld = getProperty(inputCloned, "style");
+				mapParam.put("style", Objects.toString(styleOld,"")+style.toString());
+				String styleClassTemp = Objects.toString(mapParam.get("styleClass"),"");
+				mapParam.put("styleClass", styleClassTemp+" style");
+			}			
 			// setValue(inputCloned, "value", str);
 			ComponentFactory.updateElementProperties(inputCloned, mapParam);
 		} catch (ClassNotFoundException e) {
@@ -2718,6 +2732,60 @@ public class ComponentFactory {
 		return o;
 	}
 
+	public static boolean hasExpression(UIComponent comp) {
+		//Object o = null;
+		try {
+			Field f2 = UIComponentBase.class.getDeclaredField("pdMap");
+			f2.setAccessible(true);
+			HashMap<String, PropertyDescriptor> hm = (HashMap) f2.get(comp);
+			for (Map.Entry<String, PropertyDescriptor> object : hm.entrySet()) {
+				String object1 = object.getKey();
+				PropertyDescriptor object2 = object.getValue();
+				if (object2.getReadMethod() != null) {
+					Object o = null;
+					ValueExpression valEx = comp.getValueExpression(object1);
+					if (valEx != null) {
+						o = valEx;
+					} else {
+						try {
+							o = object2.getReadMethod().invoke(comp);
+						} catch (java.lang.reflect.InvocationTargetException e) {
+							// System.out.println("Exception:" +
+							// e.getMessage());
+							continue;
+						}
+					}				
+					if (!(o instanceof String) && object2.getReadMethod() != null) {
+						try {
+							object2.getReadMethod().setAccessible(true);
+							String className = object2.getWriteMethod().getParameterTypes()[0].getName();
+							o = getPropertyString(o, className);
+						} catch (Exception e) {
+							continue;
+						}
+					}
+					if(String.valueOf(o).startsWith("#{")){							
+						return true;
+					}
+				}
+			}
+		} catch (NoSuchFieldException ex) {
+			// Logger.getLogger(ComponentFactory.class.getName()).log(Level.SEVERE,
+			// null, ex);
+		} catch (SecurityException ex) {
+			// Logger.getLogger(ComponentFactory.class.getName()).log(Level.SEVERE,
+			// null, ex);
+		} catch (IllegalArgumentException ex) {
+			// Logger.getLogger(ComponentFactory.class.getName()).log(Level.SEVERE,
+			// null, ex);
+		} catch (IllegalAccessException ex) {
+			// Logger.getLogger(ComponentFactory.class.getName()).log(Level.SEVERE,
+			// null, ex);
+		}
+		return false;
+	}
+	
+	
 	public static String getPropertyString(Object o, String className) {
 		if (o != null) {
 			try {
@@ -3029,7 +3097,9 @@ public class ComponentFactory {
 				}
 			}
 			if (facesContext != null && comp2.getId() == null) {
-				comp2.setId("ad_" + facesContext.getViewRoot().createUniqueId());
+				SecureRandom prng = SecureRandom.getInstance("SHA1PRNG","SUN");
+				//prng.setSeed(Integer.MAX_VALUE);
+				comp2.setId("ad_" +comp2.getClass().getSimpleName()+System.nanoTime() );
 			}
 			comp2.setParent(null);
 		} catch (Throwable ex) {
@@ -3439,6 +3509,41 @@ public class ComponentFactory {
 		return parentContainer;
 	}
 
+	public static void resetComponent(UIComponent ...components){
+		try {
+			if(components==null || components.length == 0){
+				List<UIComponent> componentsList = new ArrayList<UIComponent>();
+				FacesContext facesContext = FacesContext.getCurrentInstance();
+				PartialViewContext partialViewContext = facesContext.getPartialViewContext();
+				UIViewRoot viewRoot = facesContext.getViewRoot();
+				Collection<String> renderIds = partialViewContext.getRenderIds();
+				for (String renderId : renderIds) {
+					UIComponent component = viewRoot.findComponent(renderId);
+					componentsList.add(component);
+				}	
+				components = componentsList.toArray(new UIComponent[]{});
+			}
+			
+			for (UIComponent uiComponent : components) {
+				if(uiComponent!=null){
+					if (uiComponent.isRendered() && uiComponent instanceof EditableValueHolder) {
+						EditableValueHolder input = (EditableValueHolder) uiComponent;
+						input.resetValue();
+					}else{
+						List<UIComponent> componentsChildrenList = uiComponent.getChildren();
+						if(!componentsChildrenList.isEmpty()){						
+							resetComponent(componentsChildrenList.toArray(new UIComponent[]{}));
+						}
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public enum AppType {
 
 		LIST_FORM("listForm"), FORM_LIST("formList"), FORM("form"), SUMM("summ"), LIST_EDIT_FORM("listEditForm");

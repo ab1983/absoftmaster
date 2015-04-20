@@ -77,3 +77,38 @@ function showConfirm(msg,title,callback,callbackFalse){
     });                
 }
 
+function formatMaskFields(dateMask,timeMask,thousandsSeparator,decimalSeparator){
+        $('.dateFormat .hasDatepicker').mask(dateMask);
+        $('.timeFormat .hasDatepicker').mask(timeMask);
+
+        $(".decimalFormat1").maskMoney({
+            thousands: thousandsSeparator,
+            decimal: decimalSeparator,
+            precision: 1
+        });
+        $(".decimalFormat2").maskMoney({
+            thousands: thousandsSeparator,
+            decimal: decimalSeparator,
+            precision: 2
+        });
+        $(".decimalFormat3").maskMoney({
+            thousands: thousandsSeparator,
+            decimal: decimalSeparator,
+            precision: 3
+        });
+        $(".decimalFormat4").maskMoney({
+            thousands: thousandsSeparator,
+            decimal: decimalSeparator,
+            precision: 4
+        });
+        $(".decimalFormat5").maskMoney({
+            thousands: thousandsSeparator,
+            decimal: decimalSeparator,
+            precision: 5
+        });
+        $(".decimalFormat6").maskMoney({
+            thousands: thousandsSeparator,
+            decimal: decimalSeparator,
+            precision: 6
+        });
+}

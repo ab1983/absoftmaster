@@ -15,12 +15,15 @@ import com.algoboss.erp.entity.AdmService;
 import com.algoboss.erp.entity.AdmServiceContract;
 import com.algoboss.erp.entity.AdmServiceModuleContract;
 import com.algoboss.erp.entity.SecUser;
+import com.algoboss.erp.util.ComponentFactory;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -28,6 +31,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.TransferEvent;
 import org.primefaces.model.DualListModel;
@@ -388,9 +392,10 @@ public class AdmContractBean extends GenericBean<AdmContract> {
         serviceModuleContract = new AdmServiceModuleContract();
     }
 
-    public void startEditItem(String container) {
-        RequestContext context = RequestContext.getCurrentInstance();
-        context.reset("tabView:" + container + ":itemPaneladmContractBeanserviceModuleContract");
+    public void startEditItem(UIComponent container) {
+        //RequestContext context = RequestContext.getCurrentInstance();//FacesContext.getCurrentInstance().getViewRoot().findComponent("tabView:"+container + ":itemPaneladmContractBeanserviceModuleContract")getPartialViewContext().getRenderIds()
+        //context.reset(container.getClientId());
+    	ComponentFactory.resetComponent(container);
     }
 
     public void cancelEditItem() {

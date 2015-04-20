@@ -86,6 +86,9 @@
             <p:remoteCommand name="updateMenu" immediate="true" update="@(.startMenu)"/>
             <script type="text/javascript">
         /* <![CDATA[ */
+                 $(document).ready(function() {
+     				 formatMaskFields("#{msg['dateMask']}","#{msg['timeMask']}",'#{msg.thousandsSeparator}','#{msg.decimalSeparator}');                        	
+                 });
         var currentElModel = null;
         var timeoutID;
         var propertyOk = true;

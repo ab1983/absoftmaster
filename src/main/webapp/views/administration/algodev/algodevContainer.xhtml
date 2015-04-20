@@ -1,0 +1,369 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://java.sun.com/jsf/facelets"
+       xmlns:h="http://java.sun.com/jsf/html"
+       xmlns:f="http://java.sun.com/jsf/core"
+       xmlns:p="http://primefaces.org/ui">  
+    <h:form binding="#{admAlgodevContainerForm}" id="containerForm" styleClass="ui-algo-dev-form"  prependId="true" onsubmit="javascript:return false">
+    	<f:event type="preRenderComponent" listener="#{app.initBean()}"/>
+        <p:panel binding="#{algoContainerBind}" style="width: 1024px;height: 450px;font-size:11px;" styleClass="ui-algo-container ui-algo-container-dev" id="algoContainer">
+        </p:panel>
+        <!-- 
+        <p:droppable id="algoContainerDrop1" scope="ui-algo" activeStyleClass="ui-state-active" hoverStyleClass="ui-state-highlight" for="algoContainer" tolerance="fit" accept=".ui-panel-content .ui-algo-element" binding="#{algoContainerDropBind}" onDrop="(function(event, ui) {
+                handleDrop(event, ui);
+            })"></p:droppable>      
+         -->
+        <f:event type="preRenderComponent" listener="#{(app.setContainerClass('ui-algo-container-dev'))}"/>  
+        <f:event type="preRenderComponent" listener="#{(app.setContainerPage(admAlgodevBean.containerPage))}"/>  
+        <f:event type="preRenderComponent" listener="#{(app.setRequirement(admAlgodevBean.requirement))}"/>
+        <f:event type="preRenderComponent" listener="#{(app.setAppBean(algoContainerBind.clientId))}"/>
+        <f:event type="preRenderComponent" listener="#{(app.updateContainerPage())}"/>
+                  <!-- 
+        <f:phaseListener  binding="#{app.getPhaseListener()}"/>         
+        <f:event rendered="true" type="preRenderComponent" listener="#{admAlgodevBean.setAlgoContainerEvt(baseBean.getComponentEvent(algoContainerBind))}"/>        
+        <f:event rendered="true" type="preRenderComponent" listener="#{admAlgodevBean.setAlgoPaletteEvt(baseBean.getComponentEvent(algoPaletteBind))}"/> 
+                   -->
+        <p:remoteCommand name="updateCurrentConteiner" immediate="true" update="@(.containerPage)">
+        <!-- 
+            <f:setPropertyActionListener value="#{algoContainerBind}" target="#{admAlgodevBean.algoContainer}" />                            
+            <f:setPropertyActionListener value="#{algoPaletteBind}" target="#{admAlgodevBean.algoPalette}" />      
+         -->
+        </p:remoteCommand>
+        <p:remoteCommand name="updateCurrentForm" immediate="true" update="@form"/>
+        <p:remoteCommand name="removeChildren" actionListener="#{admAlgodevBean.removeComponent()}"  onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();" immediate="true"/>
+        <p:remoteCommand name="removeComponent" actionListener="#{admAlgodevBean.removeComponent()}"  onstart="updateCurrentConteiner();" oncomplete="updateCurrentForm();" immediate="true"/>
+        <p:remoteCommand name="onDropChildren" immediate="true" actionListener="#{admAlgodevBean.onDrop()}">
+        <!-- 
+            <f:setPropertyActionListener rendered="false" value="#{algoContainerBind}" target="#{admAlgodevBean.algoContainer}" />  
+            <f:setPropertyActionListener rendered="false" value="#{algoPaletteBind}" target="#{admAlgodevBean.algoPalette}" />  
+         -->
+        </p:remoteCommand>
+        <p:remoteCommand name="onDropComponent" immediate="true"  update="@form" actionListener="#{admAlgodevBean.onDrop()}">
+        </p:remoteCommand> 
+        <p:remoteCommand name="createByConstructor" immediate="true"  update="@form" actionListener="#{admAlgodevBean.createByConstructor()}" oncomplete="containerPageUpdate();updateOpenProjectDlg();updateMenu();">
+        </p:remoteCommand>           
+        <p:remoteCommand name="updateMenu" immediate="true" actionListener="#{gerLoginBean.setModel(null)}" update="@(.startMenu)"/>
+        <p:remoteCommand name="onSortComponent" immediate="true" update="@form" actionListener="#{admAlgodevBean.onSort()}">
+        </p:remoteCommand>  
+        <p:remoteCommand name="containerPageUpdate" immediate="true" update="@(.containerPage)"/>
+
+        <script type="text/javascript">
+        /* <![CDATA[ */
+        var currentElModel = null;
+        var timeoutID;
+        var propertyOk = true;
+        var dropCallbackFunc = null;
+        var dropCallbackParam = null;
+        function handleDrop(event, ui) {
+            //alert(ui.offset['left']);
+            var elSource = $(event.target);
+            teste23 = elSource;
+            //alert(event.offsetX+"-"+teste23.offset().top);
+            var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - elSource.offset().top + 45) + 'px;left:' + parseInt(ui.offset['left'] - elSource.offset().left + 20) + 'px;';
+            //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+            //var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top']) + 'px;left:' + parseInt(ui.offset['left']) + 'px;';
+            //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+            //alert(ui.position['top']+":"+ui.position['left']);
+            //alert(ui.offset['top']+":"+ui.offset['left']);
+            timeoutID = window.setTimeout(function(ui, elSource, styleStr) {
+                prepareDrop(ui, elSource, styleStr, 0);
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+            }, 1000, ui, elSource, styleStr);
+
+        }
+        function positionChange(dir, pos) {
+            if (currentEl !== null) {
+                window.clearTimeout(timeoutID);
+                //alert($(currentEl).attr('id'));
+                //alert($(currentEl).offset()[dir]);
+                //alert(parseFloat($(currentEl).offset()[dir])+parseFloat(pos));
+                //var posObj = {top:$(currentEl).offset()['top'],left:$(currentEl).offset()['left']}
+                //alert(currentEl);
+                var currentElObj = $(esc(currentEl));
+                //alert(currentElObj);
+                var posObj = $(currentElObj).offset();
+                posObj[dir] = $(currentElObj).offset()[dir] + parseInt(pos);
+                $(currentElObj).offset(posObj);
+                //$(currentEl).offset({ dir: (parseFloat($(currentEl).offset()[dir])+parseFloat(pos))});
+                //alert($(currentEl).offset()[dir]);
+                //$(currentEl).css(dir,parseInt($(currentEl).css(dir))+parseInt(pos));  
+                //updateElementAux(currentEl);
+                var param_id = {name: 'param_id', value: $(currentElObj).attr('id')};
+                var style = {name: 'style', value: $(currentElObj).attr('style')};
+                var tabindex = {name: 'tabindex', value: createTabindex(currentElObj)};
+                var prop = [param_id, style, tabindex];
+                timeoutID = window.setTimeout(function(prop) {
+                    updateElementAux(prop);
+                }, 2000, prop);
+            } else {
+                alert('Nenhum Elemento selecionado!');
+            }
+        }
+        function updateElementAux(property) {
+            currentEl = null;
+            for (var i in property) {
+                if (property[i].name === 'param_id' && property[i].value !== null && property[i].value.indexOf('algoContainer') === -1) {
+                    currentEl = property[i].value;
+                    break;
+                }
+            }
+            if (currentEl !== null) {
+                updateElementJs(property);
+            } else {
+                alert('Nenhum elemento selecionado.');
+            }
+        }
+        var senderSort = null;
+        function init() {
+            registerHotkeys('#{algoContainerBind.id}');
+            $(function() {
+                $(".sortable").sortable({
+                    placeholder: "ui-state-highlight",
+                    connectWith: ".connectedSortable",
+                    start: function(e, ui) {
+                        // creates a temporary attribute on the element with the old index
+                        $(this).attr('data-previndex', ui.item.index());
+                    },
+                    update: function(e, ui) {
+                        // gets the new and old index then removes the temporary attribute
+                        var newIndex = ui.item.index();
+                        var oldIndex = $(this).attr('data-previndex');
+
+                    },
+                    stop: function(event, ui) {
+                        //alert($(ui.placeholder).attr('id'));
+                        //alert($(ui.helper).attr('id'));
+                        //alert($(ui.sender).attr('id'));
+                        //alert($(this).attr('id'));
+                        var newIndex = ui.item.index();
+                        var oldIndex = $(this).attr('data-previndex');
+                        window.clearTimeout(timeoutID);
+                        //$(ui.sender).attr('data-target', $(this).attr('id'));
+                        //senderSort = ui.sender;
+                        //alert($(ui.sender).attr('id'));
+                        var param_id = {name: 'elementModelId', value: $(this).attr('id')};
+                        //var style = {name: 'style', value: $(this).attr('style')};
+                        var oldIndexParam = {name: 'oldIndexParam', value: oldIndex};
+                        var newIndexParam = {name: 'newIndexParam', value: newIndex};
+                        var targetId = {name: 'targetId', value: $(this).attr('data-target')};
+                        var prop = [param_id, oldIndexParam, newIndexParam, targetId];
+                        timeoutID = window.setTimeout(function(prop) {
+                            onSortComponent(prop);
+                        }, 2000, prop);
+                        //alert(newIndex +'-'+oldIndex);
+                        //alert("target: " + $(this).attr('data-target'));
+                        $(this).removeAttr('data-target');
+                        $(this).removeAttr('data-previndex');
+                    },
+                    receive: function(event, ui) {
+                        $(ui.sender).attr('data-target', $(this).attr('id'));
+                        //alert("receive: "+$(ui.sender).attr('id'));
+                    }
+                });
+                $(".sortable").disableSelection();
+                $(".sortable").resizable();
+
+
+                //$(".ui-icon-sortable").addClass( "ui-icon ui-icon-grip-dotted-vertical" );
+                $(".ui-icon-sortable").addClass("ui-icon ui-icon-arrow-4");
+                //$(".ui-icon-sortable").addClass( "ui-icon ui-icon-arrow-4-diag" );
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').resizable();
+            $('.elementPanel .ui-panel-content .ui-algo-element-value').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                helper: "clone",
+                revert: false
+            });
+            $('.elementPanel .ui-panel-content .ui-algo-element-container').draggable({
+                scope: 'ui-algo', //
+                cursor: "crosshair",
+                cancel: "",
+                helper: "clone",
+                revert: false
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-value').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                grid: [10, 10]
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').draggable({
+                scope: 'ui-algo',
+                cursor: "crosshair",
+                cancel: "",
+                grid: [10, 10]
+            });
+
+            $('.ui-algo-container .ui-panel-content .ui-algo-element-container').droppable({
+                activeClass: 'ui-state-active',
+                hoverClass: 'ui-state-highlight',
+                tolerance: 'touch',
+                scope: 'ui-algo',
+                drop: function(event, ui) {
+                    window.clearTimeout(timeoutID);
+                    var styleStr = 'position:absolute;top:' + parseInt(ui.offset['top'] - $(this).offset().top) + 'px;left:' + parseInt(ui.offset['left'] - $(this).offset().left) + 'px;';
+                    //var styleStr = 'position:relative;top:'+ui.position['top']+'px;left:'+ui.position['left']+'px;';
+                    //alert(ui.position['top']+":"+ui.position['left']);
+                    //alert(ui.offset['top']+":"+ui.offset['left']); 
+                    var timeCount = $(this).find('.ui-algo-element-container').length + 1 * 1000;
+
+                    prepareDrop(ui, this, styleStr, timeCount);
+
+
+                    //exibirConfirm("Informe os parâmetros.", "Vincular Dados", callbackFunc);
+                }
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').dblclick(function(event) {
+                event.preventDefault();
+                if (window.showPropertyValue !== undefined) {
+                    showPropertyValue();
+                }
+                //updateElementAux(this,{name:'style',value:$(this).attr('style')});
+            });
+            var oldTabIndex = 0;
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').mouseup(function(event) {
+                oldTabIndex = createTabindex(this);
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').mouseup(function(event) {
+                if ($(elClicked).closest("form").is('.ui-algo-dev-form')) {
+                    window.setTimeout(function(thisEl) {
+                        event.preventDefault();
+                        var newTabIndex = createTabindex(thisEl);
+                        var actualTabIndex = newTabIndex !== oldTabIndex ? newTabIndex : $(thisEl).attr('tabindex');
+                        //alert('oi');
+                        if (propertyOk) {
+                            propertyOk = false;
+                            var prop = [{name: 'param_id', value: thisEl.id}, {name: 'style', value: $(thisEl).attr('style')}, {name: 'tabindex', value: actualTabIndex}];
+                            updateElementAux(prop);
+                            window.setTimeout(function() {
+                                propertyOk = true;
+                            }, 1000);
+                        }
+                    }, 500, this);
+                }
+            });
+            $('.ui-algo-container .ui-panel-content .ui-algo-element').each(function() {
+                //var aClick = $(this).attr('onClick');
+                //if(aClick===undefined){
+                //alert(aClick);                        
+                //aClick = function(){};
+                //}
+                $(this).prop("onclick", null);
+                //$(this).attr('onClick',null);
+                //$(this).off("click", aClick);
+                //$(this).unbind("click", aClick);   
+                //$(this).click(function(event){ 
+                //  return false;
+                //});   
+                //$(this).on("click", aClick);
+
+            });
+            $('.elementPanel .ui-panel-content .ui-algo-element').click(function(event) {
+                event.preventDefault();
+                currentElModel = this;
+            });
+
+        }
+
+        function prepareDrop(ui, el, styleStr, timeCount) {
+            dropCallbackParam = {timeCount: timeCount, ui: ui, styleStr: styleStr, el: el};
+            dropCallbackFunc = function(p, value, dataList) {
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+                //onDropComponent([{name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                timeoutID = window.setTimeout(function(ui, styleStr, el) {
+                    //onDropComponent([{name: 'style', value: styleStr}, {name: 'elementModelId', value: ui.draggable.attr('id')}]);
+                    onDropComponent([{name: 'value', value: value}, {name: 'datalist', value: dataList}, {name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                }, p.timeCount, p.ui, p.styleStr, p.el, value, dataList);
+            };
+            //elementPropertyApplyWv.jq.click(dropCallbackFunc);
+            if (ui.draggable.parents('.ui-algo-container,.ui-algo-element-container').attr('id') !== $(el).attr('id')) {
+                if (ui.draggable.is('.elementPanel .ui-panel-content .ui-algo-element')) {
+                    $('.prepareElementPropertyValue').val('');
+                    if (ui.draggable.is('.data-list')) {
+                        dataListChkBox.check();
+                        dataListChkBox.jq.show();
+                        $('.panelGridEntityProperty').show();
+                    } else {
+                        dataListChkBox.uncheck();
+                        dataListChkBox.jq.hide();
+                        $('.panelGridEntityProperty').hide();
+                    }
+                    preparePropertyDlg.show();
+                } else {
+                    onDropComponent([{name: 'style', value: styleStr}, {name: 'tabindex', value: createTabindex(el)}, {name: 'elementModelId', value: ui.draggable.attr('id')}, {name: 'elementContainerId', value: $(el).attr('id')}]);
+                }
+            }
+        }
+        function createTabindex(el) {
+            return $(el).offset().top / 10 * 100 + $(el).offset().left / 10;
+        }
+        function registerHotkeys(containerId) {
+
+            var key = 'keydown.moveElem_' + containerId;
+
+            $(document).off(key).on(key, function(e) {
+                var keyCode = $.ui.keyCode;
+                //var active = parseInt(dlgWidget.jq.css('z-index')) === PrimeFaces.zindex;
+
+                //if (dlgWidget.jq.hasClass('ui-overlay-visible') && active) {
+                if (e.which === keyCode.ESCAPE) {
+                    //dlgWidget.hide();
+                } else if (e.which === keyCode.ENTER || e.which === keyCode.NUMPAD_ENTER) {
+                    //dlgWidget.jq.find('button:submit:first').click();
+                    //e.preventDefault();
+                } else if (e.ctrlKey && e.which === keyCode.LEFT) {
+                    positionChange('left', -2);
+                } else if (e.ctrlKey && e.which === keyCode.RIGHT) {
+                    positionChange('left', +2);
+                } else if (e.ctrlKey && e.which === keyCode.UP) {
+                    positionChange('top', -2);
+                } else if (e.ctrlKey && e.which === keyCode.DOWN) {
+                    positionChange('top', +2);
+                } else if (e.which === keyCode.DELETE) {
+                    var propShow = false;
+                    $('.propertyDlg').each(
+                            function() {
+                                if ($(this).css("visibility") !== "hidden") {
+                                    propShow = true;
+                                }
+                            });
+                    if (currentEl !== null && currentEl !== undefined && !propShow) {
+                        removeComponent();
+                    }
+                }
+                // }
+            });
+        }
+        function showPropertyItem(property) {
+            //alert(property.type);
+            if (property.type === 'boolean') {
+                propertyBoolDlg.show();
+                if (property.value === 'true') {
+                    elementPropertyValueBoolWv.check();
+                } else {
+                    elementPropertyValueBoolWv.uncheck();
+                }
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+            } else if (property.type === 'int' || property.name.toLowerCase().indexOf('width') !== -1 || property.name.toLowerCase().indexOf('height') !== -1) {
+                elementPropertyValueIntWv.value = parseInt(property.value);
+                $(".elementPropertyValue").val(parseInt(property.value));
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+                propertyIntDlg.show();
+            } else {
+                $(".elementPropertyValue").val(property.value);
+                $(".elementPropertyKey").html(property.name);
+                $(".elementPropertyLabel").html(property.name);
+                propertyDlg.show();
+            }
+            //$(".elementPropertyApply").click();
+        }
+        init();
+        /* ]]> */
+        </script>
+
+    </h:form>
+</html>

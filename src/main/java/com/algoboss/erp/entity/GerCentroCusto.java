@@ -13,7 +13,7 @@ import javax.persistence.*;
 @NamedQueries({
     @NamedQuery(name = "findAllGerCentroCusto", query = "select t from GerCentroCusto t")})
 @Table(name = "ger_centro_custo")
-@javax.persistence.Entity
+@Entity
 public class GerCentroCusto extends GenericEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

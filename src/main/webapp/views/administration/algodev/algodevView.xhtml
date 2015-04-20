@@ -12,18 +12,38 @@
         var beanMapCache = new Array();
         var timeoutVar = null;
         </script>     
-    <h:form >  
+    <h:form>  
     	<f:event type="preRenderComponent" listener="#{app.initBrowserCache()}"/>
+    	<f:event type="preRenderComponent" listener="#{app.setIdxBrowserCached('')}"/>
+    	<p:remoteCommand rendered="true" name="updateCache" immediate="true" update="@form" oncomplete="updateCurrentForm()"/>
+    	<script>
+    		beanMapCache = new Array();
+    	</script>
     </h:form>
     <h:form prependId="false" acceptcharset="ISO-8859-1" styleClass="ui-algo-container-form">    
         <p:remoteCommand rendered="true" name="updateCurrentForm" immediate="true" update="@form"/>
         <p:remoteCommand rendered="false" name="updateBasePanel" update=":basePanel"/>  
         <p:remoteCommand name="updateStartPage" actionListener="#{app.updateContainerPage()}" update="@form"/>  
-        <p:remoteCommand name="eventBeanRc" actionListener="#{app.eventBean()}" immediate="false" update="@form"/>
+        <p:remoteCommand name="eventBeanRc" actionListener="#{app.eventBean()}" immediate="false" update="@form" oncomplete="oncomplete(xhr, status, args)"/>
         <p:remoteCommand name="eventPageRc" actionListener="#{app.eventBean()}" immediate="true" update="@form"/>
         <script type="text/javascript">
             /* <![CDATA[ */
             var idxCached = '#{app.idxBrowserCached}';
+            function oncomplete(xhr, status, args){
+            	var call = args.callback;
+            	if(call!==null && call !== undefined && call !== ""){
+        	        timeoutVar = window.setTimeout(function(call) {
+    	            	//if(isFormChanged()){
+    	                		$(document).ready(function() {
+    	                			//alert(1);
+    	                			eval(call);           		            			
+    	                		});  	            	
+    	            	//}                
+        	        }, 500,call);                		
+            		
+            	}
+				//log(call);            	
+            }
             function init1() {
 
                 //alert($('.ui-growl').html());
@@ -43,7 +63,10 @@
             }
             function isFormChanged(){
             	log('formChanged');
-                var formNew = $('.ui-algo-container-form').serialize();  
+            	var formCloned = $('.ui-algo-container-form').clone(true);
+            	var els = formCloned.children().remove("input[name='javax.faces.ViewState']");;            	              	
+                var formNew = $(formCloned).serialize();  
+				
                 if(formNew !== formOld && formNew!== formOld2){
                 	formOld2 = formOld;
     	            formOld = formNew;  
@@ -56,6 +79,10 @@
 	            formOld = "";
 	            formOld2 = "";            	
             }
+            function restartFormChanged(){
+            	clearFormChanged();
+            	isFormChanged();
+            }            
             function eventPage(call) {
                 //if (page !== '#{app.containerPage}') {
                     //page = '#{app.containerPage}';
@@ -80,20 +107,24 @@
             		});
             	}
             }
-            function eventBeanWait(call) {
+            function eventBeanWait(call,timeout) {
             	if(timeoutVar!==null){
             		clearTimeout(timeoutVar);
             	}
-            	if(isFormChanged()){
+            	
+            	if(timeout===undefined){
+            		timeout = 2000;
+            	}
             		//alert('1');
             		$(document).ready(function() {
             			timeoutVar = window.setTimeout(function(call) {
+		            	if(isFormChanged()){
 		           			eventBeanRc([{name: 'call', value: call}]);            		            			
 		           			timeoutVar = null;
 		           			//alert('2');
-        	            }, 1000,call);             			
+		            	}
+        	            }, timeout,call);             			
             		});
-            	}
             }            
             function focusBean(element) {
 	            window.setTimeout(function() {
@@ -119,6 +150,7 @@
 			            var idWdEl = 'widget_'+idEl.replace(':','_');
 			            try {
 				            var elWd = eval(idWdEl);
+			            	
 				            if(typeof beanMapCache[page1][idxSel]!=='undefined'){
 				            	//alert(beanMapCache[page][idxSel]);
 				            	//$(this).empty();
@@ -151,7 +183,6 @@
 					            
 						        input.val(selected);
 					            restartSelect(elWd,elWd.cfg);
-					            
 					            //elWd.options = elWd.options.clone().empty();//beanMapCache[page1][idxSel];
 					            elWd.bindEvents();
 				                   
@@ -183,6 +214,7 @@
 					            });
 					            	//});
 					            */
+					           
 				            }else{
 				            	//alert(page+2);
 				            	beanMapCache[page1][idxSel] = elWd.options.clone();//$(this).children();
@@ -191,8 +223,10 @@
 				            	//alert(page+3);
 				            }						
 			            idxSel++;
+			            //alert(idxSel+"/"+selects.length);
 						} catch (e) {
-							log(e);
+							//log("##Stack do Erro:"+e.stack);
+							log("reloadSelectsByJS:"+e);
 						}
 	            	}
 	            });
@@ -281,10 +315,21 @@
             //init1();
             /* ]]> */
         </script>
-        <p:panel  binding="#{app.algoContainerView}"  style="width: #{baseBean.expandedWindow?'1250px':'1024px'};height: 490px;font-size:11px;" styleClass="ui-algo-container" >
-			
-        </p:panel>                   
+        <p:panel style="width: #{baseBean.expandedWindow?'1250px':'1024px'};height: 490px;font-size:11px;" styleClass="ui-algo-container ui-algo-container-app" >
 
+        </p:panel>          
+        <!-- 
+        <f:event type="postAddToView" listener="#{(app.setAlgoContainer())}"/>
+        <f:event type="postAddToView" listener="#{(app.setAppBean(algoContainerObj.clientId))}"/>
+        <f:event type="preRenderView" listener="#{(app.setAppBean(algoContainerObj.clientId))}"/>
+        <f:phaseListener binding="#{app.getPhaseListenerImpl()}">
+        <f:phaseListener binding="#{app.getPhaseListener()}"/> 
+        <f:event type="preRenderComponent" listener="#{(app.setAppBean(algoContainerObj.clientId))}"/>
+		<f:event type="preRenderComponent" listener="#{(app.setContainerClass('ui-algo-container-app'))}"/>  
+        <f:event type="preRenderComponent" listener="#{(app.updateContainerPage())}"/>        
+         -->
+         <f:event type="preRenderComponent" listener="#{app.preRenderComponent}"/>
+         
         <p:dialog onShow="prepareExportHtmlToPdf('.ui-algo-container .ui-datatable-tablewrapper');" widgetVar="exportTableDlg" header="Selecione o Formato para Exportação" modal="false" dynamic="true" resizable="false">
             <h:commandLink rendered="false">  
                 <p:graphicImage value="resources/images/excel.png" />  
@@ -315,8 +360,7 @@
         <p:remoteCommand immediate="false" name="exportHtmlToPdf" actionListener="#{(app.exportHtmlToPdf)}"/>
         <p:remoteCommand immediate="false" name="exportPdf" actionListener="#{(app.exportPdf())}"/>
         <p:commandButton value="Atualizar" rendered="false" immediate="true" oncomplete="updateStartPage();"/>
-        <f:event type="preRenderComponent" listener="#{(app.setAlgoContainer(app.algoContainerView))}"/>
-        <f:phaseListener binding="#{app.getPhaseListenerImpl()}" /> 
+
         <p:dialog widgetVar="pdfViewer" dynamic="true" rendered="false">
             <p:media value="#{app.pdfFileStr}" player="pdf" width="100%" height="300px">  
                 Your browser can't display pdf, <h:outputLink value="#{app.pdfFileStr}">click</h:outputLink> to download pdf instead.  
@@ -345,9 +389,11 @@
                         }
                         if ((tabindex === null && $(this).attr("tabindex") !== undefined) || parseFloat($(this).attr("tabindex")) < parseFloat($(tabindex).attr("tabindex"))) {
                             tabindex = this;
-                            window.setTimeout(function() {
+                            
+                            window.setTimeout(function(tabindex) {
+                            	//alert(tabindex);
                                 $(tabindex).focus();
-                            }, 1000);
+                            }, 100,tabindex);
                         }
                     }
                     //alert($(tabindex).attr("tabindex"));
@@ -357,9 +403,9 @@
                 var elements = $('.ui-algo-container').find('[tabindex]');
                 findIndex(elements);
                 if (tabindex === null && firstindex !== null) {
-                	window.setTimeout(function() {
+                	window.setTimeout(function(firstindex) {
                         $(firstindex).focus();
-                    }, 1000);
+                    }, 100,firstindex);
                 }
                 //alert($(tabindex).attr("tabindex"));
                 if (!loaded) {
@@ -423,41 +469,9 @@
             $ = jQuery;
             
             // Now you can use it
-            $(document).ready(function() {
-                $('.dateFormat .hasDatepicker').mask('#{msg['dateMask']}');
-                $('.timeFormat .hasDatepicker').mask('#{msg['timeMask']}');
-
-                $(".decimalFormat1").maskMoney({
-                    thousands: '#{msg.thousandsSeparator}',
-                    decimal: '#{msg.decimalSeparator}',
-                    precision: 1
-                });
-                $(".decimalFormat2").maskMoney({
-                    thousands: '#{msg.thousandsSeparator}',
-                    decimal: '#{msg.decimalSeparator}',
-                    precision: 2
-                });
-                $(".decimalFormat3").maskMoney({
-                    thousands: '#{msg.thousandsSeparator}',
-                    decimal: '#{msg.decimalSeparator}',
-                    precision: 3
-                });
-                $(".decimalFormat4").maskMoney({
-                    thousands: '#{msg.thousandsSeparator}',
-                    decimal: '#{msg.decimalSeparator}',
-                    precision: 4
-                });
-                $(".decimalFormat5").maskMoney({
-                    thousands: '#{msg.thousandsSeparator}',
-                    decimal: '#{msg.decimalSeparator}',
-                    precision: 5
-                });
-                $(".decimalFormat6").maskMoney({
-                    thousands: '#{msg.thousandsSeparator}',
-                    decimal: '#{msg.decimalSeparator}',
-                    precision: 6
-                });
-            });
+                 $(document).ready(function() {
+     				 formatMaskFields("#{msg['dateMask']}","#{msg['timeMask']}",'#{msg.thousandsSeparator}','#{msg.decimalSeparator}');                        	
+                 });
         </script>        
         <style>
         	#{app.requirement.requirementStyle}

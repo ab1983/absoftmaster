@@ -1,0 +1,119 @@
+<?xml  version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:lang="http://www.springframework.org/schema/lang"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd
+        http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+ 
+    <context:annotation-config />
+    <!-- context:component-scan base-package="com.howtodoinjava.controller" /-->
+ 
+    <!-- bean id="jspViewResolver"
+        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass"
+            value="org.springframework.web.servlet.view.JstlView" />
+        <property name="prefix" value="/WEB-INF/view/" />
+        <property name="suffix" value=".jsp" />
+    </bean-->
+ 
+    <!-- bean id="propertyConfigurer"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+        p:location="/WEB-INF/jdbc.properties" /-->
+
+	<bean id="jdbc"
+	 class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+	 <property name="location" value="classpath:/WEB-INF/jdbc.properties" />
+	 </bean>
+    
+	 <bean id="abstractDataSource"
+        class="org.apache.commons.dbcp.BasicDataSource" 
+        destroy-method="close"
+        p:driverClassName="#{jdbc.driverClassName}"
+        p:username="#{jdbc.username}"
+        p:password="#{jdbc.password}" />
+ 
+    <bean id="concreteDataSource1" parent="abstractDataSource" p:url="#{jdbc.databaseurl1}"/>
+    <bean id="concreteDataSource2" parent="abstractDataSource" p:url="#{jdbc.databaseurl2}"/>
+    <bean id="concreteDataSource3" parent="abstractDataSource" p:url="#{jdbc.databaseurl3}"/>
+    <bean id="concreteDataSource4" parent="abstractDataSource" p:url="#{jdbc.databaseurl4}"/>
+    <bean id="concreteDataSource5" parent="abstractDataSource" p:url="#{jdbc.databaseurl5}"/>
+    <bean id="concreteDataSource6" parent="abstractDataSource" p:url="#{jdbc.databaseurl6}"/>     
+    <bean id="concreteDataSource7" parent="abstractDataSource" p:url="#{jdbc.databaseurl7}"/>     
+    <bean id="concreteDataSource8" parent="abstractDataSource" p:url="#{jdbc.databaseurl8}"/>     
+    <bean id="concreteDataSource9" parent="abstractDataSource" p:url="#{jdbc.databaseurl9}"/>     
+    <bean id="concreteDataSource10" parent="abstractDataSource" p:url="#{jdbc.databaseurl10}"/>     
+     
+     <bean id="dataSource" class="com.algoboss.integration.router.spring.MyRoutingDataSource">
+	   <property name="targetDataSources">
+	      <map key-type="java.lang.Integer">
+	         <entry key="1" value-ref="concreteDataSource1"/>
+	         <entry key="2" value-ref="concreteDataSource2"/>
+	         <entry key="3" value-ref="concreteDataSource3"/>
+	         <entry key="4" value-ref="concreteDataSource4"/>
+	         <entry key="5" value-ref="concreteDataSource5"/>
+	         <entry key="6" value-ref="concreteDataSource6"/>
+	         <entry key="7" value-ref="concreteDataSource7"/>
+	         <entry key="8" value-ref="concreteDataSource8"/>
+	         <entry key="9" value-ref="concreteDataSource9"/>
+	         <entry key="10" value-ref="concreteDataSource10"/>
+	      </map>
+	   </property>
+	    <property name="defaultTargetDataSource" ref="concreteDataSource1"/>
+	</bean>
+	
+     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
+	      p:basenames="messages" />
+	
+	<!-- Declare the Interceptor -->
+	<!--mvc:interceptors>    
+	    <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
+	          p:paramName="locale" />
+	</mvc:interceptors-->
+	
+	<!-- Declare the Resolver -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+    
+    <bean id="sessionFactory"
+        class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
+        <property name="dataSource" ref="dataSource" />
+        <property name="persistenceXmlLocation">
+            <value>classpath:META-INF/persistence.xml</value>
+        </property>
+		<property name="persistenceUnitName" value="SMALLPU" />
+		
+	    <property name="eclipselink.target-server" value="JBoss"/>
+	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
+		<property name="eclipselink.weaving" value="static"/> 
+		<property name="eclipselink.logging.level.sql" value="FINE"/>
+		<property name="eclipselink.logging.parameters" value="true"/>	
+		<property name="eclipselink.jdbc.fetch-size" value="5000"/> 
+        <property name="eclipselink.jdbc.batch-writing" value="JDBC" />
+        <property name="eclipselink.jdbc.batch-writing.size" value="1000" />	
+        <!--  Optimization #9 - statement caching 
+        <property name="eclipselink.jdbc.cache-statements" value="true" />        	
+        -->
+    </bean>
+     <bean id="smallDao" class="com.algoboss.integration.small.dao.SmallDao"></bean>
+    <!-- bean id="employeeDAO" class="com.howtodoinjava.dao.EmployeeDaoImpl"></bean>
+    <bean id="employeeManager" class="com.howtodoinjava.service.EmployeeManagerImpl"></bean-->
+ 
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <bean id="transactionManager"
+        class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+</beans>

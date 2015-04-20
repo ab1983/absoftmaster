@@ -118,9 +118,25 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
 
     public void setFormRendered(boolean formRendered) {
         this.formRendered = formRendered;
-    }
+    }    
+    
+    public String getUrl() {
+		return url;
+	}
 
-    public String getUrlForm() {
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getSubtitle() {
+		return subtitle;
+	}
+
+	public void setSubtitle(String subtitle) {
+		this.subtitle = subtitle;
+	}
+
+	public String getUrlForm() {
         return urlForm;
     }
 
@@ -599,6 +615,11 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public void onReload() {
+		// TODO Auto-generated method stub
+		
 	}
     
 }

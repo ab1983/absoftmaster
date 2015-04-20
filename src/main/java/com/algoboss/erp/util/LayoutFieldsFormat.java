@@ -40,6 +40,8 @@ public class LayoutFieldsFormat {
 			jsEngine.eval("importPackage(com.algoboss.erp.util);var fmt =LayoutFieldsFormat.getInstance(requirement);");
 			jsEngine.eval(requirement.getRequirementScript());
 			jsEngine.eval("onConstruction();");			
+		}else{
+			new LayoutFieldsFormat(requirement).showAll();
 		}
 	}	
 
@@ -49,14 +51,14 @@ public class LayoutFieldsFormat {
 				requirement.getFieldContainerList().clear();
 				writeOptArray(new String[] { "head" }, "Date", "Data Inicial", new String[] { "fil" }, requirement, "startdate");
 				writeOptArray(new String[] { "head" }, "Date", "Data Final", new String[] { "fil" }, requirement, "enddate");
-				writeOptArray(new String[] { "head" }, "String", "Rota", new String[] { "fil" }, requirement, "rota");
+				writeOptArray(new String[] { "head" }, "String", "Número NF", new String[] { "fil" }, requirement, "numeronf");
 				writeOptArray(new String[] { "param" }, "String", "P_ROTA", new String[] { "fil" }, requirement, "rota");		
 			}
 			if(requirement.getReportRequirementId()==8){
 				requirement.getFieldContainerList().clear();
 				writeOptArray(new String[] { "head" }, "Date", "Data Inicial", new String[] { "fil" }, requirement, "startdate");
 				writeOptArray(new String[] { "head" }, "Date", "Data Final", new String[] { "fil" }, requirement, "enddate");				
-				writeOptArray(new String[] { "head" }, "String", "Rota", new String[] { "fil" }, requirement, "rota");
+				writeOptArray(new String[] { "head" }, "String", "Número NF", new String[] { "fil" }, requirement, "numeronf");
 				writeOptArray(new String[] { "param" }, "String", "P_ROTA", new String[] { "fil" }, requirement, "rota");		
 			}			
 		}
@@ -306,9 +308,12 @@ public class LayoutFieldsFormat {
 			// fieldNames.add("vendedor");
 			fieldNames.add("descricao");
 			fieldNames.add("preco");
-			// fieldNames.add("identificador1");
+			fieldNames.add("custocompr");
+			fieldNames.add("livre1");
 			fieldNames.add("peso");
 			fieldNames.add("comissao");
+			fieldNames.add("ipi");
+			fieldNames.add("cf");
 			clear(requirement);
 			List<String> fieldNamesList = new ArrayList<String>(fieldNames);
 			//fieldNamesList.remove("dataentrada");
@@ -524,11 +529,19 @@ public class LayoutFieldsFormat {
 	public static void clear(DevRequirement requirement) {
 		requirement.getFieldContainerList().clear();
 		DevEntityClass entitySelected = requirement.getEntityClass();
-		requirement.getFieldContainerList().addAll(genarateFieldContainer(entitySelected,"form","list"));
+		requirement.getFieldContainerList().addAll(generateFieldContainerHide(entitySelected,"form","list"));
 		
 	}
 	
-	public static List<DevReportFieldContainer> genarateFieldContainer(DevEntityClass entitySelected, String... containers){
+	public static List<DevReportFieldContainer> generateFieldContainerHide(DevEntityClass entitySelected, String... containers){		
+		return generateFieldContainer(false, entitySelected, containers);
+	}
+	
+	public static List<DevReportFieldContainer> generateFieldContainerShow(DevEntityClass entitySelected, String... containers){		
+		return generateFieldContainer(true, entitySelected, containers);
+	}
+	
+	public static List<DevReportFieldContainer> generateFieldContainer(Boolean show, DevEntityClass entitySelected, String... containers){
 		List<DevReportFieldContainer> fieldContainerList = new ArrayList<DevReportFieldContainer>();
 		for (int i = 0; i < containers.length; i++) {
 			String container = 	containers[i];
@@ -543,14 +556,14 @@ public class LayoutFieldsFormat {
 				devReportFieldOptions.setEntityPropertyDescriptor(devEntityPropertyDescriptor);
 				devReportFieldOptions.setName(devEntityPropertyDescriptor.getPropertyName());
 				fieldOptionsList.add(devReportFieldOptions);
-				loadOpt(entObj, fieldContainer, devEntityPropertyDescriptor.getPropertyName(), "visible", "Boolean").setOptionsValue("true");
+				loadOpt(entObj, fieldContainer, devEntityPropertyDescriptor.getPropertyName(), "visible", "Boolean").setOptionsValue(show.toString());
 				if(container.startsWith("form") && devEntityPropertyDescriptor.getPropertyType().equalsIgnoreCase("ENTITYCHILDREN")){
-					fieldContainerList.addAll(genarateFieldContainer(devEntityPropertyDescriptor.getPropertyClass(),"form-form-"+entitySelected.getName(),"form-list-"+entitySelected.getName()));
+					fieldContainerList.addAll(generateFieldContainer(show, devEntityPropertyDescriptor.getPropertyClass(),"form-form-"+entitySelected.getName(),"form-list-"+entitySelected.getName()));
 				}
 			}			
 		}
 		return fieldContainerList;
-	}
+	}	
 
 	public static DevReportFieldOptions load(DevEntityClass entCls, DevReportFieldContainer fieldContainer, String fieldName) {
 		DevEntityObject entObj = new DevEntityObject(entCls);
@@ -592,7 +605,7 @@ public class LayoutFieldsFormat {
 
 	public static DevReportFieldOptionsMap loadOpt(DevEntityObject entObj, DevReportFieldContainer fieldContainer, String fieldName, String optionName, String optionType) {
 		if(fieldContainer.getFieldOptionsList().isEmpty()){
-			fieldContainer.getFieldOptionsList().addAll(generateOptionsForAll(entObj.getEntityClass()));
+			//fieldContainer.getFieldOptionsList().addAll(generateOptionsForAll(entObj.getEntityClass()));
 		}
 		DevReportFieldOptions fieldOptions = load(entObj, fieldContainer, fieldName);
 		return loadOpt(fieldOptions, optionName, optionType);
@@ -620,10 +633,33 @@ public class LayoutFieldsFormat {
 		}
 		return fieldOptionsMap;
 	}
-
+	/**
+	 * Show fields in form or list. <br>
+	 * Example: <br>
+	 * 		var fieldNamesList = new ArrayList(fieldNames);<br>
+			fieldNamesList.remove("operacao");<br>
+			fieldNamesList.remove("descricao3");<br>
+			fieldNamesList.remove("produtos");<br>
+			fmt.show("list", fmt.array(fieldNamesList));<br>
+	 * @param container
+	 * @param fieldNames
+	 */	
 	public void show(String container, String... fieldNames) {
-		writeOptArray(new String[] { "visible" }, "Boolean", "true", new String[] { container }, requirement, fieldNames);
+		if(fieldNames == null){
+			clear(requirement);
+		}else{
+			DevReportFieldContainer fieldContainer = getFieldContainer(requirement.getFieldContainerList(), container);
+			fieldContainer.getFieldOptionsList().clear();
+			writeOptArray(new String[] { "visible" }, "Boolean", "true", new String[] { container }, requirement, fieldNames);
+		}
 	}
+	
+	public void showAll() {
+		requirement.getFieldContainerList().clear();
+		DevEntityClass entitySelected = requirement.getEntityClass();
+		requirement.getFieldContainerList().addAll(generateFieldContainerShow(entitySelected,"form","list"));
+
+	}	
 	
 	public void hidden(String container, String... fieldNames) {
 		writeOptArray(new String[] { "visible" }, "Boolean", "false", new String[] { container }, requirement, fieldNames);

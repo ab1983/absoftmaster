@@ -30,7 +30,9 @@
         <h:outputScript library="js/jquery/" name="jquery.ui.button.min.js" target="head"></h:outputScript>
         
         <h:outputScript library="js" name="custom.js" target="head"></h:outputScript> 
-        
+        <!-- 
+        <f:event type="preRenderComponent" listener="#{(baseBean.refresh())}"/>
+         -->
         <link href="#{request.contextPath}/resources/css/custom.css" rel="stylesheet" type="text/css" />     
         <script type = "text/javascript" > /* <![CDATA[ */
             $ = jQuery;
@@ -118,10 +120,10 @@
                 <h:panelGroup id="basePanel" layout="block">
                     <p:schedule   value="#{grtCronogramaBean.eventModel}" id="schedule" timeFormat="" aspectRatio="5" leftHeaderTemplate="prev,next,today" rightHeaderTemplate="month, basicWeek, basicDay" 
                                   centerHeaderTemplate="title" widgetVar="myschedule" style="height:2000px;width: 1100px;display:none;" locale="br"/>               
-                    <p:tabView id="tabView" binding="#{baseBean.tabView}" cache="true" dynamic="true" widgetVar="tabViewWv" activeIndex="#{baseBean.containerIndex}" onTabClose="handleTabChange(index);" onTabShow="handleTabChange(index)">                       
+                    <p:tabView styleClass="tabViewAlgoBoss" id="tabView" binding="#{tabViewObj}" cache="true" dynamic="true" widgetVar="tabViewWv" activeIndex="#{baseBean.containerIndex}" onTabClose="handleTabChange(index);" onTabShow="handleTabChange(index)">                       
                         <c:forEach items="#{baseBean.urlList}" var="tab">
                             <p:tab title="#{tab[0]}" closable="true" titletip="Aba carregada!" >
-                                <ui:include src="#{tab[1]}"/>
+	                        	<ui:include src="#{tab[1]}"/>
                             </p:tab>
                         </c:forEach>
                         <p:tab titletip="Adiciona nova aba vazia." disabled="true" id="plusTab" titleStyle="padding:0px;">  
@@ -133,10 +135,11 @@
                             </f:facet>
                         </p:tab>
                         <p:ajax event="tabChange" oncomplete="updateBasePanelCmd()" listener="#{baseBean.onChange}"/>
-                        <p:ajax event="tabClose" oncomplete="updateBasePanelCmd()" listener="#{baseBean.onClose}"/>                         
+                        <p:ajax event="tabClose" oncomplete="updateBasePanelCmd()" listener="#{baseBean.onClose}"/> 
                     </p:tabView>             
-
-                </h:panelGroup>            
+                </h:panelGroup>  
+                <!-- 
+                 -->                            
             </div>
             <div id="bottom">
                 <ui:include src="bottom.xhtml"></ui:include>
@@ -144,10 +147,9 @@
         </div>  
         <h:form>       
         <p:remoteCommand name="updateBasePanelCmd" update=":basePanel"></p:remoteCommand>
-        <p:remoteCommand name="updateContainerFormCmd" update="@(.ui-algo-container-form)"></p:remoteCommand>
-        
-        </h:form>
-        <p:ajaxStatus style="width:64px;height:64px;position:fixed;right:5px;bottom:20px" onerror="alert('#{msg.serverNotFound}!')">  
+        <p:remoteCommand name="updateContainerFormCmd" update="@(.ui-algo-container-form)"></p:remoteCommand>        
+        </h:form>        
+        <p:ajaxStatus style="width:64px;height:64px;position:fixed;right:5px;bottom:20px" onerror="showError()" onsuccess="clearError()">  
             <f:facet name="start">  
                 <p:graphicImage url="resources/images/loading.gif" style="margin: auto;"/>  
             </f:facet>  
@@ -157,5 +159,22 @@
             </f:facet>  
         </p:ajaxStatus>                            
         <p:growl autoUpdate="true" widgetVar="algoMsg"/>
+        <script>
+        var errorTime = null;
+        function showError(){
+        	if(errorTime == null){
+	        	errorTime = window.setTimeout(function(){
+	        		errorTime = null;
+			        alert('#{msg.serverNotFound}!');
+		        },30000);
+        	}
+        }
+        function clearError(){
+        	if(errorTime!=null){
+        		window.clearTimeout(errorTime);
+        		errorTime = null;
+        	}        	
+        }
+        </script>
     </h:body>    
 </html>

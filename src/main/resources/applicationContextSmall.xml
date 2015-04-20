@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p" xmlns:jee="http://www.springframework.org/schema/jee"
+
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+          http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+          http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+          http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+          
+          ">
+	<context:component-scan base-package="com.algoboss.integration.small.dao, com.algoboss.integration.face.DataSourceBean" />
+	<bean id="jdbc"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="classpath:database.properties" />
+	</bean>
+	
+	<bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor">
+	    <property name="alwaysUseJndiLookup" value="true" />
+	</bean>	
+	<!-- 
+	 -->
+	 
+	<bean id="dataSourceBean" class="com.algoboss.integration.face.DataSourceBean">
+	<!-- 
+		<property name="dataSource" value="#{jdbc['database.url1']}"/>
+	 -->
+	</bean>	
+
+	<bean id="small-ds1" parent="parentDataSource">
+		<property name="url" value="#{dataSourceBean.url}" />
+		<!-- property name="url" value="#{jdbc['database.url1']}" /-->
+	</bean>
+
+	<bean id="small-ds2" parent="parentDataSource">
+		<property name="url" value="#{jdbc['database.url2']}" />
+	</bean>
+	
+	<bean id="small-ds3" parent="parentDataSource">
+		<property name="url" value="#{jdbc['database.url3']}" />
+	</bean>	
+
+	<bean id="parentDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+		abstract="true">
+		<property name="driverClassName" value="#{jdbc['database.driver']}" />
+		<property name="username" value="#{jdbc['database.user']}" />
+		<property name="password" value="#{jdbc['database.pass']}" />
+	</bean>
+
+	<util:map id="targetDataSources">
+		<entry key="SMALL1" value="small-ds1" />
+		<entry key="SMALL2" value="small-ds2" />
+		<entry key="SMALL3" value="small-ds3" />
+	</util:map>
+
+	<bean id="routerDataSource" class="com.algoboss.integration.small.dao.RouterDataSource">
+		<property name="defaultTargetDataSource" ref="small-ds3" />
+		<property name="targetDataSources" ref="targetDataSources" />
+	</bean>
+
+	<!-- Multiple DataSource EntityManagerFactory -->
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<!-- 
+		<property name="jtaDataSource" ref="routerDataSource2" />
+		 -->
+		<property name="dataSource" ref="routerDataSource2" />
+		<property name="jpaVendorAdapter">
+			<bean id="jpaVendorAdapter"
+				class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"
+				p:databasePlatform="org.eclipse.persistence.platform.database.FirebirdPlatform"
+				p:showSql="true">
+			</bean>
+			<!-- <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter" 
+				p:databasePlatform="org.eclipse.persistence.platform.database.MySQLPlatform" 
+				p:showSql="true" /> -->
+		</property>
+		
+		<property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" />
+		<property name="persistenceUnitName" value="SMALLPU" />
+		<property name="jpaPropertyMap" ref="hibernateProperties" />
+		<property name="packagesToScan">
+			<list>
+				<value>com.algoboss.integration.small.entity</value>
+			</list>
+		</property>
+	  <property name="loadTimeWeaver">
+	        <bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver" />
+	    </property>		
+	</bean>
+
+	<util:map id="hibernateProperties">
+	
+	
+		<!--entry key="javax.persistence.transactionType" value="jta" /-->
+		
+		
+	    <entry key="eclipselink.target-server" value="JBoss"/>
+	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
+		<entry key="eclipselink.weaving" value="false"/> 
+		<entry key="eclipselink.logging.level.sql" value="FINE"/>
+		<entry key="eclipselink.logging.parameters" value="true"/>	
+		<entry key="eclipselink.jdbc.fetch-size" value="5000"/> 
+        <entry key="eclipselink.jdbc.batch-writing" value="JDBC" />
+        <entry key="eclipselink.jdbc.batch-writing.size" value="1000" />	
+        <!--  Optimization #9 - statement caching 
+        <property name="eclipselink.jdbc.cache-statements" value="true" />        		
+        -->
+        		
+	</util:map>
+
+
+	<!-- Para injetar entityManagerFactory em outro bean, passar a referencia 
+		indicando ao spring para devolver o getObject do BeanFactory, usando '&amp;' 
+		antes do nome do bean -->
+	<!-- EXEMPLO -->
+	<!-- <bean id="meuBeanComDependenciaDoEMF" class="app.multitenancy.MeuEMFConfig"> 
+		<property name="emf" ref="&amp;entityManagerFactory" /> </bean> -->
+	<!-- EXEMPLO -->
+
+	<!-- Transaction manager for a single JPA EntityManagerFactory (alternative 
+		to JTA) -->
+		<!-- 
+		 -->
+	
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	<!-- 
+
+
+
+	 -->
+	 
+<!-- 
+	<tx:jta-transaction-manager /> 
+
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"> 
+		<property name="allowCustomIsolationLevels" value="true"/>
+		<property name="globalRollbackOnParticipationFailure" value="false"/>
+		<property name="transactionManagerName" value="java:/TransactionManager" />
+		<property name="transactionSynchronizationRegistryName" value="java:/jboss/TransactionSynchronizationRegistry" />
+		
+		<property name="userTransactionName" value="java:comp/UserTransaction" />	
+		
+		<property name="emf" ref="entityManagerFactory" />		
+	</bean>
+ -->
+		<!--  
+		-->
+
+	<tx:annotation-driven transaction-manager="transactionManager"  proxy-target-class="true" />
+	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+
+
+	<!-- Aspecto para preenchimento do DS -->
+	<context:load-time-weaver aspectj-weaving="on" />
+	<context:spring-configured />
+
+
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	
+	<bean id="smallDao" class="com.algoboss.integration.small.dao.SmallDao" scope="globalSession">
+		<!-- property name="dataSource" ref="small-ds1" /-->		
+	</bean>
+	<!-- bean id="baseDao" class="com.algoboss.erp.dao.BaseDao">
+		<property name="smallDao" ref="smallDao" />
+	</bean-->
+
+
+
+<tx:advice id="entityTransactionAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+               <tx:method name="getEntityManagerSmall" propagation="REQUIRED" />
+               <tx:method name="saveReplicate" propagation="REQUIRED" />
+               <tx:method name="findByObjImplReplicate" propagation="REQUIRED" />
+               <tx:method name="removeReplicate" propagation="REQUIRED" />     
+               <tx:method name="findEntityObjectByClassReplicate" propagation="REQUIRED" />                        
+        </tx:attributes>
+</tx:advice>
+
+
+
+
+
+
+ <!--
+ This is the bean that the application 'sees' as the datasource. Underneath the covers, the real
+ datasource is swapped as needed.
+ -->
+ <bean id="dataSource" class="org.springframework.aop.framework.ProxyFactoryBean">
+  <property name="targetSource" ref="swappableDataSource"/>
+ </bean>
+ 
+ <!--
+ This is a magic bean from Spring that allows the underlying (or real) datasource to be
+ swapped.
+ -->
+ <bean name="swappableDataSource" class="org.springframework.aop.target.HotSwappableTargetSource">
+  <constructor-arg ref="dummyDataSource"/>
+ </bean>
+ 
+ <!-- 
+ This dummy datasource is here just to show that you can start off with zero information about the 
+ datasource. Later, as the program is running and the datasource information becomes known you 
+ can hot swap to the right datasource. 
+ -->
+ <bean id="dummyDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close"/>
+ 
+ <!--
+ This datasource shows how to use properties set by an instance of PropertyPlaceholderConfigurer.
+ You can define as many of these types of datasources as you'd like. Switch between them 
+ -->
+ <bean id="defaultDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+	<property name="driverClassName" value="#{jdbc['database.driver']}" />
+	<property name="username" value="#{jdbc['database.user']}" />
+	<property name="password" value="#{jdbc['database.pass']}" />
+	<property name="url" value="#{dataSourceBean.url}" />
+
+ </bean>
+ 	<bean id="smallx-ds1" parent="dummyDataSource">
+		<property name="url" value="#{jdbc['database.url1']}" />
+	</bean>	
+ 	<bean id="smallx-ds2" parent="dummyDataSource">
+		<property name="url" value="#{jdbc['database.url2']}" />
+	</bean>	
+ 	<bean id="smallx-ds3" parent="dummyDataSource">
+		<property name="url" value="#{jdbc['database.url3']}" />
+	</bean>		
+
+	<util:map id="targetDataSources2">
+		<entry key="smallx-ds1" value-ref="smallx-ds1" />
+		<entry key="smallx-ds2" value-ref="smallx-ds2" />
+		<entry key="smallx-ds3" value-ref="smallx-ds3" />
+	</util:map>
+
+	<bean id="routerDataSource2" class="com.algoboss.integration.small.dao.RouterDataSource">
+		<property name="defaultTargetDataSource" ref="smallx-ds1" />
+		<property name="targetDataSources" ref="targetDataSources2" />
+	</bean>
+</beans>
+

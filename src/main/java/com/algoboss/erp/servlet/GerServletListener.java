@@ -12,6 +12,7 @@ import com.algoboss.erp.face.AdmAlgodevBean;
 import com.algoboss.erp.face.GerLoginBean;
 import com.algoboss.erp.util.AlgodevUtil;
 import com.algoboss.erp.util.ManualCDILookup;
+import com.algoboss.integration.small.dao.DataSourceContextHolder;
 
 import java.util.Date;
 import java.util.List;
@@ -31,6 +32,9 @@ import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Web application lifecycle listener.
@@ -78,7 +82,13 @@ public class GerServletListener extends ManualCDILookup implements ServletContex
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+    	//baseDao.clearEntityManager();
         System.out.println("CONTEXT DESTROYED!!!!!!!!!! " + new Date());
+        DataSourceContextHolder.clearTargetDataSourceMap();
+        ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("applicationContextSmall.xml");
+        ctx.stop();
+        ctx.close();
+        ctx.registerShutdownHook();  
     }
 
     @Override
