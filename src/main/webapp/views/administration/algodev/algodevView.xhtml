@@ -26,6 +26,7 @@
         <p:remoteCommand name="updateStartPage" actionListener="#{app.updateContainerPage()}" update="@form"/>  
         <p:remoteCommand name="eventBeanRc" actionListener="#{app.eventBean()}" immediate="false" update="@form" oncomplete="oncomplete(xhr, status, args)"/>
         <p:remoteCommand name="eventPageRc" actionListener="#{app.eventBean()}" immediate="true" update="@form"/>
+        <p:remoteCommand name="eventCallRc" actionListener="#{app.eventBean()}" immediate="true"/>
         <script type="text/javascript">
             /* <![CDATA[ */
             var idxCached = '#{app.idxBrowserCached}';
@@ -125,6 +126,9 @@
 		            	}
         	            }, timeout,call);             			
             		});
+            }    
+            function eventCall(call){
+            	eventCallRc([{name: 'call', value: call}]);    
             }            
             function focusBean(element) {
 	            window.setTimeout(function() {
@@ -333,7 +337,7 @@
         <p:dialog onShow="prepareExportHtmlToPdf('.ui-algo-container .ui-datatable-tablewrapper');" widgetVar="exportTableDlg" header="Selecione o Formato para Exportação" modal="false" dynamic="true" resizable="false">
             <h:commandLink rendered="false">  
                 <p:graphicImage value="resources/images/excel.png" />  
-                <p:dataExporter type="xls" target="#{app.dataTableSelected.id}" fileName="#{app.requirement.requirementName}" />  
+                <p:dataExporter type="xls" target="#{app.elementSelected.id}" fileName="#{app.requirement.requirementName}" />  
             </h:commandLink>  
 
             <h:commandLink rendered="false" charset="UTF-8" actionListener="#{app.exportHtmlToPdf()}" target="_blank">   
@@ -346,12 +350,12 @@
 
             <h:commandLink>  
                 <p:graphicImage value="resources/images/csv.png" />  
-                <p:dataExporter type="csv" target="#{app.dataTableSelected.id}" fileName="#{app.requirement.requirementName}" />  
+                <p:dataExporter type="csv" target="#{app.elementSelected.id}" fileName="#{app.requirement.requirementName}" />  
             </h:commandLink>  
 
             <h:commandLink>  
                 <p:graphicImage value="resources/images/xml.png" />  
-                <p:dataExporter type="xml" target="#{app.dataTableSelected.id}" fileName="#{app.requirement.requirementName}" />  
+                <p:dataExporter type="xml" target="#{app.elementSelected.id}" fileName="#{app.requirement.requirementName}" />  
             </h:commandLink>        
         </p:dialog>               
         <input type="hidden" name="html" id="html" value="" />
@@ -359,7 +363,7 @@
 
         <p:remoteCommand immediate="false" name="exportHtmlToPdf" actionListener="#{(app.exportHtmlToPdf)}"/>
         <p:remoteCommand immediate="false" name="exportPdf" actionListener="#{(app.exportPdf())}"/>
-        <p:commandButton value="Atualizar" rendered="false" immediate="true" oncomplete="updateStartPage();"/>
+        <p:commandButton value="Atualizar" rendered="false" immediate="true" oncomplete="updateStartPage();" />
 
         <p:dialog widgetVar="pdfViewer" dynamic="true" rendered="false">
             <p:media value="#{app.pdfFileStr}" player="pdf" width="100%" height="300px">  

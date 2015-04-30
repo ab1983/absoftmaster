@@ -18,9 +18,11 @@
         var teste669 = null;
     </script>
     <f:view contentType="text/html" >    
-        <h:form binding="#{admAlgorepContainerForm}"  styleClass="ui-algo-container" prependId="false" onsubmit="javascript:return false">
-
-            <p:panel style="width: 960px;"  binding="#{app.algoContainerView}">
+        <h:form styleClass="ui-algo-containerX" prependId="false" onsubmit="javascript:return false">
+        <!-- 
+    	<f:event type="preRenderComponent" listener="#{app.initBean()}"/>
+         -->
+            <p:panel binding="#{algoContainerBind}" style="width: 960px;"  styleClass="ui-algo-container ui-algo-container-rep">
                 <!--h:panelGrid columns="2">
                     <h:panelGroup>
                         Período de:
@@ -40,7 +42,15 @@
                 <h:commandLink rendered="#{algoRep.bean.reportFile!=null and !algoRep.formRendered}" target="_blank" actionListener="#{algoRep.doPdfReport}">
                     <p:button widgetVar="downloadBtnWv1" value="#{msg.list}"  
                               icon="ui-icon-search">  
-                    </p:button>                                    
+                              <!-- 
+                                    <f:event type="preRenderComponent" listener="#{(app.setAppBean(algoContainerBind.clientId))}"/>
+        							<f:event type="preRenderComponent" listener="#{(app.onConstruct())}"/>
+                               -->
+                    </p:button>      
+                    <!-- 
+                    <f:setPropertyActionListener value="#{app.requirement}" target="#{algoRep.requirement}" />
+                    <f:setPropertyActionListener value="#{app.bean}" target="#{algoRep.entityObject}" />  
+                     -->                              
                 </h:commandLink>    
             <!-- p:overlayPanel for="dateSelectBtn" dismissable="false" style="height: 250px;">
             	<table>
@@ -55,8 +65,16 @@
                 </table>
                   
             </p:overlayPanel-->
-        <f:event type="preRenderComponent" listener="#{(app.setAlgoContainer(app.algoContainerView))}"/>
-        <f:phaseListener binding="#{app.getPhaseListenerImpl()}" /> 
+        <f:event type="preRenderComponent" listener="#{(app.setRequirement(algoRep.requirement))}"/>
+        <f:event type="preRenderComponent" listener="#{(app.setAppBean(algoContainerBind.clientId))}"/>
+        <f:event type="preRenderComponent" listener="#{(app.onConstruct())}"/>
+        <f:event type="preRenderComponent" listener="#{app.preRenderComponent}"/>
+         <!-- 
+        <f:event type="preRenderComponent" listener="#{(app.setContainerClass('ui-algo-container-rep'))}"/>  
+        <f:event type="preRenderComponent" listener="#{(app.setContainerPage(admAlgodevBean.containerPage))}"/>  
+        <f:event type="preRenderComponent" listener="#{(app.updateContainerPage())}"/>
+          -->
+         
             <p:scrollPanel  rendered="#{algoRep.bean.reportFile==null or algoRep.formRendered}" style="width: 960px;height: 400px;" styleClass="ui-algo-container" id="algoRepContainer2">
                 <h:outputText escape="false" value="#{algoRep.html}"/>
                 <div><script type="text/javascript">
@@ -71,8 +89,10 @@
             <br/>
             <p:droppable id="algoContainerDrop1" rendered="false" scope="ui-algo" activeStyleClass="ui-state-active" hoverStyleClass="ui-state-highlight" for="algoRepContainer" tolerance="fit" accept=".ui-panel-content .ui-algo-element" binding="#{algoContainerDropBind}" onDrop="(function(event, ui) {
                 handleDrop(event, ui);
-            })"></p:droppable>      
+            })"></p:droppable>
+            <!-- 
             <f:event type="preRenderComponent" rendered="true" listener="#{(algoRep.setAlgoContainer(algoRepContainerBind))}"/>            
+             -->      
             <p:remoteCommand  rendered="false" name="updateCurrentConteiner" immediate="true" update="@(.containerPage)">
                 <f:setPropertyActionListener value="#{algoRepContainerBind}" target="#{algoRep.algoContainer}" />                            
                 <f:setPropertyActionListener value="#{algoRepPaletteBind}" target="#{algoRep.algoPalette}" />      

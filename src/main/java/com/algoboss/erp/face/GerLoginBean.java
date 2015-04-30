@@ -69,6 +69,7 @@ public class GerLoginBean implements Serializable {
     private BaseDao baseDao;
     private SecUser user;
     private boolean userLogged = false;
+    private boolean reloadView = false;
     private MenuModel model;
     private List<AdmService> serviceList;
     private AdmServiceModuleContract serviceModuleContract;
@@ -135,8 +136,18 @@ public class GerLoginBean implements Serializable {
     public void setNewUserForm(boolean newUserForm) {
         this.newUserForm = newUserForm;
     }
+    
+    
 
-    public String getQuestionsOrSuggestions() {
+    public boolean isReloadView() {
+		return reloadView;
+	}
+
+	public void setReloadView(boolean reloadView) {
+		this.reloadView = reloadView;
+	}
+
+	public String getQuestionsOrSuggestions() {
         return questionsOrSuggestions;
     }
 
@@ -547,7 +558,10 @@ public class GerLoginBean implements Serializable {
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.DATE, -10);
                     if (admService.getLastAccess() != null && cal.getTime().before(admService.getLastAccess()) && !user.isBoss()) {
-                        app.generateElementsContainerMap(admService);
+                    	AdmAlgoappBean app = new AdmAlgoappBean();
+                        app.setBaseBean(baseBean);
+                        app.setBaseDao(baseDao);
+                    	app.generateElementsContainerMap(admService);
                     }
                     String[] nivelArray = admService.getName().split(">");
                     DefaultSubMenu firstSubmenu = new DefaultSubMenu();

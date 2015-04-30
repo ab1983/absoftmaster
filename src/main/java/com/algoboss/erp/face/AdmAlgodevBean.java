@@ -79,25 +79,25 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
 	private UIComponent algoContainer;
     private transient UIComponent algoPalette;
     private transient UIComponent elementSelected;
-    private List<UIComponent> childrenElementSelected = new ArrayList<UIComponent>();
-    private List<UIComponent> facetsElementSelected = new ArrayList<UIComponent>();
-    private Map<String, String[]> elementPropertiesSelected = new TreeMap<String, String[]>();
-    private List<UIComponent> elements = new ArrayList<UIComponent>();
-    private DevEntityClass entityNodeSelected;
-    private DevEntityPropertyDescriptor entityPropertyDescriptor;
-    private List<DevEntityPropertyDescriptor> entityPropertyDescriptorList = new ArrayList<DevEntityPropertyDescriptor>();
-    private List<DevEntityClass> entityClassNodeList = new ArrayList<DevEntityClass>();
-    private Map<Integer, DevEntityPropertyDescriptor> propertyTypeNodeMap = new HashMap<Integer, DevEntityPropertyDescriptor>();    
-    private Long autorizationUserIdTemp = null;
-    private DevEntityClass entitySelected;
-    private List<DevEntityPropertyDescriptor> propertySelectedListCollection;
-    private List<DevEntityPropertyDescriptor> propertySelectedFormCollection;
-    private String strUIComponentId;
-    private List<DevEntityClassConfig> entityClassConfigList;
-    private List<DevEntityPropertyDescriptorConfig> entityPropertyDescriptorConfigList;
-    private Date data = new Date();
-    private String actualServiceDescription;
-    private List<DevEntityClass> propEntList;
+    protected List<UIComponent> childrenElementSelected = new ArrayList<UIComponent>();
+    protected List<UIComponent> facetsElementSelected = new ArrayList<UIComponent>();
+    protected Map<String, String[]> elementPropertiesSelected = new TreeMap<String, String[]>();
+    protected List<UIComponent> elements = new ArrayList<UIComponent>();
+    protected DevEntityClass entityNodeSelected;
+    protected DevEntityPropertyDescriptor entityPropertyDescriptor;
+    protected List<DevEntityPropertyDescriptor> entityPropertyDescriptorList = new ArrayList<DevEntityPropertyDescriptor>();
+    protected List<DevEntityClass> entityClassNodeList = new ArrayList<DevEntityClass>();
+    protected Map<Integer, DevEntityPropertyDescriptor> propertyTypeNodeMap = new HashMap<Integer, DevEntityPropertyDescriptor>();    
+    protected Long autorizationUserIdTemp = null;
+    protected DevEntityClass entitySelected;
+    protected List<DevEntityPropertyDescriptor> propertySelectedListCollection;
+    protected List<DevEntityPropertyDescriptor> propertySelectedFormCollection;
+    protected String strUIComponentId;
+    protected List<DevEntityClassConfig> entityClassConfigList;
+    protected List<DevEntityPropertyDescriptorConfig> entityPropertyDescriptorConfigList;
+    protected Date data = new Date();
+    protected String actualServiceDescription;
+    protected List<DevEntityClass> propEntList;
     
     //@Inject
     AdmAlgoreportBean algoRep = new AdmAlgoreportBean();
@@ -723,8 +723,7 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
                     elementsContainerMap.put(devComponentContainer.getName(), elements);
                     containerPage = devComponentContainer.getName();
                 }*/
-                algoApp.setRequirement(requirement);
-                algoApp.generateElementsContainerMap(bean);
+                algoApp = AlgodevUtil.getAlgoAppInstance(requirement, baseBean, baseDao);
                 HttpSession session = (HttpSession)FacesContext.getCurrentInstance().getExternalContext().getSession(true);
                 session.setAttribute("requirement", requirement);
                 //updateContainerPage();
@@ -1037,6 +1036,7 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
     }
 
     public void createByConstructor() {
+    	algoContainer = getAlgoContainer();
         autorizationUserIdTemp = null;
         setNotReadOnly(true);
         //Map map = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();

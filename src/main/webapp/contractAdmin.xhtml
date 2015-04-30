@@ -4,7 +4,9 @@
        xmlns:h="http://java.sun.com/jsf/html"
        xmlns:f="http://java.sun.com/jsf/core"
        xmlns:p="http://primefaces.org/ui">
-    <span style="color: red;font-size: 14px;font-weight: bold;">Cadastre-se gratuitamente e conheça.</span>    
+    <h:panelGroup rendered="#{!gerLoginBean.userLogged}">
+    	<span style="color: red;font-size: 14px;font-weight: bold;">Cadastre-se gratuitamente e conheça.</span>    
+    </h:panelGroup>
     <br/><br/>
     <h:panelGrid columns="2">
         <h:panelGroup>

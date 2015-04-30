@@ -9,8 +9,10 @@ import static com.algoboss.erp.util.ComponentFactory.getProperty;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -105,6 +107,8 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
     private Map<String, String[]> elementPropertiesSelected = new TreeMap<String, String[]>();
     private transient List<UIComponent> elements = new ArrayList<UIComponent>();
     private DevEntityClass entity;
+    private DevEntityObject entityObject;
+    private DevRequirement requirement;
     private List<DevEntityObject> entityObjectList = new ArrayList<DevEntityObject>();
     private DevEntityClass entityNodeSelected;
     private DevEntityPropertyDescriptor entityPropertyDescriptor;
@@ -118,7 +122,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
     private String html = "<table><tr><td>teste</td></tr></table>";
     private List<Map<String,String>> reportMap = new ArrayList<Map<String,String>>();
     //@Inject
-    private AdmAlgoappBean app = new AdmAlgoappBean();
+    private AdmAlgoappBean app;
     @Inject
     private ObjectConverter objectConverter;
     private List<Map<String, Object>> fieldOptionsAll = new ArrayList<Map<String, Object>>();
@@ -177,9 +181,25 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
 
     public void setHtml(String html) {
         this.html = html;
-    }
+    }           
+    
+    public AdmAlgoappBean getApp() {
+		return app;
+	}
 
-    public List<Map<String, Object>> getFieldOptionsAll() {
+	public void setApp(AdmAlgoappBean app) {
+		this.app = app;
+	}
+
+	public DevRequirement getRequirement() {
+		return requirement;
+	}
+
+	public void setRequirement(DevRequirement requirement) {
+		this.requirement = requirement;
+	}
+
+	public List<Map<String, Object>> getFieldOptionsAll() {
         return fieldOptionsAll;
     }
 
@@ -553,10 +573,10 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             clonedContainer.getChildren().add(cloned);
             ComponentFactory.updateElementProperties(clonedContainer, Collections.singletonMap("header", ""));
             //app.setAlgoContainerView(cloned);
-            DevRequirement req = new DevRequirement();
-            req.setEntityClass(entFilter);
-            DevEntityObject entObj = new DevEntityObject();
-            entObj.setEntityClass(entFilter);
+            requirement = new DevRequirement();
+            requirement.setEntityClass(entFilter);
+            entityObject = new DevEntityObject();
+            entityObject.setEntityClass(entFilter);
             UIComponent container = cloned;
             try {
 
@@ -565,15 +585,24 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
     			//}            	
 
 				//app.indexBeanNoList(null);
-                app.setBean(entObj);
-                createByConstructor(Collections.singletonMap("dataform", "true"), container, elementsContainerMap, req, entFilter);
+            	createByConstructor(Collections.singletonMap("dataform", "true"), container, elementsContainerMap, requirement, entFilter);
+            	requirement.setRequirementId(-bean.getReportRequirementId());
+            	app = AlgodevUtil.getAlgoAppInstance(requirement, baseBean, baseDao);
+            	//app.initBean();
+            	app.loginBean = loginBean;
+                app.setBean(entityObject);
+                //app.setBaseBean(baseBean);
+                //app.setBaseDao(baseDao);
                 //cloned.getChildren().clear();
                 //cloned.getChildren().addAll(elementsContainerMap.get("form"));
                 //app.getAlgoContainerView().getChildren().clear();
-                app.setAlgoContainerViewWidget(cloned);
-                app.generateElementsContainerMap(req);
+                //app.setRequirement(requirement);
+                //app.setAlgoContainerViewWidget(cloned);
+                //app.generateElementsContainerMap(requirement);
                 app.doForm();
+                app.setAppBean("app_"+ requirement.getRequirementId());
             	app.setSubtitle("report|filter|"+bean.getReportRequirementId());
+            	app.getAppBean().setAppBean(BaseBean.copyObject(app));	
             	//app.setUrl("views/administration/algoreport/algoreportList.xhtml?report-filter="+bean.getReportRequirementId());
     			String beansubtitle = "";
     			boolean clonable = false;
@@ -1651,7 +1680,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             File relatorioJasper = new File(context.getRealPath(bean.getReportFile()));
             // parâmetros, se houver
             Map params = new HashMap();
-            List<DevEntityPropertyValue> propValList = app.getBean().getEntityPropertyValueList();
+            List<DevEntityPropertyValue> propValList = entityObject.getEntityPropertyValueList();
             for (DevEntityPropertyValue devEntityPropertyValue : propValList) {
             	String key = devEntityPropertyValue.getEntityPropertyDescriptor().getPropertyName();
             	Object value = devEntityPropertyValue.getVal();
@@ -1696,6 +1725,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             if (bytes != null && bytes.length > 0) {
                 try {
                     // Envia o relatório em formato PDF para o browser
+                	/*
                     response.setContentType("application/pdf");
                     response.setContentLength(bytes.length);
                     response.setHeader("Content-disposition", "inline; filename="+bean.getReportRequirementName());
@@ -1703,11 +1733,19 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                     ServletOutputStream ouputStream = response.getOutputStream();
                     ouputStream.write(bytes, 0, bytes.length);
                     ouputStream.flush();
-                    ouputStream.close();
+                    ouputStream.close();*/
+                    
+                    response.reset();
+                    response.setContentType("application/pdf");
+                    response.setHeader("Content-Disposition", "inline;filename=\"" + AlgoUtil.escapeURL(bean.getReportRequirementName()) + ".pdf\";");
+                    response.setCharacterEncoding("UTF-8");
+                    response.setContentLength(bytes.length);
+                    response.getOutputStream().write(bytes, 0, bytes.length);
+                    FacesContext.getCurrentInstance().responseComplete();                    
                 } catch (IOException ex) {
                     Logger.getLogger(FinReportBean.class.getName()).log(Level.SEVERE, null, ex);
                 }finally{
-                    fc.responseComplete();  
+                    //fc.responseComplete();  
                 }
             }
             } catch (Throwable e) {
@@ -1719,4 +1757,5 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
         } finally {
         }
     }    
+    
 }

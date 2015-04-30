@@ -65,7 +65,7 @@
             <ui:include src="../../../contractAdmin.xhtml" rendered="false"/>
         </p:fieldset>                  
         </p:tab>
-        <p:tab title="Funcionalidades">
+        <p:tab title="Funcionalidades" rendered="#{gerLoginBean.user.boss}">
         <p:fieldset style="width: 770px;height:100%; " styleClass="fsItem">
             <!--h:form id="fsItem"-->
             <!--p:focus for="tipoDespesa" rendered="#{admContractBean.bean.gerFornecedor.fornecedorId != null}"/-->                     

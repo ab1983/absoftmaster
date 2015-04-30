@@ -3099,7 +3099,7 @@ public class ComponentFactory {
 			if (facesContext != null && comp2.getId() == null) {
 				SecureRandom prng = SecureRandom.getInstance("SHA1PRNG","SUN");
 				//prng.setSeed(Integer.MAX_VALUE);
-				comp2.setId("ad_" +comp2.getClass().getSimpleName()+System.nanoTime() );
+				comp2.setId("j_id" +comp2.getClass().getSimpleName()+System.nanoTime() );
 			}
 			comp2.setParent(null);
 		} catch (Throwable ex) {
@@ -3306,7 +3306,11 @@ public class ComponentFactory {
 					int start = valStr.indexOf("#{");
 					int end = valStr.indexOf("}", start) + 1;
 					String expr = valStr.substring(start, end);
-					o = fc.getApplication().getExpressionFactory().createMethodExpression(fc.getELContext(), expr, null, new Class<?>[] {});
+					if(fc!=null){
+						o = fc.getApplication().getExpressionFactory().createMethodExpression(fc.getELContext(), expr, null, new Class<?>[] {});						
+					}else{
+						o = expr;
+					}
 					return o;
 				} else {
 					o = clazz.newInstance();

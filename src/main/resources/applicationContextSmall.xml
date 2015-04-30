@@ -57,10 +57,10 @@
 		<entry key="SMALL3" value="small-ds3" />
 	</util:map>
 
-	<bean id="routerDataSource" class="com.algoboss.integration.small.dao.RouterDataSource">
+	<!-- bean id="routerDataSource" class="com.algoboss.integration.small.dao.RouterDataSource">
 		<property name="defaultTargetDataSource" ref="small-ds3" />
 		<property name="targetDataSources" ref="targetDataSources" />
-	</bean>
+	</bean-->
 
 	<!-- Multiple DataSource EntityManagerFactory -->
 	<bean id="entityManagerFactory"

@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 
+import com.algoboss.erp.dao.BaseDao;
 import com.algoboss.erp.entity.DevComponentContainer;
 import com.algoboss.erp.entity.DevEntityClass;
 import com.algoboss.erp.entity.DevEntityObject;
@@ -30,6 +31,7 @@ import com.algoboss.erp.entity.DevPrototypeComponentProperty;
 import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.face.AdmAlgoappBean;
 import com.algoboss.erp.face.AdmAlgodevBean;
+import com.algoboss.erp.face.BaseBean;
 import com.algoboss.integration.small.business.SmallUtil;
 
 /**
@@ -464,6 +466,15 @@ public class AlgodevUtil {
             Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
         }
+    }
+    
+    public static AdmAlgoappBean getAlgoAppInstance(DevRequirement requirement, BaseBean baseBean, BaseDao baseDao){
+    	AdmAlgoappBean algoApp = new AdmAlgoappBean();
+        algoApp.setRequirement(requirement);
+        algoApp.setBaseBean(baseBean);
+        algoApp.setBaseDao(baseDao);
+        algoApp.generateElementsContainerMap(requirement);
+        return algoApp;
     }
     
 }

@@ -65,7 +65,7 @@ public class BaseDao implements Serializable {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION, properties = { @PersistenceProperty(name = "javax.persistence.sharedCache.mode", value = "ENABLE_SELECTIVE") }, unitName = "ERPPU")
 	private EntityManager entityManager;
 	private EntityManager entityManagerSmall;
-
+/*
 	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU1")
 	private EntityManager entityManagerSmall_1;
 	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU2")
@@ -85,7 +85,7 @@ public class BaseDao implements Serializable {
 	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU9")
 	private EntityManager entityManagerSmall_9;	
 	@PersistenceContext(type=PersistenceContextType.TRANSACTION, unitName = "SMALLPU10")
-	private EntityManager entityManagerSmall_10;	
+	private EntityManager entityManagerSmall_10;	*/
 	private EntityTransaction transacao;
 	private boolean manualTransaction = false;
 	@Inject private GerLoginBean loginBean;
@@ -117,6 +117,7 @@ public class BaseDao implements Serializable {
 
 	public EntityManager getEntityManagerSmall() {
 		try {
+			/*
 			if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
 				entityManagerSmall = entityManagerSmall_1;
 			}else if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1766){
@@ -208,6 +209,7 @@ public class BaseDao implements Serializable {
 
 	public Connection getConnectionSmall() {
 		try {
+			/*
 			InitialContext ic = new InitialContext();
 			Connection conn=  null;		
 			DataSource ds = null;
@@ -233,8 +235,8 @@ public class BaseDao implements Serializable {
 				ds = (DataSource)ic.lookupLink("java:/small10");	
 			}else{
 				ds = (DataSource)ic.lookupLink("java:/small1");	
-			}		
-			return ds.getConnection();			
+			}*/		
+			return getSmallDao().getConnection();			
 		} catch (Exception e) {
 			return null;
 		}

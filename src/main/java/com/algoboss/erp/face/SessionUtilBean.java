@@ -14,7 +14,10 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Named;
+import javax.servlet.http.HttpSession;
 
 import com.algoboss.erp.entity.DevEntityClass;
 import com.algoboss.erp.entity.DevEntityObject;
@@ -31,7 +34,7 @@ public class SessionUtilBean implements Serializable {
     
     protected transient Map<String, List<UIComponent>> elementsContainerMap = new HashMap();
     protected transient Map<Long,Map<String, List<UIComponent>>> elementsContainerMapByReq;    
-    protected static Map<Long,Map<Long,Map<String, List<UIComponent>>>> elementsContainerMapByReqSession;    
+    protected static Map<String,Map<Long,Map<String, List<UIComponent>>>> elementsContainerMapByReqSession;    
 	protected DevEntityClass entity;
 	protected DevRequirement requirement;
 	protected String containerPage = "form";
@@ -47,16 +50,21 @@ public class SessionUtilBean implements Serializable {
 		if(elementsContainerMapByReq == null){
 			elementsContainerMapByReq = new HashMap();	
 		}
+
+	}
+	
+	public Map<String, Map<Long,Map<String,List<UIComponent>>>> getElementsContainerMapByReqSession(){
 		if(elementsContainerMapByReqSession == null){
-			elementsContainerMapByReqSession = new HashMap<Long, Map<Long,Map<String,List<UIComponent>>>>();
+			elementsContainerMapByReqSession = new HashMap<String, Map<Long,Map<String,List<UIComponent>>>>();
 		}
-		if(!elementsContainerMapByReqSession.containsKey(Thread.currentThread().getId())){
-			elementsContainerMapByReqSession.put(Thread.currentThread().getId(), elementsContainerMapByReq);			
-		}
+		if(!elementsContainerMapByReqSession.containsKey(getId())){
+			elementsContainerMapByReqSession.put(getId(), elementsContainerMapByReq);			
+		}		
+		return elementsContainerMapByReqSession;
 	}
 	
 	public Map<Long, Map<String, List<UIComponent>>> getElementsContainerMapByReq() {
-		return elementsContainerMapByReqSession.get(Thread.currentThread().getId());
+		return getElementsContainerMapByReqSession().get(getId());
 	}
 
 	public void setElementsContainerMapByReq(Map<Long, Map<String, List<UIComponent>>> elementsContainerMapByReq) {
@@ -125,6 +133,16 @@ public class SessionUtilBean implements Serializable {
 		this.appBean = appBean;
 	}		
 	
-    
+	public static void clear(){
+		if(SessionUtilBean.elementsContainerMapByReqSession != null){
+			SessionUtilBean.elementsContainerMapByReqSession.remove(SessionUtilBean.getId());
+		}		
+	}
+	
+    public static String getId(){
+        ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+        HttpSession session = (HttpSession) context.getSession(false);
+        return session.getId();
+    }
 	
 }

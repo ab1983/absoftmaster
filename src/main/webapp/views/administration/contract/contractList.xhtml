@@ -10,7 +10,7 @@
                 <ui:include src="#{admContractBean.urlForm}"></ui:include>
             </h:panelGroup>
             <h:panelGroup  layout="block" rendered="#{!admContractBean.formRendered}">
-                <p:commandButton value="#{msg['include']}" action ="#{admContractBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
+                <p:commandButton  rendered="#{gerLoginBean.user.boss}" value="#{msg['include']}" action ="#{admContractBean.doBeanForm()}" icon="ui-icon-document" update="@form"/>       
                 <p:commandButton rendered="true" value="#{msg['disable']}"  update="@form" oncomplete="updateMenu()" icon="ui-icon-trash">
                     <f:setPropertyActionListener target="#{gerLoginBean.user.contract}" value="#{null}"/>
                 </p:commandButton>

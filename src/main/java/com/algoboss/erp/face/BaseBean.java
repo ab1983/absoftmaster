@@ -198,7 +198,7 @@ public class BaseBean implements Serializable {
 	public void setActualBean(GenericBean actualBean) {
 		this.actualBean = actualBean;
 	}
-
+	
 	public UIComponent getTabView() {
 		return tabView;
 	}
@@ -225,9 +225,7 @@ public class BaseBean implements Serializable {
 	
 	@PreDestroy
 	public void onDestroy(){
-		if(SessionUtilBean.elementsContainerMapByReqSession != null){
-			SessionUtilBean.elementsContainerMapByReqSession.remove(Thread.currentThread().getId());
-		}
+		SessionUtilBean.clear();
 	}
 
 	public int getTabId() {
@@ -577,7 +575,9 @@ public class BaseBean implements Serializable {
 								 * ComponentFactory.componentClone(comp, false);
 								 * parent.getChildren().add(comp); val = comp; }
 								 */
-								comp = ComponentFactory.componentClone(comp, false);
+								if(FacesContext.getCurrentInstance()!=null && !comp.isTransient()){
+									comp = ComponentFactory.componentClone(comp, false);
+								}
 								val = comp;
 							}
 						} else {

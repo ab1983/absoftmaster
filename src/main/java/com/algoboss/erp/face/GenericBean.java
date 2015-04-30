@@ -44,6 +44,7 @@ import com.algoboss.erp.entity.AdmServiceModuleContract;
 import com.algoboss.erp.entity.DevReportRequirement;
 import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.entity.SecUserAuthorization;
+import com.algoboss.erp.util.AlgoUtil;
 
 /**
  *
@@ -541,55 +542,12 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
                 long timeCount = System.currentTimeMillis();
 
                 public void run() {
-                    try {
-                        Properties props = System.getProperties();
-                        props.put("mail.smtp.host", "smtp.algoboss.com");
-                        props.put("mail.smtp.auth", "true");
-                        props.put("mail.smtp.port", "587");
-                        props.put("mail.smtp.starttls.enable", "true");
-                        Authenticator auth = new Authenticator() {
-                            public PasswordAuthentication getPasswordAuthentication() {
-                                return new PasswordAuthentication("webmaster@algoboss.com", "algoboss1");
-                            }
-                        };
-
-                        Session session = Session.getInstance(props, auth);
-                        MimeMessage message = new MimeMessage(session);
-                        message.setFrom(new InternetAddress(emailRemet, nomeRemet));
-                        for (String[] dest : destinatarios) {
-                            message.addRecipient(Message.RecipientType.TO,
-                                    new InternetAddress(dest[0], dest[1]));
-                        }
-
-                        message.setSubject(assunto);
-                        // cuida do anexo da mensagem
-                        Multipart mp = new MimeMultipart();
-                        MimeBodyPart mbpMsg = new MimeBodyPart();
-                        mbpMsg.setDisposition(Part.INLINE);
-                        mbpMsg.setText(corpo);
-                        mp.addBodyPart(mbpMsg);
-                        if (files != null) {
-                            for (File file : files) {
-                                DataSource fds = new FileDataSource(file);
-                                MimeBodyPart mbp = new MimeBodyPart();
-                                mbp.setDisposition(Part.ATTACHMENT);
-                                mbp.setDataHandler(new DataHandler(fds));
-                                mbp.setFileName(fds.getName());
-                                mp.addBodyPart(mbp);
-                            }
-                        }
-
-                        message.setContent(mp);
-
-
-                        //message.setContent(corpo, "text/plain");
-
-
-                        Transport.send(message);
-                        System.out.println("EMAIL ENVIADO!");
-                    } catch (Exception ex) {
-                        Logger.getLogger(GenericBean.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                	try {
+						AlgoUtil.sendEmail(destinatarios, emailRemet, nomeRemet, assunto, corpo, files);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
                 }
             });
             t.start();
@@ -603,7 +561,19 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
     
 	public BaseDao getBaseDao() {
 		return baseDao;
+	}	
+	
+	public void setBaseDao(BaseDao baseDao) {
+		this.baseDao = baseDao;
 	}
+	
+	public BaseBean getBaseBean() {
+		return baseBean;
+	}
+
+	public void setBaseBean(BaseBean baseBean) {
+		this.baseBean = baseBean;
+	}		
 
 	@Override
 	public Object clone() {
