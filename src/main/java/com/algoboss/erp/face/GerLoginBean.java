@@ -92,7 +92,7 @@ public class GerLoginBean implements Serializable {
     private boolean activeSession = false;
     private HttpSession session;
     private List<Long> moduleIdList;
-    private Map<String, String> mainActionMap = new HashMap<String, String>();
+    private Map<String, Long> mainActionMap = new HashMap<String, Long>();
     private Map<String, Long> appEntityMap = new HashMap<String, Long>();
     private List<MenuModel> menuModelList = new ArrayList<MenuModel>();
     private String questionsOrSuggestions = "";
@@ -211,11 +211,11 @@ public class GerLoginBean implements Serializable {
         this.menuModelList = menuModelList;
     }
 
-    public Map<String, String> getMainActionMap() {
+    public Map<String, Long> getMainActionMap() {
         return mainActionMap;
     }
 
-    public void setMainActionMap(Map<String, String> mainActionMap) {
+    public void setMainActionMap(Map<String, Long> mainActionMap) {
         this.mainActionMap = mainActionMap;
     }
 
@@ -360,7 +360,12 @@ public class GerLoginBean implements Serializable {
 
     public String doLogout() {
         removeActiveSession();
-        baseDao.clearEntityManager();
+        try {
+			baseDao.clearEntityManager();
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         this.user = new SecUser();
         this.userLogged = false;
         this.model = null;
@@ -490,7 +495,7 @@ public class GerLoginBean implements Serializable {
             ExpressionFactory expressionFactory = application.getExpressionFactory();
 
             //MethodExpression methodExpression = expressionFactory.createMethodExpression(elContext, "#{secUserBean.indexBean()}", String.class, new Class[0]);
-            mainActionMap = new HashMap<String, String>();
+            mainActionMap = new HashMap<String, Long>();
             model = new DefaultMenuModel();
             menuModelList = new ArrayList<MenuModel>();
             //MenuItem item = new MenuItem();
@@ -569,7 +574,7 @@ public class GerLoginBean implements Serializable {
                     Submenu prevMenu = null;
                     String compId = "";
                     if ("AlgoRep AlgoDev Configuração>Autorização Usuário Configuração>Usuário".contains(admService.getName())) {
-                        mainActionMap.put(admService.getName(), String.valueOf(userAuthorization.getUserAuthorizationId()));
+                        mainActionMap.put(admService.getName(), userAuthorization.getUserAuthorizationId());
                     }
                     if(admService.getRequirement()!=null){
                     	appEntityMap.put(admService.getRequirement().getEntityClass().getName(), userAuthorization.getUserAuthorizationId());

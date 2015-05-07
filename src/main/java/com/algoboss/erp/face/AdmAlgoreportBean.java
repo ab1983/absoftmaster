@@ -1743,7 +1743,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                     response.getOutputStream().write(bytes, 0, bytes.length);
                     FacesContext.getCurrentInstance().responseComplete();                    
                 } catch (IOException ex) {
-                    Logger.getLogger(FinReportBean.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(AdmAlgoreportBean.class.getName()).log(Level.SEVERE, null, ex);
                 }finally{
                     //fc.responseComplete();  
                 }

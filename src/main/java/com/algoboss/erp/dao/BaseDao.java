@@ -92,7 +92,7 @@ public class BaseDao implements Serializable {
 
 	private SmallDao smallDao;
 			
-	public SmallDao getSmallDao() {
+	public SmallDao getSmallDao() throws Throwable {
 		this.smallDao = SmallDao.createInstance(loginBean,this.smallDao);
 		return this.smallDao;
 	}
@@ -115,7 +115,7 @@ public class BaseDao implements Serializable {
 		return entityManager;
 	}
 
-	public EntityManager getEntityManagerSmall() {
+	public EntityManager getEntityManagerSmall()throws Throwable {
 		try {
 			/*
 			if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
@@ -207,7 +207,7 @@ public class BaseDao implements Serializable {
 	}
 	
 
-	public Connection getConnectionSmall() {
+	public Connection getConnectionSmall()throws Throwable {
 		try {
 			/*
 			InitialContext ic = new InitialContext();
@@ -1104,7 +1104,7 @@ public class BaseDao implements Serializable {
 		}
 	}
 	
-	public void clearEntityManager(){
+	public void clearEntityManager()throws Throwable{
 		try {
 			entityManager.getEntityManagerFactory().getCache().evictAll();
 			SmallDao smallDao = getSmallDao();

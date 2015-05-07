@@ -3099,7 +3099,7 @@ public class ComponentFactory {
 			if (facesContext != null && comp2.getId() == null) {
 				SecureRandom prng = SecureRandom.getInstance("SHA1PRNG","SUN");
 				//prng.setSeed(Integer.MAX_VALUE);
-				comp2.setId("j_id" +comp2.getClass().getSimpleName()+System.nanoTime() );
+				comp2.setId("j_id" +comp2.getClass().getSimpleName()+Long.toHexString(System.nanoTime()) );
 			}
 			comp2.setParent(null);
 		} catch (Throwable ex) {

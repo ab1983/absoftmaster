@@ -142,19 +142,25 @@ public class AdmContract implements Serializable {
 
     public void setSystemLogo(String systemLogo) {    	
     	try {
-    		if(systemLogo.isEmpty()){
-    			this.systemLogo = null;
+    		if(systemLogo!=null){
+	    		if(systemLogo.isEmpty()){
+	    			this.systemLogo = null;
+	    			return;
+	    		}
+				if((new File(systemLogo).exists()  || ((HttpURLConnection)new URL(systemLogo).openConnection()).getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND)){
+					this.systemLogo = systemLogo;    		
+				}
     		}
-			if(systemLogo!=null && (new File(systemLogo).exists()  || ((HttpURLConnection)new URL(systemLogo).openConnection()).getResponseCode() != HttpURLConnection.HTTP_NOT_FOUND)){
-				this.systemLogo = systemLogo;    		
-			}
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}   
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}     
     }
     
     public List<AdmCompany> getCompanyList() {

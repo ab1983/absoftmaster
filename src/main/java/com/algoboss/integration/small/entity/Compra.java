@@ -32,6 +32,8 @@ public class Compra implements Serializable {
 
 	private double basesubsti;
 
+	@Lob
+	@Basic(fetch=FetchType.LAZY)	
 	private String complemento;
 
 	private double desconto;
@@ -69,6 +71,8 @@ public class Compra implements Serializable {
 
 	private String marca;
 
+	@Lob
+	@Basic(fetch=FetchType.LAZY)	
 	private String mdestinxml;
 
 	private double mercadoria;
@@ -76,7 +80,9 @@ public class Compra implements Serializable {
 	private String modelo;
 
 	private String nfeid;
-
+	
+	@Lob
+	@Basic(fetch=FetchType.LAZY)
 	private String nfexml;
 
 	private String numeronf;

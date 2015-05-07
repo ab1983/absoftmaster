@@ -42,8 +42,8 @@
                             <p:commandLink action="#{admContractBean.doBeanForm()}" value="#{msg['edit']}" immediate="true"  update="@form">                                
                                 <f:setPropertyActionListener target="#{admContractBean.bean}" value="#{item}"/>
                                 <f:setPropertyActionListener target="#{gerLoginBean.user.contract}" value="#{item}"/>
-                            </p:commandLink> |
-                            <p:commandLink action="#{admContractBean.doBeanRemove()}" value="#{msg['exclude']}" immediate="true"  update="@form">
+                            </p:commandLink> <h:outputText rendered="#{gerLoginBean.user.boss}" value=" | "></h:outputText>
+                            <p:commandLink rendered="#{gerLoginBean.user.boss}" action="#{admContractBean.doBeanRemove()}" value="#{msg['exclude']}" immediate="true"  update="@form">
                                 <f:setPropertyActionListener target="#{admContractBean.bean}" value="#{item}"/>
                             </p:commandLink>                        
                         </p:column>         
@@ -52,6 +52,41 @@
                 </p:panel>
             </h:panelGroup>        
         </h:panelGroup>
-        <p:remoteCommand name="updateMenu" immediate="true" actionListener="#{gerLoginBean.setModel(null)}" update="@(.startMenu)"/>
+        <p:remoteCommand name="updateMenu" immediate="true" actionListener="#{gerLoginBean.setModel(null)}" update="@(.startMenu)" oncomplete="updateMenu2();"/>
     </h:form>
+    <script>
+	    function listener(data) {
+	        var status = data.status; // Can be "begin", "complete" or "success".
+	
+	        switch (status) {
+	            case "begin": // Before the ajax request is sent.
+	                // ...
+	                break;
+	
+	            case "complete": // After the ajax response is arrived.
+	                // ...
+	                break;
+	
+	            case "success": // After update of HTML DOM based on ajax response..
+	                // ...
+	                break;
+	        }
+	    }    
+	 	function updateMenu2(){
+	 		$('.updateMenuAction').click();
+	 	}    
+	 	function doInstatiatesSite(){
+	 		window.setTimeout(function(){
+		 		$('.doInstatiatesSite').click();
+	 		}, 1000);
+	 	}    	 	
+    </script>
+	<h:form id="form" style="display:none;">
+	    <h:commandLink styleClass="doInstatiatesSite" actionListener="#{gerLoginBean.doInstatiatesSite()}">
+	       <f:ajax onevent="function(data){if(data.status=='complete') updateMenu()}"></f:ajax>
+	    </h:commandLink>	
+	    <h:commandLink styleClass="updateMenuAction" action="/f/index.xhtml?faces-redirect=true">
+	       
+	    </h:commandLink>
+	</h:form>
 </html>

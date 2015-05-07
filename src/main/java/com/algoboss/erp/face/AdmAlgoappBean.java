@@ -221,6 +221,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 
 		public BeanList(List list) {
 			super();
+			
 			this.addAll(list);
 		}
 
@@ -956,7 +957,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 						if (i > 0) {
 							keyStr += " - ";
 						}
-						keyStr += String.valueOf(value.getPropertyValue());
+						keyStr += String.valueOf(value.getStr());
 					}					
 					if (!keyStr.isEmpty()) {
 						keyMap = keyStr;
@@ -1012,11 +1013,13 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				entityObjectList = beanListMap.get(className);
 			} else {
 				entityObjectList = findListByClass((entity.getName()!=null && entity.getName().equals(className))?entity:baseDao.findEntityClass(className));
-				beanListMap.put(className, entityObjectList);
-				beanListFilteredMap.put(className, new BeanList(entityObjectList));
-				getAppBean().setBeanListMap(beanListMap);
-				getAppBean().setBeanListFilteredMap(beanListFilteredMap);
-				
+				if(entityObjectList!=null){
+					beanListMap.put(className, entityObjectList);
+					beanListFilteredMap.put(className, new BeanList(entityObjectList));
+					
+					getAppBean().setBeanListMap(beanListMap);
+					getAppBean().setBeanListFilteredMap(beanListFilteredMap);
+				}
 				formRendered = false;
 			}
 		}
@@ -1110,7 +1113,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				formRendered = false;
 				// return "/f/cadastro/usuario/usuarioList.xhtml";
 			} catch (Throwable ex) {
-				msgStr = "Falha no processamento. Motivo: " + ex.getClass();
+				msgStr = "Falha no processamento. Motivo: " + ex.getClass() +"-"+ex.getMessage();
 				ex.printStackTrace();
 			} finally {
 				if (!msgStr.isEmpty()) {
@@ -1537,6 +1540,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		private AdmAlgoappBean bean;
 		private int lastPhaseId;
 		private AppComponentListener appComponentListener;
+		private boolean isAlgoapp = false;
 		
 		public AdmAlgoappBean getBean() {
 			return bean;
@@ -1562,11 +1566,19 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 					if (event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES)) {
 						//firstRender = false;
 						UIComponent algoContainerX = bean.getAlgoContainer();
-						if (algoContainerX != null && !firstRender) {
+						isAlgoapp = algoContainerX != null;
+						if (isAlgoapp && !firstRender) {
+							Map map = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+							String source = String.valueOf(map.get("javax.faces.source"));
+							String draggedId = source.split(":")[source.split(":").length - 1];
+							System.out.println(draggedId);
 							//algoContainerX.unsubscribeFromEvent(arg0, arg1);
 							//bean.generateElementsContainerMap(bean.requirement);
-							bean.updateContainerPage();
-							ComponentFactory.resetComponent();
+							isAlgoapp = !draggedId.equals("updateActiveSession") && !draggedId.equals("tabView");
+							if(isAlgoapp){
+								bean.updateContainerPage();
+								ComponentFactory.resetComponent();
+							}
 						}
 					}
 					/*if ((bean.firstRender || PhaseId.APPLY_REQUEST_VALUES.getOrdinal() != lastPhaseId) && PhaseId.RENDER_RESPONSE.equals(event.getPhaseId())) {
@@ -1585,7 +1597,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println("Before Executing " + event.getPhaseId()+":"+(bean.getAlgoContainer()!=null?"not null":"null"));
+			//System.out.println("Before Executing " + event.getPhaseId()+":"+(bean.getAlgoContainer()!=null?"not null":"null"));
 		}
 
 		@Override
@@ -1607,7 +1619,9 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			}	
 			if (bean.containerClass.endsWith("-app") || bean.containerClass.endsWith("-rep")) {
 				if (event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES)) {
-					ComponentFactory.resetComponent();
+					if(isAlgoapp){
+						//ComponentFactory.resetComponent();						
+					}
 					//UIComponent algoContainerX = bean.getAlgoContainer();
 					//if (algoContainerX != null) {
 						//algoContainerX.unsubscribeFromEvent(arg0, arg1);
@@ -1646,7 +1660,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				e.printStackTrace();
 			}
 			lastPhaseId = event.getPhaseId().getOrdinal();
-			System.out.println("After Executing " + event.getPhaseId()+":"+(bean.getAlgoContainer()!=null?"not null":"null"));
+			//System.out.println("After Executing " + event.getPhaseId()+":"+(bean.getAlgoContainer()!=null?"not null":"null"));
 		}
 
 		@Override

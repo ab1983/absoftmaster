@@ -171,7 +171,7 @@ public class PreVendaBo {
 					obj.getPropObj("pesoliqui").setPropertyValue(0d);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}

@@ -18,8 +18,11 @@
             <p:password value="#{secUserBean.bean.password}" autocomplete="off" redisplay="true" required="true" requiredMessage="Password #{msg.required}."/>
             <h:outputText value="Administrador:"/>
             <p:selectBooleanCheckbox value="#{secUserBean.bean.administrator}" />
+            <h:outputText value="Inativo:"/>
+            <p:selectBooleanCheckbox value="#{secUserBean.bean.inactive}" />            
+            
         </h:panelGrid>
-        <p:commandButton value="Gravar"   action="#{secUserBean.doBeanSave()}" update="@form"></p:commandButton>
+        <p:commandButton value="Gravar"  action="#{secUserBean.doBeanSave()}" update="@form"></p:commandButton>
     </p:panel>
     <!--/ui:define-->
 </html>

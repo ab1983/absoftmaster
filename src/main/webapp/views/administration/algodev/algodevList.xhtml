@@ -25,6 +25,9 @@
         function eventBeanWait(call) {
         	
         }
+        function restartFormChanged(){
+        	
+        }
     </script>
 	<ui:include src="algodevContainer.xhtml"/>
 
@@ -51,9 +54,7 @@
                 </p:commandButton>    
                 <p:commandButton value="#{msg['build']}" icon="ui-icon-newwin" onclick="prepareConfigDlg.show();" immediate="true"/>  
                 
-                <p:commandButton value="#{msg['exclude']}" rendered="#{admAlgodevBean.bean.requirementId!=null}" icon="ui-icon-trash" onclick="confirmAction(function() {
-                confirmExclude()
-            })">                      
+                <p:commandButton value="#{msg['exclude']}" rendered="#{admAlgodevBean.bean.requirementId!=null}" icon="ui-icon-trash" onclick="confirmAction(function() {confirmExclude();})">                      
 
                 </p:commandButton>    
                   
@@ -189,11 +190,48 @@
         <!--p:hotkey bind="r" onsuccess="positionChange('left',+2);"/-->  
         <p:remoteCommand name="cleanUpApp" immediate="true" actionListener="#{admAlgodevBean.cleanUpApp()}" oncomplete="updateCurrentForm();"/>                 
         <p:remoteCommand name="clearContainerPage" immediate="true" actionListener="#{admAlgodevBean.clearContainerPage()}" oncomplete="updateCurrentForm();"/>   
-        <p:dialog dynamic="true" widgetVar="scriptDlg" visible="false" header="Script" closable="true" style="height: 583px;max-height: 583px;min-height: 483px;  width: 988px;max-width: 1188px;" resizable="false">         
-            <p:panel>
-            <p:scrollPanel style="width: 1350px;max-width:1400px; height: 450px;" >
-            <p:inputTextarea style="width: 1850px;max-width:1900px; height: 450px;" cols="300" autoResize="true"   value="#{admAlgodevBean.bean.requirementScript}"  styleClass="no-upper"></p:inputTextarea>
-			</p:scrollPanel>
+        <p:dialog dynamic="true" widgetVar="scriptDlg" visible="false" header="Script" closable="true" style="height: 583px;max-height: 583px;min-height: 483px;  width: 988px;max-width: 1188px; min-width: 988px;" resizable="false">         
+            <p:panel style="height: 450px;">
+            <p:scrollPanel rendered="false" style="width: 1350px;max-width:1400px; height: 450px;" >
+        		<p:editor rendered="false" style="width: 1850px;max-width:1900px; height: 450px;" cols="300"  autoResize="true"   value="#{admAlgodevBean.bean.requirementScript}"  styleClass="no-upper"></p:editor>
+			</p:scrollPanel>            
+		    <div id="editor">some text</div>
+		    <h:inputTextarea styleClass="requirementScript" value="#{admAlgodevBean.bean.requirementScript}"></h:inputTextarea> 
+		    <script src="#{request.contextPath}/resources/js/ace-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+		    <script src="#{request.contextPath}/resources/js/ace-min-noconflict/theme-tomorrow.js" type="text/javascript" charset="utf-8"></script>
+		    <script src="#{request.contextPath}/resources/js/ace-min-noconflict/mode-javascript.js" type="text/javascript" charset="utf-8"></script>
+		    <script src="#{request.contextPath}/resources/js/ace-min-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+		    <script>
+			    // trigger extension
+			    ace.require("ace/ext/language_tools");		    
+		        var editor = ace.edit("editor");
+		        //editor.setTheme("ace/theme/twilight");
+		        var JavaScriptMode = ace.require("ace/mode/javascript").Mode;
+		        editor.getSession().setMode(new JavaScriptMode());	
+		        editor.setTheme("ace/theme/tomorrow");
+		        // enable autocompletion and snippets
+		        
+		        editor.setOptions({
+		            enableBasicAutocompletion: true,
+		            enableSnippets: true,
+		            enableLiveAutocompletion: false
+		        });		
+		        //var editor = ace.edit("requirementScriptEditor");
+		        var textarea = $('.requirementScript').hide();
+		        editor.getSession().setValue(textarea.val());
+		        editor.getSession().on('change', function(){
+		          textarea.val(editor.getSession().getValue());
+		        });		        
+		    </script>   
+		    <style>
+			#editor {
+		        position: absolute;
+		        width: 900px;
+		        height: 400px;
+    		}
+		    </style>  
+		          
+    
 			</p:panel>
 			<p:commandButton value="#{msg['save']}" process="@form" icon="ui-icon-document" oncomplete="scriptDlg.hide()">
             </p:commandButton>              
@@ -279,4 +317,5 @@
             onDropComponent([{name: 'datagrid', value: true}, {name: 'elementContainerId', value: '#{algoContainerBind.getClientId()}'}]);
         }
     </script>
+        <div id="div_msg"></div>
 </html>

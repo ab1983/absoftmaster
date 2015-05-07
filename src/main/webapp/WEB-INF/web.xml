@@ -48,17 +48,19 @@
     <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>
     <param-value>true</param-value>
   </context-param>
+  <!-- 
   <context-param>
     <param-name>javax.faces.FULL_STATE_SAVING_VIEW_IDS</param-name>
     <param-value>/index.xhtml,/login.xhtml</param-value>
   </context-param>
+   -->
   <context-param>
     <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-    <param-value>client</param-value>
+    <param-value>server</param-value>
   </context-param>
  <context-param>
     <param-name>javax.faces.PARTIAL_STATE_SAVING</param-name>
-    <param-value>false</param-value>
+    <param-value>true</param-value>
 </context-param> 
   <!-- 
    -->  

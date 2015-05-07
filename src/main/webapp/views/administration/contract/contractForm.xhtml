@@ -6,12 +6,12 @@
        xmlns:p="http://primefaces.org/ui">  
     <p:commandButton  value="#{msg['list']}" icon="ui-icon-search" action="#{admContractBean.doBeanList()}"  immediate="true"  update="@form"> 
     </p:commandButton>
-    <p:panel header="#{msg['registration']} #{msg['contract']}" style="width: 1300px;height: 470px;position: relative;">                      
+    <p:panel header="#{msg['registration']} #{msg['contract']}" style="width: 1300px;height: 470px;position: relative;" rendered="#{admContractBean.bean != null}">                      
         
     <p:tabView style="height:400px"  binding="#{contractFormTab}">
     <p:tab title="Dados Contrato">
     <p:focus for="admContractSystemName"/>
-        <p:fieldset style="width: 500px;height: 180px;">
+        <p:fieldset style="width: 800px;height: 180px;">
             <h:panelGrid columns="2">
                 <h:outputText value="#{msg['systemName']}:"/>
                 <p:inputText value="#{admContractBean.bean.systemName}" id="admContractSystemName" required="true" requiredMessage="#{msg['systemName']} #{msg.required}."/>
@@ -31,13 +31,13 @@
                     <!--f:ajax render="@all" /-->
                 </p:selectOneMenu >           
                 <h:outputText value="#{msg['systemLogo']}:"/>
-                <p:inputText value="#{admContractBean.bean.systemLogo}" styleClass="no-upper" id="admContractSystemLogo" required="false" requiredMessage="#{msg['systemLogo']} #{msg.required}."/>                            
+                <p:inputText value="#{admContractBean.bean.systemLogo}" style="width: 500px;" styleClass="no-upper" id="admContractSystemLogo" required="false" requiredMessage="#{msg['systemLogo']} #{msg.required}."/>                            
                 <h:outputText value="#{msg['corporateName']}:"/>
                 <p:inputText value="#{admContractBean.company.corporateName}" required="true" requiredMessage="#{msg['corporateName']} #{msg.required}."/>
                 <h:outputText value="#{msg['registrationNumber']}:"/>
                 <p:inputMask mask="#{msg.corporateRegistrationMask}" value="#{admContractBean.company.registrationNumber}"  required="true" requiredMessage="#{msg['registrationNumber']} #{msg.required}."/>
                 <h:outputText value="Data Source:"/>
-                <p:inputText  styleClass="no-upper" value="#{admContractBean.company.dataSource}"/>            
+                <p:inputText  styleClass="no-upper" style="width:500px;" value="#{admContractBean.company.dataSource}"/>            
                             
             </h:panelGrid>
         </p:fieldset>
@@ -150,7 +150,8 @@
     </p:dialog>            
         </p:tab>
     </p:tabView>    
-        <p:commandButton value="#{msg['save']}" action="#{admContractBean.doBeanSave()}"  update="@form" style="bottom: 0px;position: absolute;"></p:commandButton>
+        <p:commandButton value="#{msg['save']}" actionListener="#{admContractBean.doBeanSave()}" oncomplete="doInstatiatesSite()"  update="@form" style="bottom: 0px;position: absolute;">
+        </p:commandButton>
     </p:panel>
 
     

@@ -165,7 +165,7 @@ public class SmallUtil {
 					obj.getPropObj("pesoliqui").setPropertyValue(0d);						
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
@@ -197,7 +197,7 @@ public class SmallUtil {
 					obj.getPropObj("identifi1").setPropertyValue("Interno");				
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}

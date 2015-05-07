@@ -74,6 +74,7 @@ public class SecUser implements Serializable {
 
     public void setName(String nome) {
         this.name = nome != null ? nome.toUpperCase() : nome;
+        
     }
 
     public String getLogin() {

@@ -60,7 +60,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
     protected String subtitle;
     protected String urlForm;
     protected String containerId;
-    protected boolean formRendered = true;
+    protected boolean formRendered = false;
     protected String namedFindAll;
     protected boolean limitExceeded = false;
     protected AdmInstantiatesSite site;
@@ -74,6 +74,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
     protected SecUserAuthorization userAuth;
 
     public GenericBean() {
+    	bean = newInstance();
     }
 
     /**
@@ -423,7 +424,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
             formRendered = false;
             //return "/f/cadastro/usuario/usuarioList.xhtml";
         } catch (Throwable ex) {
-            msgStr = "Falha no processamento. Motivo: " + ex.getClass();
+            msgStr = "Falha no processamento. Motivo: " + ex.getClass()+"-"+ex.getMessage();
             ex.printStackTrace();
         } finally {
             if (!msgStr.isEmpty()) {
@@ -454,7 +455,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
                 msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, ex.getCause().getMessage(), "");
                 throw ex;
             } else {
-                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na gravação. Motivo: " + ex.getClass(), "");
+                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na gravação. Motivo: " + ex.getClass()+"-"+ex.getMessage(), "");
             }
         } finally {
             FacesContext.getCurrentInstance().addMessage(null, msg);
@@ -488,7 +489,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
                 msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Acesso somente para leitura! Não foi possível gravar registro.", "");
             }
         } catch (Throwable ex) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na gravação. Motivo: " + ex.getClass(), "");
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na gravação. Motivo: " + ex.getClass()+"-"+ex.getMessage(), "");
         } finally {
             FacesContext.getCurrentInstance().addMessage(null, msg);
         }
@@ -513,7 +514,7 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
         } catch (javax.transaction.RollbackException ex) {
             msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na exclusão. Verifique se o registro não está sendo utilizado e repita a operação.", "");
         } catch (Throwable ex) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na exclusão. Motivo: " + ex.getClass(), "");
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na exclusão. Motivo: " + ex.getClass()+"-"+ex.getMessage(), "");
         } finally {
             FacesContext.getCurrentInstance().addMessage(null, msg);
         }

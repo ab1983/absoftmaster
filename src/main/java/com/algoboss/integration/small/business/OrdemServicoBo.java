@@ -43,7 +43,7 @@ public class OrdemServicoBo {
 					obj.getPropObj("identifi1").setPropertyValue("Interno");				
 				}
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}

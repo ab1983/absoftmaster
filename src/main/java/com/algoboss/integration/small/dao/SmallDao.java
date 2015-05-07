@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
@@ -55,6 +56,7 @@ import com.algoboss.erp.entity.AdmInstantiatesSite;
 import com.algoboss.erp.entity.DevEntityClass;
 import com.algoboss.erp.entity.DevEntityObject;
 import com.algoboss.erp.entity.DevEntityPropertyValue;
+import com.algoboss.erp.face.GenericBean;
 import com.algoboss.erp.face.GerLoginBean;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -92,8 +94,9 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 		return userTransaction;
 	}
 	
-	public static SmallDao createInstance(GerLoginBean loginBean,SmallDao actual) {
-		try {/*
+	public static SmallDao createInstance(GerLoginBean loginBean,SmallDao actual)throws Throwable {
+			/*
+		
 			if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
 				entityManagerSmall = entityManagerSmall_1;
 			}else if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1766){
@@ -155,9 +158,7 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 				}
 				return smallDao;				
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 		return actual;
 	}
 	
