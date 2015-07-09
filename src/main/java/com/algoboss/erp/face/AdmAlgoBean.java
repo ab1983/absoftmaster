@@ -820,7 +820,7 @@ abstract class AdmAlgoBean<T> extends GenericBean<T> implements Cloneable{
 				algoContainerView = algoContainerX;	
 			}
 			if(algoContainerView!=null){
-				updateContainerPage();					
+				setAlgoContainer();					
 				if(event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES)){
 					ComponentFactory.resetComponent();
 				}

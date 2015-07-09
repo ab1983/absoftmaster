@@ -107,5 +107,29 @@ public class DevReportFieldOptions implements Serializable, Cloneable {
 			return null;
 		}
 	}    
+	
+	public DevReportFieldOptions attr(String optionName, String optionValue){
+		loadOpt(this, optionName, "String").setOptionsValue(optionValue);
+		return this;
+	}
+	
+	public static DevReportFieldOptionsMap loadOpt(DevReportFieldOptions fieldOptions, String optionName, String optionType) {
+		DevReportFieldOptionsMap fieldOptionsMap = null;
+		for (DevReportFieldOptionsMap fieldOptionsMapTmp : fieldOptions.getFieldOptionsMapList()) {
+			if (fieldOptionsMapTmp.getOptionsName().equals(optionName)) {
+				fieldOptionsMap = fieldOptionsMapTmp;
+				break;
+			}
+		}
+		if (fieldOptionsMap == null) {
+			fieldOptionsMap = new DevReportFieldOptionsMap();
+			if (optionType != null) {
+				fieldOptionsMap.setOptionsName(optionName);
+				fieldOptionsMap.setOptionsType(optionType);
+				fieldOptions.getFieldOptionsMapList().add(fieldOptionsMap);
+			}
+		}
+		return fieldOptionsMap;
+	}	
     
 }

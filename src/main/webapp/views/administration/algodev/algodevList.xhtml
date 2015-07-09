@@ -289,7 +289,7 @@
     	<!-- 
         <ui:include src="algodevExpression.xhtml"/>        
     	 -->
-        <p:dialog dynamic="true" widgetVar="prepareConfigDlg" visible="false" header="#{msg['projectConfiguration']}" closable="true" style="height: 883px;max-height: 883px;min-height: 483px;  width: 988px;max-width: 988px;" resizable="false">         
+        <p:dialog dynamic="true" styleClass="tabViewConfigDlg" widgetVar="prepareConfigDlg" visible="false" header="#{msg['projectConfiguration']}" closable="true" style="height: 883px;max-height: 883px;min-height: 483px;  width: 988px;max-width: 988px;" resizable="false">         
             <p:tabView id="tabViewConfig" styleClass="tabViewConfig" activeIndex="#{admAlgodevBean.actualConstructorTabIndex}" widgetVar="prepareConfigTabView" style="width: 850px;max-width: 850px;min-width: 850px;">
                 <ui:include src="algodevProject.xhtml"></ui:include>      
             </p:tabView>

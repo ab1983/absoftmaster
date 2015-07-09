@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc versao="2.00" xmlns="http://www.portalfiscal.inf.br/nfe">
+	<NFe xmlns="http://www.portalfiscal.inf.br/nfe">
+		<infNFe versao="2.00"
+			Id="NFe31140723791122000149550010000061191454084083">
+			<ide>
+				<cUF>31</cUF>
+				<cNF>45408408</cNF>
+				<natOp>VENDA DE PRODUCAO DO ESTABELECIMENTO</natOp>
+				<indPag>0</indPag>
+				<mod>55</mod>
+				<serie>1</serie>
+				<nNF>6119</nNF>
+				<dEmi>2014-07-30</dEmi>
+				<dSaiEnt>2014-07-30</dSaiEnt>
+				<tpNF>1</tpNF>
+				<cMunFG>3169406</cMunFG>
+				<tpImp>1</tpImp>
+				<tpEmis>1</tpEmis>
+				<cDV>3</cDV>
+				<tpAmb>1</tpAmb>
+				<finNFe>1</finNFe>
+				<procEmi>0</procEmi>
+				<verProc>4.0.1-NT2009.006</verProc>
+			</ide>
+			<emit>
+				<CNPJ>23791122000149</CNPJ>
+				<xNome>ALFA INDUSTRIA E COMERCIO LTDA EPP</xNome>
+				<enderEmit>
+					<xLgr>AVENIDA CAIO DE BRITO</xLgr>
+					<nro>1460</nro>
+					<xBairro>SANTANA</xBairro>
+					<cMun>3169406</cMun>
+					<xMun>TRES PONTAS</xMun>
+					<UF>MG</UF>
+					<CEP>37190000</CEP>
+					<cPais>1058</cPais>
+					<xPais>BRASIL</xPais>
+					<fone>3532651227</fone>
+				</enderEmit>
+				<IE>7073043480024</IE>
+				<CRT>1</CRT>
+			</emit>
+			<dest>
+				<CNPJ>15542326000118</CNPJ>
+				<xNome>KAYENA ALIMENTOS LTDA EPP</xNome>
+				<enderDest>
+					<xLgr>RUA MARIO ALMEIDA</xLgr>
+					<nro>009</nro>
+					<xCpl>ED. CANAA</xCpl>
+					<xBairro>SANTOS DUMONT</xBairro>
+					<cMun>3205200</cMun>
+					<xMun>VILA VELHA</xMun>
+					<UF>ES</UF>
+					<CEP>29109140</CEP>
+					<cPais>1058</cPais>
+					<xPais>BRASIL</xPais>
+					<fone>2733399362</fone>
+				</enderDest>
+				<IE>082874751</IE>
+				<email>kayenaxml@gmail.com;atendimento.alfaplast@hotmail.com</email>
+			</dest>
+			<det nItem="1">
+				<prod>
+					<cProd>45</cProd>
+					<cEAN></cEAN>
+					<xProd>SACOS PP 17 x 24</xProd>
+					<NCM>39232990</NCM>
+					<CFOP>6101</CFOP>
+					<uCom>MIL</uCom>
+					<qCom>16.2500</qCom>
+					<vUnCom>169.0600000000</vUnCom>
+					<vProd>2747.23</vProd>
+					<cEANTrib></cEANTrib>
+					<uTrib>MIL</uTrib>
+					<qTrib>16.2500</qTrib>
+					<vUnTrib>169.0600000000</vUnTrib>
+					<indTot>1</indTot>
+					<nFCI></nFCI>
+				</prod>
+				<imposto>
+					<ICMS>
+						<ICMSSN102>
+							<orig>0</orig>
+							<CSOSN>102</CSOSN>
+						</ICMSSN102>
+					</ICMS>
+					<PIS>
+						<PISOutr>
+							<CST>99</CST>
+							<vBC>0.00</vBC>
+							<pPIS>0.00</pPIS>
+							<vPIS>0.00</vPIS>
+						</PISOutr>
+					</PIS>
+					<COFINS>
+						<COFINSOutr>
+							<CST>99</CST>
+							<vBC>0.00</vBC>
+							<pCOFINS>0.00</pCOFINS>
+							<vCOFINS>0.00</vCOFINS>
+						</COFINSOutr>
+					</COFINS>
+				</imposto>
+			</det>
+			<total>
+				<ICMSTot>
+					<vBC>0.00</vBC>
+					<vICMS>0.00</vICMS>
+					<vBCST>0.00</vBCST>
+					<vST>0.00</vST>
+					<vProd>2747.23</vProd>
+					<vFrete>0.00</vFrete>
+					<vSeg>0.00</vSeg>
+					<vDesc>0.00</vDesc>
+					<vII>0.00</vII>
+					<vIPI>0.00</vIPI>
+					<vPIS>0.00</vPIS>
+					<vCOFINS>0.00</vCOFINS>
+					<vOutro>0.00</vOutro>
+					<vNF>2747.23</vNF>
+				</ICMSTot>
+				<prod>
+					<xProd></xProd>
+				</prod>
+			</total>
+			<transp>
+				<modFrete>0</modFrete>
+				<transporta>
+					<CPF>05711907662</CPF>
+					<xNome>ALEXANDRE TADEU DA CRUZ</xNome>
+					<xEnder>AV URBANO G FIGUEIREDO NETO,339</xEnder>
+					<xMun>TRES PONTAS</xMun>
+					<UF>MG</UF>
+				</transporta>
+				<vol>
+					<qVol>3</qVol>
+					<esp>VOLUME(S)</esp>
+					<pesoL>67.150</pesoL>
+					<pesoB>67.150</pesoB>
+				</vol>
+				<prod>
+					<xProd></xProd>
+				</prod>
+			</transp>
+			<cobr>
+				<fat>
+					<nFat>6119</nFat>
+					<vOrig>2747.23</vOrig>
+					<vLiq>2747.23</vLiq>
+				</fat>
+				<dup>
+					<nDup>NE006119-01</nDup>
+					<dVenc>2014-07-30</dVenc>
+					<vDup>2747.23</vDup>
+				</dup>
+				<prod>
+					<xProd></xProd>
+				</prod>
+			</cobr>
+			<infAdic>
+				<infCpl>DOCUMENTO EMITIDO POR ME OU EPP OPTANTE PELO SIMPLES
+					NACIONAL NAO GERA DIREITO A CREDITO FISCAL DE IPI.</infCpl>
+				<prod>
+					<xProd></xProd>
+				</prod>
+			</infAdic>
+		</infNFe>
+		<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+			<SignedInfo>
+				<CanonicalizationMethod
+					Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></CanonicalizationMethod>
+				<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"></SignatureMethod>
+				<Reference URI="#NFe31140723791122000149550010000061191454084083">
+					<Transforms>
+						<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"></Transform>
+						<Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></Transform>
+					</Transforms>
+					<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></DigestMethod>
+					<DigestValue>3nXewM5thyFPG2O4CWXVtOgwZrQ=</DigestValue>
+				</Reference>
+			</SignedInfo>
+			<SignatureValue>JEVjwossm/3pMyRJgsSfpZiMOfqYlNVfw6xzV9yHRaS1hdE1df7kmpLmXJmi7KBDDV1GygbALajv04WWOSRV+zA2b4ZC1oq0zeE+sIWuLkD+qQIcv0RE8bQcqGVWlc24PetAHJHj72bJ78lSyY4MKyOoBhvhnc5CbmUa82nFr1YPDpZ2P6sgAhBfbLuLP/CE/w2MW0/KPI8pm2rI4DIZkkTlIfBkx4m6UUo6O2L6dAPx3pgefHWdMIVzkMLjmQuXqaaYDQwt/CNoghZ/X6Jol86jxKI01GljF401WeXdsRpY0eqZGVB6HOfl0sLNeCGxcnpgsRicx68cqQo5UItfQg==
+			</SignatureValue>
+			<KeyInfo>
+				<X509Data>
+					<X509Certificate>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
+					</X509Certificate>
+				</X509Data>
+			</KeyInfo>
+		</Signature>
+	</NFe>
+	<protNFe versao="2.00">
+		<infProt Id="ID131141503397562">
+			<tpAmb>1</tpAmb>
+			<verAplic>13_2_13</verAplic>
+			<chNFe>31140723791122000149550010000061191454084083</chNFe>
+			<dhRecbto>2014-07-30T09:33:13</dhRecbto>
+			<nProt>131141503397562</nProt>
+			<digVal>3nXewM5thyFPG2O4CWXVtOgwZrQ=</digVal>
+			<cStat>100</cStat>
+			<xMotivo>Autorizado o uso da NF-e</xMotivo>
+		</infProt>
+	</protNFe>
+</nfeProc>

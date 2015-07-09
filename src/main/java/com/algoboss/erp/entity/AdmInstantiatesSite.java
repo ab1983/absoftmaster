@@ -5,6 +5,7 @@
 package com.algoboss.erp.entity;
 
 import java.io.Serializable;
+
 import javax.persistence.*;
 
 /**

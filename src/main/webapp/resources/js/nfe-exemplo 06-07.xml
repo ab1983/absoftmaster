@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nfeProc versao="3.10" xmlns="http://www.portalfiscal.inf.br/nfe">
+	<NFe xmlns="http://www.portalfiscal.inf.br/nfe">
+		<infNFe versao="3.10"
+			Id="NFe33150627175413000163550040000133671244725639">
+			<ide>
+				<cUF>33</cUF>
+				<cNF>24472563</cNF>
+				<natOp>VENDA DE MERCADORIA</natOp>
+				<indPag>1</indPag>
+				<mod>55</mod>
+				<serie>4</serie>
+				<nNF>13367</nNF>
+				<dhEmi>2015-06-05T00:00:00-03:00</dhEmi>
+				<dhSaiEnt>2015-06-05T00:00:00-03:00</dhSaiEnt>
+				<tpNF>1</tpNF>
+				<idDest>2</idDest>
+				<cMunFG>3304557</cMunFG>
+				<tpImp>1</tpImp>
+				<tpEmis>1</tpEmis>
+				<cDV>9</cDV>
+				<tpAmb>1</tpAmb>
+				<finNFe>1</finNFe>
+				<indFinal>0</indFinal>
+				<indPres>9</indPres>
+				<procEmi>0</procEmi>
+				<verProc>2.0.0</verProc>
+			</ide>
+			<emit>
+				<CNPJ>27175413000163</CNPJ>
+				<xNome>ORGALENT PRODUTOS OTICOS LTDA</xNome>
+				<xFant>ORGALENT</xFant>
+				<enderEmit>
+					<xLgr>AV RODRIGUES ALVES</xLgr>
+					<nro>823</nro>
+					<xCpl>FUNDOS</xCpl>
+					<xBairro>SANTO CRISTO</xBairro>
+					<cMun>3304557</cMun>
+					<xMun>RIO DE JANEIRO</xMun>
+					<UF>RJ</UF>
+					<CEP>20220361</CEP>
+					<cPais>1058</cPais>
+					<xPais>BRASIL</xPais>
+					<fone>2130314444</fone>
+				</enderEmit>
+				<IE>81242062</IE>
+				<CRT>3</CRT>
+			</emit>
+			<dest>
+				<CNPJ>30573737000164</CNPJ>
+				<xNome>EIXO OTICO LTDA - ME</xNome>
+				<enderDest>
+					<xLgr>RUA JOAQUIM DA SILVA LIMA</xLgr>
+					<nro>207</nro>
+					<xCpl>LJ2 EDIF PALMAR</xCpl>
+					<xBairro>CENTRO</xBairro>
+					<cMun>3202405</cMun>
+					<xMun>GUARAPARI</xMun>
+					<UF>ES</UF>
+					<CEP>29200260</CEP>
+					<cPais>1058</cPais>
+					<xPais>BRASIL</xPais>
+					<fone>2733621602</fone>
+				</enderDest>
+				<indIEDest>1</indIEDest>
+				<IE>081046456</IE>
+				<email>contato@oticasguarapari.com.br</email>
+			</dest>
+			<entrega>
+				<CNPJ>30573737000164</CNPJ>
+				<xLgr>RUA JOAQUIM DA SILVA LIMA</xLgr>
+				<nro>207</nro>
+				<xCpl>LJ2 EDIF PALMAR</xCpl>
+				<xBairro>CENTRO</xBairro>
+				<cMun>3202405</cMun>
+				<xMun>GUARAPARI</xMun>
+				<UF>ES</UF>
+			</entrega>
+			<det nItem="1">
+				<prod>
+					<cProd>1107</cProd>
+					<cEAN />
+					<xProd>LP EOS POLI HC INCO - CH 1</xProd>
+					<NCM>90015000</NCM>
+					<CFOP>6102</CFOP>
+					<uCom>UN</uCom>
+					<qCom>7.0000</qCom>
+					<vUnCom>4.7601000000</vUnCom>
+					<vProd>33.32</vProd>
+					<cEANTrib />
+					<uTrib>UN</uTrib>
+					<qTrib>7.0000</qTrib>
+					<vUnTrib>4.7601000000</vUnTrib>
+					<indTot>1</indTot>
+				</prod>
+				<imposto>
+					<vTotTrib>2.55</vTotTrib>
+					<ICMS>
+						<ICMS00>
+							<orig>1</orig>
+							<CST>00</CST>
+							<modBC>3</modBC>
+							<vBC>33.32</vBC>
+							<pICMS>4.0000</pICMS>
+							<vICMS>1.33</vICMS>
+						</ICMS00>
+					</ICMS>
+					<IPI>
+						<clEnq>90015</clEnq>
+						<cEnq>999</cEnq>
+						<IPINT>
+							<CST>52</CST>
+						</IPINT>
+					</IPI>
+					<PIS>
+						<PISAliq>
+							<CST>01</CST>
+							<vBC>33.32</vBC>
+							<pPIS>0.6500</pPIS>
+							<vPIS>0.22</vPIS>
+						</PISAliq>
+					</PIS>
+					<COFINS>
+						<COFINSAliq>
+							<CST>01</CST>
+							<vBC>33.32</vBC>
+							<pCOFINS>3.0000</pCOFINS>
+							<vCOFINS>1.00</vCOFINS>
+						</COFINSAliq>
+					</COFINS>
+				</imposto>
+			</det>
+			<det nItem="2">
+				<prod>
+					<cProd>1125</cProd>
+					<cEAN />
+					<xProd>LP EOS RESINA HMC - CH 1</xProd>
+					<NCM>90015000</NCM>
+					<CFOP>6102</CFOP>
+					<uCom>UN</uCom>
+					<qCom>9.0000</qCom>
+					<vUnCom>3.5002000000</vUnCom>
+					<vProd>31.50</vProd>
+					<cEANTrib />
+					<uTrib>UN</uTrib>
+					<qTrib>9.0000</qTrib>
+					<vUnTrib>3.5002000000</vUnTrib>
+					<indTot>1</indTot>
+				</prod>
+				<imposto>
+					<vTotTrib>2.42</vTotTrib>
+					<ICMS>
+						<ICMS00>
+							<orig>1</orig>
+							<CST>00</CST>
+							<modBC>3</modBC>
+							<vBC>31.50</vBC>
+							<pICMS>4.0000</pICMS>
+							<vICMS>1.26</vICMS>
+						</ICMS00>
+					</ICMS>
+					<IPI>
+						<clEnq>90015</clEnq>
+						<cEnq>999</cEnq>
+						<IPINT>
+							<CST>52</CST>
+						</IPINT>
+					</IPI>
+					<PIS>
+						<PISAliq>
+							<CST>01</CST>
+							<vBC>31.50</vBC>
+							<pPIS>0.6500</pPIS>
+							<vPIS>0.21</vPIS>
+						</PISAliq>
+					</PIS>
+					<COFINS>
+						<COFINSAliq>
+							<CST>01</CST>
+							<vBC>31.50</vBC>
+							<pCOFINS>3.0000</pCOFINS>
+							<vCOFINS>0.95</vCOFINS>
+						</COFINSAliq>
+					</COFINS>
+				</imposto>
+			</det>
+			<total>
+				<ICMSTot>
+					<vBC>64.82</vBC>
+					<vICMS>2.59</vICMS>
+					<vICMSDeson>0.00</vICMSDeson>
+					<vBCST>0.00</vBCST>
+					<vST>0.00</vST>
+					<vProd>64.82</vProd>
+					<vFrete>0.00</vFrete>
+					<vSeg>0.00</vSeg>
+					<vDesc>0.00</vDesc>
+					<vII>0.00</vII>
+					<vIPI>0.00</vIPI>
+					<vPIS>0.43</vPIS>
+					<vCOFINS>1.95</vCOFINS>
+					<vOutro>0.00</vOutro>
+					<vNF>64.82</vNF>
+					<vTotTrib>4.97</vTotTrib>
+				</ICMSTot>
+			</total>
+			<transp>
+				<modFrete>0</modFrete>
+				<transporta>
+					<CNPJ>27175413000163</CNPJ>
+					<xNome>O MESMO</xNome>
+					<xEnder>RUA RODRIGUES ALVES, 823</xEnder>
+					<xMun>RIO DE JANEIRO</xMun>
+					<UF>RJ</UF>
+				</transporta>
+				<vol>
+					<qVol>0</qVol>
+					<esp>caixa</esp>
+				</vol>
+			</transp>
+			<infAdic>
+				<infCpl>ALERJ - RUA DA ALFANDEGA, 8 TERREO - TEL: 08002827060 ///
+					POSTO PROCON RIO SIMPLES CARIOCA - RUA DA AJUDA, 05 SUBSOLO -
+					TEL:151;REFERENTE A REDU..O DA ALIQUOTA DO ICMS PARA 4%. RESOLUCAO
+					SF 13/2012 TOTAL APROXIMADO DOS IMPOSTOS PAGOS: R$ 4,97 ;PEDIDO:
+					311432;CLIENTE: 528553 EIXO OTICO ES ;PL. PGTO: 30FD</infCpl>
+			</infAdic>
+		</infNFe>
+		<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+			<SignedInfo>
+				<CanonicalizationMethod
+					Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+				<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+				<Reference URI="#NFe33150627175413000163550040000133671244725639">
+					<Transforms>
+						<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+						<Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+					</Transforms>
+					<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+					<DigestValue>p9uAdc/UWdJCwz+FXEdIAdv1Uc8=</DigestValue>
+				</Reference>
+			</SignedInfo>
+			<SignatureValue>bAKHJ5kkIOEN3Ri06bFu/x5ReiVvqYJW9i7Egb6yKFmvPZAwTlHhE4lPh9Mnjuo+fBze1HNa9PUSRniUyew3nlktTmWBKEgoOyzJxTwpyvsw7U10NTzlDdYIbcG/Rrh3s9To0+VqigkUSWyhVLp+ofMVd579G002mx/in/WrXz1l9VypWkj7RUbvOYDCFAS2rLPXT3n1V6MRRYKKqu3wjaHCUghlKCUlO/6hOTgWb+hEHdJevpCEFsIlHZz6kUPNvgqx27XVFGU5G/78Ch+SlHlpjHeD/BfeLhBYujrTI0Oz4IdlJe0SGSNvbfnZyXCfBaU5hF1b0hAD7Rrduv0fhQ==
+			</SignatureValue>
+			<KeyInfo>
+				<X509Data>
+					<X509Certificate>MIIIcTCCBlmgAwIBAgIQSBhkDhwiomPBbvLCC5l4ZDANBgkqhkiG9w0BAQsFADBzMQswCQYDVQQGEwJCUjETMBEGA1UEChMKSUNQLUJyYXNpbDEtMCsGA1UECxMkQ2VydGlzaWduIENlcnRpZmljYWRvcmEgRGlnaXRhbCBTLkEuMSAwHgYDVQQDExdBQyBJbnN0aXR1dG8gRmVuYWNvbiBHMjAeFw0xNDA2MzAwMDAwMDBaFw0xNTA2MjkyMzU5NTlaMIHhMQswCQYDVQQGEwJCUjETMBEGA1UEChQKSUNQLUJyYXNpbDEtMCsGA1UECxQkQXV0ZW50aWNhZG8gcG9yIEFSIEluc3RpdHV0byBGZW5hY29uMRswGQYDVQQLFBJBc3NpbmF0dXJhIFRpcG8gQTExFTATBgNVBAsUDElEIC0gNjU0OTkzMDEmMCQGA1UEAxMdT1JHQUxFTlQgUFJPRFVUT1MgT1RJQ09TIExUREExMjAwBgkqhkiG9w0BCQEWI2VsaXphYmV0ZS5tb250ZWlyb0BvcmdhbGVudGUuY29tLmJyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmE/jjM2EJpMuMAz2idRqJe+UUYiJJdT1Y2KzAl93UYOnJ9Zb8lNgqo94cibMSYInE+JimgwALLFc8adBVW3yVO6jlnq+IBY6mcoYuRESguAEAAoh40Yf/h9faaZcrMgH//EpCmOn2gXn9SGq1nfrzzmGSC01X++iPCL0blf9Xd6GPS5NUqffUN8OlxKU8XyfqJq/a1bQMBfWXWAPMA6FPSM2evSl6n2WTGD7vOYm39u8iJFPO2WWcgpGqT0Z1ezJhkpnWIEIsqhGAX2w8SweBsPi83sCaVjLVTKnpLUVTrTYkpuzB5F9ZGx8dYbdwY6eMDkvqEXwfKxdb09rr0FhCwIDAQABo4IDkDCCA4wwgdsGA1UdEQSB0zCB0KA+BgVgTAEDBKA1BDMwNTA3MTk3MDAwNDM3NzE2NzA4MDAwMDAwMDAwMDAwMDAwMDAwODUzOTE2MzlTRUNDUkqgNQYFYEwBAwKgLAQqRUxJWkFCRVRFIERBIENPTkNFSUNBTyBERSBBTE1FSURBIE1PTlRFSVJPoBkGBWBMAQMDoBAEDjI3MTc1NDEzMDAwMTYzoBcGBWBMAQMHoA4EDDAwMDAwMDAwMDAwMIEjZWxpemFiZXRlLm1vbnRlaXJvQG9yZ2FsZW50ZS5jb20uYnIwCQYDVR0TBAIwADAfBgNVHSMEGDAWgBT7M75zvfLXcFNbovCQ1Ffq/obMhjAOBgNVHQ8BAf8EBAMCBeAwgYgGA1UdIASBgDB+MHwGBmBMAQIBITByMHAGCCsGAQUFBwIBFmRodHRwOi8vaWNwLWJyYXNpbC5hY2ZlbmFjb24uY29tLmJyL3JlcG9zaXRvcmlvL2RwYy9BQy1JbnN0aXR1dG8tRmVuYWNvbi9EUENfQUMgSW5zdGl0dXRvIEZlbmFjb24ucGRmMIIBIgYDVR0fBIIBGTCCARUwW6BZoFeGVWh0dHA6Ly9pY3AtYnJhc2lsLmFjZmVuYWNvbi5jb20uYnIvcmVwb3NpdG9yaW8vbGNyL0FDSW5zdGl0dXRvRmVuYWNvbkcyL0xhdGVzdENSTC5jcmwwWqBYoFaGVGh0dHA6Ly9pY3AtYnJhc2lsLm91dHJhbGNyLmNvbS5ici9yZXBvc2l0b3Jpby9sY3IvQUNJbnN0aXR1dG9GZW5hY29uRzIvTGF0ZXN0Q1JMLmNybDBaoFigVoZUaHR0cDovL3JlcG9zaXRvcmlvLmljcGJyYXNpbC5nb3YuYnIvbGNyL0NlcnRpc2lnbi9BQ0luc3RpdHV0b0ZlbmFjb25HMi9MYXRlc3RDUkwuY3JsMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDBDCBnwYIKwYBBQUHAQEEgZIwgY8wYwYIKwYBBQUHMAKGV2h0dHA6Ly9pY3AtYnJhc2lsLmFjZmVuYWNvbi5jb20uYnIvcmVwb3NpdG9yaW8vY2VydGlmaWNhZG9zL0FDX0luc3RpdHV0b19GZW5hY29uX0cyLnA3YzAoBggrBgEFBQcwAYYcaHR0cDovL29jc3AuY2VydGlzaWduLmNvbS5icjANBgkqhkiG9w0BAQsFAAOCAgEAmxDUU48J5OUP1PpJRIRnv7Axyn3WQ2fX6JKbkoiAhY0t2fn962cFUJAJggnrLV9rphxCpq27SNdF6rsjsFV162PDgbpZK14abBr3Ezm0oKrOkb4J7sFE/AD++VM0M8RxkQmWAjZcwevSp07y0eqw3GADIMlXgJgFrnuwPD8p7VwLbDl0/+vdglm8lhmnbbEci8SOWl3Z1egf7Un/rYbEpqxVWJ+Jj8zI/Y7EMs8nzxtTqnH2S7pSQalwYV7072TrAI+5Mdt/T6pgJLtsHpOY+iRjx6TJg+bzldGEMiMFYafcUqSUbUNx6bFZlg23wAOsp/YeI/SC/5lfL4mdUfv5Bhw8AL5n1mb1pb3qcRoDqTApRO+lydcPUYnItQalvScuESKW5HQi/2uK/gUfB7/jiETISRYXC8PlNwHNwk/Vq0k3stIFCM3h+XsnzswMkzP1PNg4Ja+2/bKsNtPPPuP6+wcegErVwmarSEf/sDm1NLU2j793oyM57cF8o57xSXtFAqOMM3Uw89RuVoqbox8vAnN7l2tqxNSd1dtcWp+WKFZpO8PMzK6/gU7/hPq875eeIZNW4/EcWpfEMD/Di1BgTQYG4c7TVg+3sK2HJrigiPZEmvW3QsOutrRQjYeyDH7gUH5euX8jQqhy3F1YZ+yDXHGRGqap32EYQD/O8vclnJ4=
+					</X509Certificate>
+				</X509Data>
+			</KeyInfo>
+		</Signature>
+	</NFe>
+	<protNFe versao="3.10">
+		<infProt>
+			<tpAmb>1</tpAmb>
+			<verAplic>SVRS201504271011</verAplic>
+			<chNFe>33150627175413000163550040000133671244725639</chNFe>
+			<dhRecbto>2015-06-05T10:59:17-03:00</dhRecbto>
+			<nProt>333150076458127</nProt>
+			<digVal>p9uAdc/UWdJCwz+FXEdIAdv1Uc8=</digVal>
+			<cStat>100</cStat>
+			<xMotivo>Autorizado o uso da NF-e</xMotivo>
+		</infProt>
+	</protNFe>
+</nfeProc>

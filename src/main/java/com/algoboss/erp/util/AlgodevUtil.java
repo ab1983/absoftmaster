@@ -54,25 +54,29 @@ public class AlgodevUtil {
 	public static String formatDescription(String description) {
 		char[] charArray = description.toCharArray();
 		StringBuilder sb = new StringBuilder();
-		Boolean isString = true;
-		for (int i = 0; i < charArray.length; i++) {
+		int len = charArray.length;
+		String separator = ",";
+		boolean addSeparator = false;
+		Boolean isString = true;		
+		for (int i = 0; i < len; i++) {
 			char c = charArray[i];
 			String cStr = "";
 			if (c == ';' || c == ',' || /*c == '.' ||*/ c == '\n' || c == '\t' || c == '\r') {
-				if (!isString) {
-					continue;
-				}
-				cStr = ",";
+				addSeparator = true;
+				continue;
+			}
+			if(addSeparator){
+				sb.append(separator);
+				addSeparator = false;
 			}
 			if (!cStr.isEmpty()) {
 				isString = false;
 			} else {
 				if (!(!isString && c == ' ')) {
-					cStr = String.valueOf(c);
+					sb.append(String.valueOf(c));
 					isString = true;
 				}
-			}
-			sb.append(cStr);
+			}							
 		}
 		return sb.toString();
 	}
@@ -81,7 +85,7 @@ public class AlgodevUtil {
 		char[] strArray = str.toCharArray();
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < strArray.length; i++) {
-			if (!Character.isLetterOrDigit(strArray[i]) && !String.valueOf(strArray[i]).matches("-|~")) {
+			if (!Character.isLetterOrDigit(strArray[i]) && !String.valueOf(strArray[i]).matches("-|~") && strArray[i] != Character.toChars(0)[0]) {
 				sb.append(strArray[i]);
 			} else {
 				return sb.toString();

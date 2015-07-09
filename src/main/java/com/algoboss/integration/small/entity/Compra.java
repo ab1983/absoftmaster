@@ -13,6 +13,7 @@ import java.util.List;
  * The persistent class for the compras database table.
  * 
  */
+@Cacheable(true)
 @Entity
 @Table(name="compras")
 @NamedQuery(name="Compra.findAll", query="SELECT c FROM Compra c")

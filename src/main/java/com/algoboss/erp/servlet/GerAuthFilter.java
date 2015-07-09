@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.application.ResourceHandler;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -26,12 +27,14 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.algoboss.erp.dao.AdmContractDao;
 import com.algoboss.erp.entity.AdmContract;
 import com.algoboss.erp.entity.SecUser;
 import com.algoboss.erp.face.GerLoginBean;
 import com.algoboss.erp.face.SecUserBean;
+import com.algoboss.erp.face.SessionUtilBean;
 import com.algoboss.erp.util.ComponentFactory;
 
 /**
@@ -68,6 +71,7 @@ public class GerAuthFilter implements Filter {
             String newUserParam = req.getParameter("newUserForm");
             String uuidParam = req.getParameter("uuid");
             String contractNewUser = req.getParameter("contractNewUser");
+            
             if (uuidParam != null && !uuidParam.isEmpty()) {
                 doGetFile(req, res, uuidParam);
                 //getFile(uuidParam);
@@ -104,7 +108,7 @@ public class GerAuthFilter implements Filter {
                     }
                     chain.doFilter(request, response);                    	
                 } else {
-                	if(url.contains("/index.xhtml")){
+                	if(false && url.contains("/index.xhtml")){
                         response.getWriter().print(xmlPartialRedirectToPage(req, "/"));
                         response.flushBuffer();
                 	}else{
@@ -117,6 +121,12 @@ public class GerAuthFilter implements Filter {
 
 
         } catch (Throwable t) {
+        	FacesContext fc = FacesContext.getCurrentInstance();
+        	if(fc != null){
+				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, "Ocorreu uma falha no processamento. Favor repetir a operação e caso o problema persista informe ao administrador do sistema.", "");
+				FacesContext.getCurrentInstance().addMessage(null, msg);
+        	}
+			
             // redirect to error page
             //HttpServletRequest request = (HttpServletRequest) req;
             //req.getSession().setAttribute("lastException", t);

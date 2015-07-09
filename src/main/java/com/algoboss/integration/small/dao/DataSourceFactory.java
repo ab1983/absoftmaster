@@ -92,16 +92,21 @@ import org.springframework.util.Assert;
 	  realDataSource.setUrl(url);
 	  realDataSource.setUsername(username);
 	  realDataSource.setPassword(password);
-	  realDataSource.setInitialSize(10);
-	  realDataSource.setMaxIdle(50);
+	  realDataSource.setInitialSize(5);
+	  realDataSource.setMinIdle(5);
+	  realDataSource.setMaxIdle(10);
 	  realDataSource.setMaxTotal(10);
 	  realDataSource.setPoolPreparedStatements(true);
 	  realDataSource.setValidationQuery(validationQuery);
-	  realDataSource.setValidationQueryTimeout(60000);
+	  realDataSource.setValidationQueryTimeout(10);
 	  realDataSource.setTestOnCreate(true);
 	  realDataSource.setMaxWaitMillis(5000);
-	  realDataSource.setDefaultQueryTimeout(30000);
-	  realDataSource.setMinEvictableIdleTimeMillis(180000);
+	  realDataSource.setDefaultQueryTimeout(30);
+	  realDataSource.setMinEvictableIdleTimeMillis(60000);
+	  realDataSource.setRemoveAbandonedTimeout(30);
+	  realDataSource.setRemoveAbandonedOnBorrow(true);
+	  realDataSource.setRemoveAbandonedOnMaintenance(true);
+	  realDataSource.setNumTestsPerEvictionRun(2);
 	  return realDataSource;//swapToDataSource(realDataSource);
 	 }
 	 

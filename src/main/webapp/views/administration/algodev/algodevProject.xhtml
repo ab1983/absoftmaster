@@ -6,24 +6,8 @@
        xmlns:p="http://primefaces.org/ui">  
     <p:tab titleStyle="opacity:1" disabled="true" id="nameProjWiz" title="Informar Identificação">
         <ui:include src="algodevProjectName.xhtml"></ui:include>
-        <p:commandButton value="Próximo" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(admAlgodevBean.actualConstructorTabIndex+1)}" update="@(.tabViewConfig)" oncomplete="updateEntity();"/>        
-    </p:tab>
-
-    <p:tab  titleStyle="opacity:1" disabled="true" id="tableWiz" title="Informar Tabela">
-        <ui:include src="algodevEntity.xhtml"></ui:include>
-        <p:commandButton value="Anterior" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(admAlgodevBean.actualConstructorTabIndex-1)}"  update="@(.tabViewConfig)"/>
-        <p:commandButton widgetVar="doneBtn1Wv" value="Concluir" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}" action="#{admAlgodevBean.setEntitySelected(admAlgodevBean.entity)}" update="@(.tabViewConfig)" onstart="updateCurrentConteiner();" oncomplete="constructorDone();"/>
-        <p:commandButton widgetVar="doneBtn2Wv" style="display: none;" value="Concluir" action="#{admAlgodevBean.setEntitySelected(admAlgodevBean.entity)}" update="@(.tabViewConfig)" oncomplete="constructorDoneConfig();"/>
-        <p:remoteCommand immediate="true" name="updateOpenProjectDlg" update="@(.openProjectDlg)"/>
-        <p:remoteCommand immediate="false" name="updateTabViewConfig" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}" update="@(.tabViewConfig)"/>
-        <div style="float: right;"><input type="checkbox" value="constructorDoneConfig" class="constructorDoneConfig" onchange="if($(this).is(':checked')){doneBtn1Wv.jq.hide();doneBtn2Wv.jq.show();}else{doneBtn1Wv.jq.show();doneBtn2Wv.jq.hide();};"/>Selecionar campos para exibição.</div>
-		
-        <p:dialog widgetVar="gridWizWv">
-            <h:panelGrid columns="1" >                
-                <ui:include src="algodevGridFactory.xhtml"></ui:include>
-            </h:panelGrid>
-            <p:commandButton value="Gerar" update="@(.tabViewConfig)" onstart="clearContainerPage();updateCurrentConteiner();" oncomplete="updateCurrentForm();dropByWizDataForm();"/>
-        </p:dialog>
+        <p:commandButton style="#{admAlgodevBean.bean.interfaceType != 'empty'?'':'display:none'}" value="Próximo" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(admAlgodevBean.actualConstructorTabIndex+1)}" update="@(.tabViewConfig)" oncomplete="updateEntity();"/>
+		<p:commandButton style="#{admAlgodevBean.bean.interfaceType == 'empty'?'':'display:none'}" value="Gerar" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}" update="@(.openProjectDlg)" onstart="updateCurrentConteiner();" oncomplete="constructorDone();"/>                
         <script>
             function constructorDoneConfig() {
                 if (appTypeWv.getSelectedValue() === 'listForm') {
@@ -39,7 +23,24 @@
                 updateCurrentConteiner();
                 updateCurrentForm();
             }
-        </script>
+        </script>   
+        <p:remoteCommand immediate="true" name="updateOpenProjectDlg" update="@(.openProjectDlg)"/>        
+    </p:tab>
+
+    <p:tab style=""  titleStyle="opacity:1;#{admAlgodevBean.bean.interfaceType != 'empty'?'':'display:none'}" disabled="true" id="tableWiz" title="Informar Tabela">
+        <ui:include src="algodevEntity.xhtml"></ui:include>
+        <p:commandButton value="Anterior" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(admAlgodevBean.actualConstructorTabIndex-1)}"  update="@(.tabViewConfig)"/>
+        <p:commandButton widgetVar="doneBtn1Wv" value="Concluir" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}" action="#{admAlgodevBean.setEntitySelected(admAlgodevBean.entity)}" update="@(.tabViewConfig)" onstart="updateCurrentConteiner();" oncomplete="constructorDone();"/>
+        <p:commandButton widgetVar="doneBtn2Wv" style="display: none;" value="Concluir" action="#{admAlgodevBean.setEntitySelected(admAlgodevBean.entity)}" update="@(.tabViewConfig)" oncomplete="constructorDoneConfig();"/>
+        <p:remoteCommand immediate="false" name="updateTabViewConfig" actionListener="#{admAlgodevBean.setActualConstructorTabIndex(0)}" update="@(.tabViewConfig)"/>
+        <div style="float: right;"><input type="checkbox" value="constructorDoneConfig" class="constructorDoneConfig" onchange="if($(this).is(':checked')){doneBtn1Wv.jq.hide();doneBtn2Wv.jq.show();}else{doneBtn1Wv.jq.show();doneBtn2Wv.jq.hide();};"/>Selecionar campos para exibição.</div>
+		
+        <p:dialog widgetVar="gridWizWv">
+            <h:panelGrid columns="1" >                
+                <ui:include src="algodevGridFactory.xhtml"></ui:include>
+            </h:panelGrid>
+            <p:commandButton value="Gerar" update="@(.tabViewConfig)" onstart="clearContainerPage();updateCurrentConteiner();" oncomplete="updateCurrentForm();dropByWizDataForm();"/>
+        </p:dialog>
     </p:tab>  
 
 </html>

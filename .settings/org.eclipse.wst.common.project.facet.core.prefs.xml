@@ -14,4 +14,9 @@
       <attribute name="provider-id" value="jsf-no-op-library-provider"/>
     </node>
   </facet>
+  <facet id="jpt.jaxb">
+    <node name="classgen">
+      <attribute name="package" value="com.algoboss.integration.fazenda.gov"/>
+    </node>
+  </facet>
 </root>

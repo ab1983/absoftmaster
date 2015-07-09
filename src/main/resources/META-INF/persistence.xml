@@ -86,9 +86,9 @@
 	    <property name="eclipselink.target-server" value="JBoss"/>
 	    <!--property name="eclipselink.target-server" value="SunAS9"/-->	    
 		<property name="eclipselink.weaving" value="static"/> 
-	    <property name="eclipselink.logging.level.sql" value="FINE"/>
  <!-- 
  -->		
+	    <property name="eclipselink.logging.level.sql" value="FINE"/>
  <property name="eclipselink.logging.parameters" value="true"/>
     </properties>
     <!--properties>

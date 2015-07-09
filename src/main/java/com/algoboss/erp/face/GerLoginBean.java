@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +32,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.primefaces.model.menu.DefaultMenuItem;
@@ -51,6 +53,7 @@ import com.algoboss.erp.entity.AdmInstantiatesSite;
 import com.algoboss.erp.entity.AdmService;
 import com.algoboss.erp.entity.AdmServiceContract;
 import com.algoboss.erp.entity.AdmServiceModuleContract;
+import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.entity.SecAuthorization;
 import com.algoboss.erp.entity.SecUser;
 import com.algoboss.erp.entity.SecUserAuthorization;
@@ -70,6 +73,7 @@ public class GerLoginBean implements Serializable {
     private SecUser user;
     private boolean userLogged = false;
     private boolean reloadView = false;
+    private boolean inRequest = false;
     private MenuModel model;
     private List<AdmService> serviceList;
     private AdmServiceModuleContract serviceModuleContract;
@@ -112,7 +116,9 @@ public class GerLoginBean implements Serializable {
         		baseBean.setTitle(user.getContract().getSystemName());
         		themeSwitcherBean.setTheme(user.getContract().getSystemTheme());        		
         	}
-            doAuthorization();
+			if(this.userLogged){			
+				doAuthorization();
+			}
         }
         return model;
     }
@@ -145,6 +151,14 @@ public class GerLoginBean implements Serializable {
 
 	public void setReloadView(boolean reloadView) {
 		this.reloadView = reloadView;
+	}	
+	
+	public boolean isInRequest() {
+		return inRequest;
+	}
+
+	public void setInRequest(boolean inRequest) {
+		this.inRequest = inRequest;
 	}
 
 	public String getQuestionsOrSuggestions() {
@@ -308,7 +322,9 @@ public class GerLoginBean implements Serializable {
                 FacesContext.getCurrentInstance().addMessage(null, msg);
                 return null;
             } else {
-                ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+            	HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();    
+            	Logger.getLogger(GerLoginBean.class.getName()).log(Level.INFO, "LOGIN USER: "+user.getLogin()+"/"+user.getEmail());
+            	Logger.getLogger(GerLoginBean.class.getName()).log(Level.INFO, "INFO USER: "+"[IP:"+request.getHeader("x-forwarded-for")+"][BROWSER:"+request.getHeader("user-agent")+"]/"+getHeadersInfo());
                 prepareSession();                
                 setModuleIdList(new ArrayList<Long>());
                 doAuthorization();
@@ -323,7 +339,7 @@ public class GerLoginBean implements Serializable {
                             //serviceContract.setHitCounter(serviceContract.getHitCounter() + 1);
                             AdmService service = serviceContract.getService();
                             if (service.equals(user.getContract().getServiceHomePage())) {
-                                String methodStr = user.getContract().getServiceHomePage().getMainAddress().replace("(", "(" + userAuth.getUserAuthorizationId());;
+                                String methodStr = user.getContract().getServiceHomePage().getMainAddress().replace("(", "(gerLoginBean.mainActionMap.get('" + service.getName()+"')");;
                                 FacesContext facesContext = FacesContext.getCurrentInstance();
                                 MethodExpression method = facesContext.getApplication().getExpressionFactory().createMethodExpression(facesContext.getELContext(), String.valueOf(methodStr), null, new Class<?>[]{});
                                 method.invoke(facesContext.getELContext(), null);
@@ -359,6 +375,7 @@ public class GerLoginBean implements Serializable {
     }
 
     public String doLogout() {
+    	Logger.getLogger(GerLoginBean.class.getName()).log(Level.INFO, "LOGOUT USER: "+user.getLogin()+"/"+user.getEmail());
         removeActiveSession();
         try {
 			baseDao.clearEntityManager();
@@ -496,6 +513,7 @@ public class GerLoginBean implements Serializable {
 
             //MethodExpression methodExpression = expressionFactory.createMethodExpression(elContext, "#{secUserBean.indexBean()}", String.class, new Class[0]);
             mainActionMap = new HashMap<String, Long>();
+            appEntityMap = new HashMap<String, Long>();
             model = new DefaultMenuModel();
             menuModelList = new ArrayList<MenuModel>();
             //MenuItem item = new MenuItem();
@@ -563,10 +581,16 @@ public class GerLoginBean implements Serializable {
                     Calendar cal = Calendar.getInstance();
                     cal.add(Calendar.DATE, -10);
                     if (admService.getLastAccess() != null && cal.getTime().before(admService.getLastAccess()) && !user.isBoss()) {
-                    	AdmAlgoappBean app = new AdmAlgoappBean();
-                        app.setBaseBean(baseBean);
-                        app.setBaseDao(baseDao);
-                    	app.generateElementsContainerMap(admService);
+                    	/*
+                        String methodStr = "#{app.generateElementsContainerMap}";
+                        //FacesContext facesContext = FacesContext.getCurrentInstance();
+                        MethodExpression method = facesContext.getApplication().getExpressionFactory().createMethodExpression(facesContext.getELContext(), String.valueOf(methodStr), null, new Class<?>[]{DevRequirement.class});
+                        method.invoke(facesContext.getELContext(), new Object[]{admService.getRequirement()});       
+                        */
+                    	//AdmAlgoappBean app = new AdmAlgoappBean();
+                        //app.setBaseBean(baseBean);
+                        //app.setBaseDao(baseDao);
+                    	//app.generateElementsContainerMap(admService.getRequirement());
                     }
                     String[] nivelArray = admService.getName().split(">");
                     DefaultSubMenu firstSubmenu = new DefaultSubMenu();
@@ -574,9 +598,9 @@ public class GerLoginBean implements Serializable {
                     Submenu prevMenu = null;
                     String compId = "";
                     if ("AlgoRep AlgoDev Configuração>Autorização Usuário Configuração>Usuário".contains(admService.getName())) {
-                        mainActionMap.put(admService.getName(), userAuthorization.getUserAuthorizationId());
                     }
-                    if(admService.getRequirement()!=null){
+                    mainActionMap.put(admService.getName(), userAuthorization.getUserAuthorizationId());
+                    if(admService.getRequirement()!=null && admService.getRequirement().getEntityClass()!=null){
                     	appEntityMap.put(admService.getRequirement().getEntityClass().getName(), userAuthorization.getUserAuthorizationId());
                     }
                     for (int j = 0; j < nivelArray.length; j++) {
@@ -667,7 +691,7 @@ public class GerLoginBean implements Serializable {
                 }
             }
         } catch (Throwable ex) {
-            Logger.getLogger(GerMenuBean.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GerLoginBean.class.getName()).log(Level.SEVERE, null, ex);
         }
 
 
@@ -742,7 +766,7 @@ public class GerLoginBean implements Serializable {
     		doLogout();
     	}
     }
-    private long updateTime = 60 * 1000;
+    private long updateTime = 60 * 1000;// 1 MINUTE
 
     public long getUpdateTime() {
         return updateTime;
@@ -757,13 +781,13 @@ public class GerLoginBean implements Serializable {
                 if (user.getContract() != null) {
                     while (userLogged) {
                         try {
-                            Thread.sleep(updateTime * 2);
+                            Thread.sleep(updateTime * 2);//TIMEOUT FOR LOGOUT
                             if(session == null || !sessionId.equals(session.getId())){
                             	return;
                             }
                             boolean activeSession = session != null ? Boolean.valueOf(Objects.toString(session.getAttribute("activeSession"),"false")) : false;
                             if (activeSession) {
-                                session.setAttribute("activeSession", false);
+                                session.setAttribute("activeSession", inRequest);
                             } else {
                                 break;
                             }
@@ -846,4 +870,18 @@ public class GerLoginBean implements Serializable {
             e.printStackTrace();
         }
     }
+    
+    private Map<String, String> getHeadersInfo() {
+    	HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();    	 
+    	Map<String, String> map = new HashMap<String, String>();
+     
+    	Enumeration headerNames = request.getHeaderNames();
+    	while (headerNames.hasMoreElements()) {
+    		String key = (String) headerNames.nextElement();
+    		String value = request.getHeader(key);
+    		map.put(key, value);
+    	}
+     
+    	return map;
+      }    
 }

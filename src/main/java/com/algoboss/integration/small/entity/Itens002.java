@@ -2,6 +2,7 @@ package com.algoboss.integration.small.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,6 +16,7 @@ import javax.persistence.SequenceGenerator;
  * The persistent class for the itens002 database table.
  * 
  */
+@Cacheable(true)
 @Entity
 @NamedQuery(name = "Itens002.findAll", query = "SELECT i FROM Itens002 i")
 public class Itens002 implements Serializable {

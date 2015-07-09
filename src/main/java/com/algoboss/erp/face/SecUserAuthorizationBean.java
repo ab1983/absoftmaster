@@ -10,13 +10,16 @@ import com.algoboss.erp.entity.AdmContract;
 import com.algoboss.erp.entity.AdmService;
 import com.algoboss.erp.entity.AdmServiceContract;
 import com.algoboss.erp.entity.AdmServiceModuleContract;
+import com.algoboss.erp.entity.SecAuthorization;
 import com.algoboss.erp.entity.SecAuthorizationItem;
 import com.algoboss.erp.entity.SecUser;
 import com.algoboss.erp.entity.SecUserAuthorization;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -112,9 +115,11 @@ public class SecUserAuthorizationBean extends GenericBean<SecUser> {
             AdmContract contract = AdmContractDao.findById(bean.getContract().getContractId());
             for (AdmServiceModuleContract module : contract.getServiceModuleContractList()) {
                 for (AdmServiceContract serviceContract : module.getServiceContractList()) {
-                    serviceContract.setServiceModuleContract(module);
+                	serviceContract.setServiceModuleContract(module);
                 }
-                serviceContractList.addAll(module.getServiceContractList());
+                if(!module.isInactive()){
+                	serviceContractList.addAll(module.getServiceContractList());
+                }
             }
             
             for (AdmServiceContract serviceContract : serviceContractList) {
@@ -126,7 +131,14 @@ public class SecUserAuthorizationBean extends GenericBean<SecUser> {
                         break;
                     }
                 }
-                userAuthorizationList.add(userAuth);
+                if(!userAuth.getServiceContract().isInactive()){
+                	SecAuthorization auth = userAuth.getAuthorization();
+                	if(auth.getAuthorizationId()==null){
+                		auth.setAllowed(true);
+                		auth.setReadOnly(false);
+                	}
+                	userAuthorizationList.add(userAuth);
+                }
             }
             bean.setUserAuthorizationList(userAuthorizationList);
         }        

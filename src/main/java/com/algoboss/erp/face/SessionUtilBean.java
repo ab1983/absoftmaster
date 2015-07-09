@@ -10,6 +10,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -34,7 +38,8 @@ public class SessionUtilBean implements Serializable {
     
     protected transient Map<String, List<UIComponent>> elementsContainerMap = new HashMap();
     protected transient Map<Long,Map<String, List<UIComponent>>> elementsContainerMapByReq;    
-    protected static Map<String,Map<Long,Map<String, List<UIComponent>>>> elementsContainerMapByReqSession;    
+    protected static Map<String,Map<Long,Map<String, List<UIComponent>>>> elementsContainerMapByReqSession;  
+    private static Map<String, HttpSession> sessionMap = new HashMap<String,HttpSession>();
 	protected DevEntityClass entity;
 	protected DevRequirement requirement;
 	protected String containerPage = "form";
@@ -134,15 +139,63 @@ public class SessionUtilBean implements Serializable {
 	}		
 	
 	public static void clear(){
-		if(SessionUtilBean.elementsContainerMapByReqSession != null){
-			SessionUtilBean.elementsContainerMapByReqSession.remove(SessionUtilBean.getId());
-		}		
+		try {
+			if(SessionUtilBean.elementsContainerMapByReqSession != null){
+				Object rm = SessionUtilBean.elementsContainerMapByReqSession.remove(SessionUtilBean.getId());
+				if(rm == null){
+					Map<String, HttpSession> newSessionMap = new HashMap<String, HttpSession>();
+					for(Entry<String, HttpSession> session: sessionMap.entrySet()){
+						try {
+							  session.getValue().getCreationTime();
+							  newSessionMap.put(session.getKey(),session.getValue());
+							} catch (IllegalStateException ise) {
+								SessionUtilBean.elementsContainerMapByReqSession.remove(session.getKey());
+								sessionMap.put(session.getKey(), null);
+							}						
+					}
+					sessionMap = newSessionMap;
+				}else{
+					sessionMap.remove(SessionUtilBean.getId());
+				}
+				Logger.getLogger(SessionUtilBean.class.getName()).log(Level.SEVERE,"SESSIONS ACTIVE: "+sessionMap.size());
+			}		
+		} catch (Exception e) {
+			Logger.getLogger(SessionUtilBean.class.getName()).log(Level.SEVERE, null, e);
+		}
 	}
 	
     public static String getId(){
-        ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
-        HttpSession session = (HttpSession) context.getSession(false);
-        return session.getId();
+        return get();
+    }
+    
+    private static final ThreadLocal<String> threadId =
+            new ThreadLocal<String>() {
+                @Override protected String initialValue() {
+                	return getSessionId(FacesContext.getCurrentInstance());
+            }
+        };
+
+    // Returns the current thread's unique ID, assigning it if necessary
+    public static String get() {
+        return threadId.get();
+    }
+    
+    public static void set(String sessionId) {
+        threadId.set(sessionId);
+    }     
+    
+    public static void set(FacesContext fc){
+    	set(getSessionId(fc));                	
+    }
+    private static String getSessionId(FacesContext fc){
+    	if(fc != null){
+    		ExternalContext context = fc.getExternalContext();
+    		HttpSession session = (HttpSession) context.getSession(false);
+    		String id = session.getId();
+    		sessionMap.put(id, session);
+    		return session.getId();                	
+    	}
+        return "";    	
     }
 	
 }

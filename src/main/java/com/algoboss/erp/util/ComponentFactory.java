@@ -473,7 +473,7 @@ public class ComponentFactory {
 		}
 	}
 	
-	public void updateComponentContainerUI(DevRequirement requirement, String parentContainer, DevEntityClass entitySelected, UIComponent parent, UIComponent elementPanel){
+	public static void updateComponentContainerUI(DevRequirement requirement, String parentContainer, DevEntityClass entitySelected, UIComponent parent, UIComponent elementPanel){
 		Map<String, Object> mapParam = new HashMap<String, Object>();
 		javax.faces.component.html.HtmlOutputText outtext = new HtmlOutputText();
 		for (DevReportFieldOptions devReportFieldOptions : LayoutFieldsFormat.getContainerOptions(requirement.getFieldContainerList(), parentContainer, entitySelected)) {
@@ -746,8 +746,8 @@ public class ComponentFactory {
 						input = child;
 						// mapParam.put("update", "@form");
 						mapParam.put("immediate", "true");
-						String propValObj = "app.$g('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "'" + item + ")";
-						String str = "#{(" + propValObj + "==null?msg['select']:" + propValObj + ")}";
+						String propValObj = "app.$('" + entitySelected.getName() + "." + devEntityPropertyDescriptor.getPropertyName() + "'" + item + ")";
+						String str = "#{(" + propValObj+".val" + "==null?msg['select']:" + propValObj+".val" + ")}";
 						mapParam.put("value", str);
 						mapParam.put("action", "#{app.prepareUpload(" + propValObj + ")}");
 						mapParam.put("oncomplete", "(handleFileUploadDlg(xhr, status, args))");
@@ -1062,7 +1062,7 @@ public class ComponentFactory {
 			}
 			UIComponent panelTableChild = null;
 			for (int i = 0; i < fieldOptionsList.size(); i++) {
-				if (i % 7 == 0) {
+				if (i % 8 == 0) {
 					UIComponent panelTableColumn = ComponentFactory.componentClone(panel, false);
 					mapParam.clear();
 					mapParam.put("style", "display:table-cell;vertical-align:top;");
@@ -3108,7 +3108,7 @@ public class ComponentFactory {
 			return comp2;
 		}
 	}
-
+	
 	private static List<DevPrototypeComponentProperty> componentSerializerBehavior(ClientBehavior behavior) {
 		// DevPrototypeComponentBehaviors devPrototypeComponentBehaviors = new
 		// DevPrototypeComponentBehaviors();
@@ -3512,15 +3512,21 @@ public class ComponentFactory {
 		}
 		return parentContainer;
 	}
-
+	
+	public static Collection<String> getRenderIds(){
+		FacesContext facesContext = FacesContext.getCurrentInstance();
+		PartialViewContext partialViewContext = facesContext.getPartialViewContext();
+		Collection<String> renderIds = partialViewContext.getRenderIds();
+		return renderIds;
+	}
+	
 	public static void resetComponent(UIComponent ...components){
 		try {
 			if(components==null || components.length == 0){
 				List<UIComponent> componentsList = new ArrayList<UIComponent>();
 				FacesContext facesContext = FacesContext.getCurrentInstance();
-				PartialViewContext partialViewContext = facesContext.getPartialViewContext();
 				UIViewRoot viewRoot = facesContext.getViewRoot();
-				Collection<String> renderIds = partialViewContext.getRenderIds();
+				Collection<String> renderIds = getRenderIds();
 				for (String renderId : renderIds) {
 					UIComponent component = viewRoot.findComponent(renderId);
 					componentsList.add(component);
@@ -3550,7 +3556,7 @@ public class ComponentFactory {
 	
 	public enum AppType {
 
-		LIST_FORM("listForm"), FORM_LIST("formList"), FORM("form"), SUMM("summ"), LIST_EDIT_FORM("listEditForm");
+		LIST_FORM("listForm"), FORM_LIST("formList"), FORM("form"), SUMM("summ"), LIST_EDIT_FORM("listEditForm"),EMPTY("empty");
 		private String appTypeName;
 
 		AppType(String appTypeName) {

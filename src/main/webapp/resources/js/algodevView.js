@@ -16,17 +16,22 @@ function oncomplete(xhr, status, args){
         	//if(isFormChanged()){
             		$(document).ready(function() {
             			//alert(1);
+            		try{
             			eval(call);           		            			
+    				} catch (e) {
+    					//log("##Stack do Erro:"+e.stack);
+    					error("oncomplete: "+e);
+    				}
             		});  	            	
         	//}                
         }, 500,call);                		
 		
 	}
-	//log(call);            	
 }
 
 function isFormChanged(){
 	//log('formChanged');
+	reloadSelectsByJS();	
 	var formCloned = $('.ui-algo-container-form').clone(true);
 	var els = formCloned.children().remove("input[name='javax.faces.ViewState']");;            	              	
     var formNew = $(formCloned).serialize();  
@@ -54,12 +59,16 @@ function eventPage(call) {
     //if (page !== '#{app.containerPage}') {
         //page = '#{app.containerPage}';
     //}
+	if(timeoutVar!==null){
+		clearTimeout(timeoutVar);
+		//alert('1');
+	}  	
     timeoutVar = window.setTimeout(function(call) {
     	if(isFormChanged()){
         		$(document).ready(function() {
         			//alert(1);
-	           		eventPageRc([{name: 'call', value: call}]);            		            			
-	           		log(call);
+        			log(call);
+	           		eventPageRc([{name: 'call', value: call},{name: 'update', value: true}]);            		            			
         		});  	            	
     	}                
     }, 500,call);       
@@ -72,8 +81,8 @@ function eventBean(call) {
 	}            	
 	if(isFormChanged()){
 		$(document).ready(function() {
-       		eventBeanRc([{name: 'call', value: call}]);     
-       		log(call);       		
+			log(call);       		
+       		eventBeanRc([{name: 'call', value: call},{name: 'update', value: true}]);     
 		});
 	}
 }
@@ -90,8 +99,8 @@ function eventBeanWait(call,timeout) {
 		$(document).ready(function() {
 			timeoutVar = window.setTimeout(function(call) {
         	if(isFormChanged()){
-       			eventBeanRc([{name: 'call', value: call}]);   
-           		log(call);
+        		log(call);
+       			eventBeanRc([{name: 'call', value: call},{name: 'update', value: true}]);   
        			timeoutVar = null;
        			//alert('2');
         	}
@@ -100,8 +109,8 @@ function eventBeanWait(call,timeout) {
 }   
 
 function eventCall(call){
-	eventCallRc([{name: 'call', value: call}]);   
 	log(call);
+	eventCallRc([{name: 'call', value: call},{name: 'update', value: false}]);   
 }   
 
 function focusBean(element) {
@@ -115,101 +124,116 @@ function reloadSelectsByJS(){
     var selectsUI = $('.ui-selectonemenu-items-wrapper').find('ul');
     var idxSel = 0;
     var page1 = page;
-    //alert(selectsUI.length);
-	if(typeof beanMapCache[page1]==='undefined'){
-    	beanMapCache[page1] = new Array();	            		
-	}            
-    selects.each(function() {
-    	//alert(beanMapCache[page]);   
-    	//alert(typeof beanMapCache[page]!=='undefined');
-    	//alert(idxSel);
-    	//alert(idxCached.indexOf('false')===-1);
-    	if(idxCached.indexOf('false')===-1){
-            var idEl = $(this).attr('id').replace('_input','');
-            var idWdEl = 'widget_'+idEl.replace(':','_');
-            try {
-	            var elWd = eval(idWdEl);
-            	
-	            if(typeof beanMapCache[page1][idxSel]!=='undefined'){
-	            	//alert(beanMapCache[page][idxSel]);
-	            	//$(this).empty();
-		            //$(this).append(beanMapCache[page1][idxSel]);
-		            ///$(selectsUI[selectsUI.length - selects.length + idxSel]).empty();
-		            //$(selectsUI[selectsUI.length - selects.length + idxSel]).html(beanMapCache[page1][idxSel+'-ui']);
-		            //var elWdOld = beanMapCache[page1][idxSel+'-wd'];			            
-		            //elWd.preShowValue = elWd.options.filter(":selected");
-		            
-		            //var panelId = elWd.jqId + '_panel';
-		            var input = $(elWd.jqId + '_input');
-		            //var focusInput = $(elWd.jqId + '_focus');
-		            //var label = elWd.jq.find('.ui-selectonemenu-label');
-		            //var menuIcon = elWd.jq.children('.ui-selectonemenu-trigger');
-		            //var panel = elWd.jq.children(this.panelId);
-		            //var disabled = elWd.jq.hasClass('ui-state-disabledc');
-		            //var itemsWrapper = elWd.panel.children('.ui-selectonemenu-items-wrapper');
-		            var itemsContainer = elWd.itemsWrapper.children('.ui-selectonemenu-items');
-		            //itemsContainer.empty();
-		            var selected = input.val();
-		            //if(input.val()===null || input.val()===''){
+    if(page!=null){
+	    //alert(selectsUI.length);
+		if(typeof beanMapCache[page1]==='undefined'){
+	    	beanMapCache[page1] = new Array();	            		
+		}
+		$(function(){
+	    selects.each(function() {
+	    	//alert(beanMapCache[page]);   
+	    	//alert(typeof beanMapCache[page]!=='undefined');
+	    	//alert(idxSel);
+	    	//alert(idxCached.indexOf('false')===-1);
+	    	if(idxCached.indexOf('false')===-1){
+	            var idEl = $(this).attr('id').replace('_input','');
+	            var idWdEl = 'widget_'+idEl.replace(':','_');
+	            try {
+		            var elWd = eval(idWdEl);
 	            	
-		            itemsContainer.html(beanMapCache[page1][idxSel+'-ui'].clone());
-		            //elWd.items = beanMapCache[page1][idxSel+'-ui'];
-		           // var items = elWd.itemsContainer.find('.ui-selectonemenu-item');
-		            //var options = elWd.input.children('option');
-		            //input.empty();
-		            input.html(beanMapCache[page1][idxSel].clone());
-		            
-		            
-			        input.val(selected);
-		            restartSelect(elWd,elWd.cfg);
-		            //elWd.options = elWd.options.clone().empty();//beanMapCache[page1][idxSel];
-		            elWd.bindEvents();
-	                   
-		            elWd.bindConstantEvents();
-	                   
-		            elWd.setupDialogSupport();
-		            //elWd.input.data(PrimeFaces.CLIENT_ID_DATA, elWd.id);
-		            //}else{
-		            	//alert(input.val());
-		            //}
-		            //$(input).find('option[value=\"'+input.val()+'\"]').attr('selected',true);
-		            //var cfg.effect = elWd.cfg.effect||'fade';
-		            //var cfg.effectSpeed = elWd.cfg.effectSpeed||'normal';
-		            //var optGroupsSize = elWd.itemsContainer.children('li.ui-selectonemenu-item-group').length;
-		            
-		            
-		            
-		            //elWd.options.empty();
-		            //elWd.options.append(beanMapCache[page1][idxSel]);
-		            //var preShow = elWd.preShowValue;
-	            	
-		            /*
-		            //$(function(){
-		            	PrimeFaces.cw('SelectOneMenu',idWdEl,{id:idEl,filter:true,filterMatchMode:'contains',			            	
-		            	behaviors:{change:function(event,ext){
-		            		PrimeFaces.bc(elWd,event,ext,['PrimeFaces.ab({source:'+idEl+',event:\'valueChange\',process:'+idEl+'}, arguments[1]);']);
-		            		}
-		            }			            
-		            });
-		            	//});
-		            */
-		           
-	            }else{
-	            	//alert(page+2);
-	            	beanMapCache[page1][idxSel] = elWd.options.clone();//$(this).children();
-	            	beanMapCache[page1][idxSel+'-ui'] = elWd.items.clone();//$(selectsUI[selectsUI.length - selects.length + idxSel]).children();
-	            	//beanMapCache[page1][idxSel+'-wd'] = elWd.jq.clone();
-	            	//alert(page+3);
-	            }						
-            idxSel++;
-            //alert(idxSel+"/"+selects.length);
-			} catch (e) {
-				//log("##Stack do Erro:"+e.stack);
-				error("reloadSelectsByJS:"+e);
-			}
-    	}
-    });
-	
+		            if(typeof beanMapCache[page1][idxSel]!=='undefined'){
+		            	//alert(beanMapCache[page][idxSel]);
+		            	//$(this).empty();
+			            //$(this).append(beanMapCache[page1][idxSel]);
+			            ///$(selectsUI[selectsUI.length - selects.length + idxSel]).empty();
+			            //$(selectsUI[selectsUI.length - selects.length + idxSel]).html(beanMapCache[page1][idxSel+'-ui']);
+			            //var elWdOld = beanMapCache[page1][idxSel+'-wd'];			            
+			            //elWd.preShowValue = elWd.options.filter(":selected");
+			            
+			            //var panelId = elWd.jqId + '_panel';
+			            var input = $(elWd.jqId + '_input');
+			            //var focusInput = $(elWd.jqId + '_focus');
+			            //var label = elWd.jq.find('.ui-selectonemenu-label');
+			            //var menuIcon = elWd.jq.children('.ui-selectonemenu-trigger');
+			            //var panel = elWd.jq.children(this.panelId);
+			            //var disabled = elWd.jq.hasClass('ui-state-disabledc');
+			            //var itemsWrapper = elWd.panel.children('.ui-selectonemenu-items-wrapper');
+			            var itemsContainer = elWd.itemsWrapper.children('.ui-selectonemenu-items');
+			            //itemsContainer.empty();
+			            var selected = input.val();
+			            //if(input.val()===null || input.val()===''){
+		            	
+			            itemsContainer.html(beanMapCache[page1][idxSel+'-ui'].clone());
+			            //elWd.items = beanMapCache[page1][idxSel+'-ui'];
+			           // var items = elWd.itemsContainer.find('.ui-selectonemenu-item');
+			            //var options = elWd.input.children('option');
+			            //input.empty();
+			            //input.html(beanMapCache[page1][idxSel].clone());
+			            var newOptions = beanMapCache[page1][idxSel].clone();
+			            
+			            //input.append(newOptions);
+			            input.html(newOptions);
+			            
+			            $(elWd.jqId + "_input option[value='" + selected + "']").attr("selected","selected");
+			            //alert(selected+"-"+ $(elWd.jqId + '_input').attr('id'));
+			            restartSelect(elWd,elWd.cfg);
+			            //elWd.options = elWd.options.clone().empty();//beanMapCache[page1][idxSel];
+			            
+			            elWd.bindEvents();
+		                   
+			            elWd.bindConstantEvents();
+		                   
+			            elWd.setupDialogSupport();
+			            //$(elWd.jqId + '_input').change(function() {
+			            	//alert( "Handler for .change() called." );
+			            //});		            
+			            //elWd.input.data(PrimeFaces.CLIENT_ID_DATA, elWd.id);
+			            //}else{
+			            	//alert(input.val());
+			            //}
+			            //$(input).find('option[value=\"'+input.val()+'\"]').attr('selected',true);
+			            //var cfg.effect = elWd.cfg.effect||'fade';
+			            //var cfg.effectSpeed = elWd.cfg.effectSpeed||'normal';
+			            //var optGroupsSize = elWd.itemsContainer.children('li.ui-selectonemenu-item-group').length;
+			            
+			            
+			            
+			            //elWd.options.empty();
+			            //elWd.options.append(beanMapCache[page1][idxSel]);
+			            //var preShow = elWd.preShowValue;
+		            	
+			            /*
+			            //$(function(){
+			            	PrimeFaces.cw('SelectOneMenu',idWdEl,{id:idEl,filter:true,filterMatchMode:'contains',			            	
+			            	behaviors:{change:function(event,ext){
+			            		PrimeFaces.bc(elWd,event,ext,['PrimeFaces.ab({source:'+idEl+',event:\'valueChange\',process:'+idEl+'}, arguments[1]);']);
+			            		}
+			            }			            
+			            });
+			            	//});
+			            */		            
+		            }else{
+		            	//alert(page+2);		            	          	
+		            	beanMapCache[page1][idxSel] = elWd.options.clone().removeAttr("selected");//$(this).children();
+		            	beanMapCache[page1][idxSel+'-ui'] = elWd.items.clone();//$(selectsUI[selectsUI.length - selects.length + idxSel]).children();
+		            	//beanMapCache[page1][idxSel+'-wd'] = elWd.jq.clone();
+		            	//alert(page+3);
+		            }						
+	            idxSel++;
+	            //alert(idxSel+"/"+selects.length);
+				} catch (e) {
+					//log("##Stack do Erro:"+e.stack);
+					error("reloadSelectsByJS:"+e);
+				}
+	    	}
+	    	
+	    	
+	    });
+		});
+    }else{
+    	error("reloadSelectsByJS: PAGE NAME CAN NOT BE NULL!");
+    }
+    //$('.ui-selectonemenu-list-item').click(function(){reloadSelectsByJS();alert('oi');});	  
 }   
 function log(msg) {
     setTimeout(function() {
@@ -219,7 +243,7 @@ function log(msg) {
 }  
 function error(msg) {
     setTimeout(function() {
-        throw new Error(msg);
+        throw msg;
     }, 0);
 }      
 function restartSelect(_this,cfg) {
@@ -407,18 +431,24 @@ function init1() {
 function onStart(pageArg){
 	tabindex = null;
 	firstindex = null; 	
+
+	var isNewPage = false;
 	if(formIsEmpty()){
-	    init2();            	
+		isNewPage = true;           	
 	}	
 	if (page !== pageArg) {            	
 	    page = pageArg;
-	    clearFormChanged();
-	    init2();   
+	    isNewPage = true;
 	}
-	//alert(page);
+	if(isNewPage){
+	    clearFormChanged();
+	    init2();  
+	}
 	$(document).ready(function() {
 		reloadSelectsByJS();         		            			
-	});  
+	}); 	
+	//alert(page);
+ 
 	
 	window.setTimeout(function() {
 	   //reloadSelectsByJS();

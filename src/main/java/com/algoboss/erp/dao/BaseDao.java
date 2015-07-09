@@ -330,7 +330,7 @@ public class BaseDao implements Serializable {
 		if (obj instanceof DevEntityObject) {
 			DevEntityObject entObj = (DevEntityObject) obj;
 			if (entObj.getEntityClass().getCanonicalClassName() != null && !entObj.getEntityClass().getCanonicalClassName().isEmpty()) {
-				return findByObjImplReplicate(entObj, clearCache);
+				return getSmallDao().findByObjImplReplicate(entObj, clearCache);
 			}
 		}
 		return findByObjImpl(obj, clearCache);
@@ -369,7 +369,7 @@ public class BaseDao implements Serializable {
 		}
 	}
 
-	public Object findByObjImplReplicate(Object obj, boolean clearCache) throws Throwable {
+	public Object findByObjImplReplicate_old(Object obj, boolean clearCache) throws Throwable {
 		Throwable t = null;
 		try {
 
@@ -378,7 +378,7 @@ public class BaseDao implements Serializable {
 			// transacao.begin();
 			// userTransaction.begin();
 			if (obj instanceof DevEntityObject) {
-				Object objRepl = entityObjectSyncImpl(false, (DevEntityObject) obj);
+				Object objRepl = getSmallDao().entityObjectSyncImpl(false, (DevEntityObject) obj);
 				Object id = getEntityManagerSmall().getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(objRepl);
 				if (id != null) {
 					if (clearCache) {
@@ -756,10 +756,19 @@ public class BaseDao implements Serializable {
 	}
 
 	public List<DevEntityObject> findEntityObjectByClass(DevEntityClass className, List<String> cols, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) throws Throwable {
-		if (className.getCanonicalClassName() != null && !className.getCanonicalClassName().isEmpty()) {
-			return getSmallDao().findEntityObjectByClassReplicate(className, cols, siteIdList, startDate, endDate, refresh);
-		} else {
-			return findEntityObjectByClassImpl(className, cols, siteIdList, startDate, endDate, refresh);
+		Date ini = new Date();
+		try {
+			if (className.getCanonicalClassName() != null && !className.getCanonicalClassName().isEmpty()) {
+				SmallDao dao = getSmallDao();
+				//System.out.println("1");
+				return dao.findEntityObjectByClassReplicate(className, cols, siteIdList, startDate, endDate, refresh);
+			} else {
+				return findEntityObjectByClassImpl(className, cols, siteIdList, startDate, endDate, refresh);
+			}
+		} catch (Exception e) {
+			throw e;
+		}finally{
+			System.err.println("Time findEntityObjectByClass " + className.getName() + ": " + (new Date().getTime() - ini.getTime()));
 		}
 	}
 
@@ -930,7 +939,11 @@ public class BaseDao implements Serializable {
 		try {
 			// userTransaction.begin();
 			if (obj.getEntityClass().getCanonicalClassName() != null && !obj.getEntityClass().getCanonicalClassName().isEmpty()) {
-				entityObjectImportSyncConverter(entityObjectSync(obj), obj, false);
+				try {
+					getSmallDao().entityObjectImportSyncConverter(getSmallDao().entityObjectSync(obj), obj, false);
+				} catch (javax.persistence.EntityNotFoundException e) {
+					System.out.println(e.getMessage());
+				}					
 			}
 			// userTransaction.commit();
 		} catch (Throwable e) {
@@ -943,7 +956,7 @@ public class BaseDao implements Serializable {
 		}
 	}
 
-	public Object entityObjectSyncImpl(boolean refresh, DevEntityObject obj) {
+	public Object entityObjectSyncImpl_Old(boolean refresh, DevEntityObject obj) {
 
 		Object objRepl = null;
 		boolean hasValue = false;
@@ -975,7 +988,7 @@ public class BaseDao implements Serializable {
 									List<DevEntityObject> entObjList = entPropVal.getPropertyChildrenList();
 									List objReplList = new ArrayList();
 									for (DevEntityObject devEntityObject : entObjList) {
-										objReplList.add(entityObjectSyncImpl(refresh, devEntityObject));
+										objReplList.add(getSmallDao().entityObjectSyncImpl(refresh, devEntityObject));
 									}
 									field.set(objRepl, objReplList);
 								}
@@ -996,7 +1009,11 @@ public class BaseDao implements Serializable {
 
 				}
 				if (refresh && objRepl != null) {
-					objRepl = getSmallDao().refresh(objRepl);
+					try {
+						objRepl = getSmallDao().refresh(objRepl);
+					} catch (javax.persistence.EntityNotFoundException e) {
+						System.out.println(e.getMessage());
+					}					
 				}
 			}
 
@@ -1006,8 +1023,8 @@ public class BaseDao implements Serializable {
 		return objRepl;
 	}
 
-	public Object entityObjectSync(DevEntityObject obj) {
-		return entityObjectSyncImpl(true, obj);
+	public Object entityObjectSync(DevEntityObject obj) throws Throwable {
+		return getSmallDao().entityObjectSyncImpl(true, obj);
 	}
 
 	public void entityObjectSyncList(DevEntityClass className, List<Long> siteIdList, List<DevEntityObject> objectList, List objectListSmallRest, Class clazz) {
@@ -1090,7 +1107,11 @@ public class BaseDao implements Serializable {
 						} else {
 							try {
 								if (val != null) {
-									entPropVal.setVal(val);
+									if(entPropVal.isType(DevEntityPropertyValue.FILE)){
+										entPropVal.setPropertyFile((byte[])val);
+									}else{
+										entPropVal.setVal(val);
+									}
 								}
 							} catch (Throwable e) {
 								throw e;

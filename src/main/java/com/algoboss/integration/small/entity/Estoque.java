@@ -73,7 +73,9 @@ public class Estoque implements Serializable {
 	private String encrypthash;
 
 	private String fornecedor;
-
+	
+	@Lob
+	@Basic(fetch=FetchType.LAZY)
 	private byte[] foto;
 
 	private String iat;
@@ -106,9 +108,11 @@ public class Estoque implements Serializable {
 	private String nome;
 
 	private String obs;
-
+	
+	@Column(precision=18,scale=4)
 	private BigDecimal offpromo;
 
+	@Column(precision=18,scale=4)
 	private BigDecimal onpromo;
 
 	private double peso;

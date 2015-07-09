@@ -7,6 +7,7 @@ package com.algoboss.integration.small.dao;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,11 +25,13 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.naming.InitialContext;
+import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.PersistenceProperty;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -47,6 +50,7 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -67,7 +71,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 //@Stateless
 //@TransactionManagement(TransactionManagementType.CONTAINER)
 @Repository
-@Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)
+//@Transactional(propagation=Propagation.REQUIRED,noRollbackFor=javax.persistence.EntityNotFoundException.class)
 public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 
 	/**
@@ -76,7 +80,7 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 	private static final long serialVersionUID = 2470841392919888321L;
 	//@Resource(shareable = true)
 	private UserTransaction userTransaction;
-	@PersistenceContext(unitName = "SMALLPU"/*, type=PersistenceContextType.TRANSACTION*/) 
+	@PersistenceContext(unitName = "SMALLPU",type = PersistenceContextType.TRANSACTION, properties = { @PersistenceProperty(name = "javax.persistence.sharedCache.mode", value = "ENABLE_SELECTIVE") }) 
 	private EntityManager entityManager;
 	public AbstractRoutingDataSource dataSource2;
 	private EntityTransaction transacao;
@@ -95,6 +99,10 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 	}
 	
 	public static SmallDao createInstance(GerLoginBean loginBean,SmallDao actual)throws Throwable {
+		Throwable t = null;
+		Date ini = new Date();
+		try {
+
 			/*
 		
 			if(loginBean.getInstantiatesSiteContract().getContract().getContractId()==1733){
@@ -131,9 +139,12 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 			if(refresh){
 				SmallDao.resetDataSource();
 			}
+			Date iniDS = new Date();
 			WebApplicationContext ctx =  FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());			
 			//ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(new String[]{"applicationContextSmall.xml"},false);
 			String dsKey = driver+url+username+password;
+			//System.setProperty("socksProxyHost", "localhost");
+			//System.setProperty("socksProxyPort", "8089");			
 			if(!DataSourceContextHolder.isSetted(dsKey)){
 				refresh = true;
 				//ctx.refresh();
@@ -141,13 +152,18 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 				DataSource ds = dataSourceFactory.getDataSourceFromDbcpBasicDataSource(driver, url, username, password, validationQuery);	
 				Connection connection = ds.getConnection();
 				DataSourceContextHolder.setTargetDataSourceKey(dsKey,ds);
+				connection.close();
 			}else{
 				if(refresh){
 					//ctx.refresh();
 				}
+				Date iniDS2 = new Date();
 				DataSourceContextHolder.setTargetDataSourceKey(dsKey);
+				//getDataSource().getConnection().close();
+				//System.err.println("Time CreateSmallDao-INI DS2 " + ": " + (new Date().getTime() - iniDS2.getTime()));
 				//return null;
 			}
+			//System.err.println("Time CreateSmallDao-INI DS " + ": " + (new Date().getTime() - iniDS.getTime()));
 			if(refresh){
 				SmallDao smallDao = ctx.getBean(SmallDao.class);
 				smallDao.dsKey = dsKey;	
@@ -155,11 +171,33 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 					smallDao.getEntityManager().getEntityManagerFactory();
 				} catch (Exception e) {
 					DataSourceContextHolder.clearTargetDataSourceMap();
-				}
-				return smallDao;				
+				}				
+				actual = smallDao;				
 			}
+			//actual.getEntityManager().getEntityManagerFactory();
+			return actual;
+		} catch (Throwable e) {
+			t = e;
 		
-		return actual;
+			if (!(e instanceof Error)) {
+				e.printStackTrace();
+			}
+			if(e instanceof java.sql.SQLException){
+				t = new java.sql.SQLException("NÃO FOI POSSÍVEL CONECTAR AO BANCO DE DADOS. FAVOR VERIFICAR SE O SERVIDOR ESTÁ DISPONÍVEL E SE OS DADOS DE ACESSO ESTÃO CORRETOS.\nDetalhe: ("+e.getMessage()+")",e);
+				//Logger.getLogger(SmallDao.class.getName()).log(Level.SEVERE, null, t);
+			}
+			// userTransaction.rollback();
+			//obj = null;
+			return null;
+		} finally {
+			// if (entityManager != null && entityManager.isOpen()) {
+			// entityManager.close();
+			// }
+			//System.err.println("Time CreateSmallDao " + ": " + (new Date().getTime() - ini.getTime()));
+			if (t != null) {
+				throw t;
+			}			
+		}	
 	}
 	
 	public EntityManager getEntityManager() {
@@ -259,17 +297,22 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 	}
 	public static Connection getConnection() {
 		try {
-			Object ds = DataSourceContextHolder.getTargetDataSource();
-			if(ds instanceof DataSource){
-				DataSource ds2 = (DataSource)ds;
-				return ds2.getConnection();							
-			}
+			return getDataSource().getConnection();	
 		} catch (Exception e) {
 		}
 		DataSourceContextHolder.clearTargetDataSourceMap();
 		return null;
 	}	
 
+	public static DataSource getDataSource(){
+		Object ds = DataSourceContextHolder.getTargetDataSource();
+		if(ds instanceof DataSource){
+			DataSource ds2 = (DataSource)ds;
+			return ds2;						
+		}
+		return null;
+	}
+	
 	public GerLoginBean getLoginBean() {
 		return loginBean;
 	}
@@ -410,11 +453,22 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 		return null;//saveImpl(refresh, obj);
 	}
 	
-	@Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)	
+	@Transactional(propagation=Propagation.REQUIRED, noRollbackFor=javax.persistence.EntityNotFoundException.class,rollbackFor=Exception.class)	
 	public Object refresh(Object objRepl) throws Throwable {
-		getEntityManager().flush();
-		objRepl = getEntityManager().merge(objRepl);
-		getEntityManager().refresh(objRepl);
+		//getEntityManager().flush();
+		Object id = getEntityManager().getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(objRepl);
+		if (id != null) {
+			getEntityManager().getEntityManagerFactory().getCache().evict(objRepl.getClass(), id);
+			objRepl = getEntityManager().find(objRepl.getClass(), id);
+		} 
+		if(false){
+			objRepl = getEntityManager().merge(objRepl);
+			getEntityManager().flush();
+			//getEntityManager().refresh(objRepl);
+			if(getEntityManager().contains(objRepl)){
+				getEntityManager().refresh(objRepl);							
+			}		
+		}
 		return objRepl;
 	}	
 	
@@ -492,10 +546,11 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 		}
 	}
 
-	@Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)	
+	@Transactional(isolation=Isolation.READ_COMMITTED,propagation=Propagation.REQUIRED, rollbackFor=Exception.class, readOnly=true)	
 	public List<DevEntityObject> findEntityObjectByClassReplicate(DevEntityClass className, List<String> cols, List<Long> siteIdList, Date startDate, Date endDate, boolean refresh) throws Throwable {
 		Throwable t = null;
 		List<DevEntityObject> objectList = new ArrayList<DevEntityObject>();
+		//System.out.println("1");
 		Date ini = new Date();
 		try {
 			if (className == null) {
@@ -551,8 +606,9 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 
 				TypedQuery<Object> query = getEntityManager().createQuery(sql.toString(), clazz);
 				Date iniQuerySmall1 = new Date();
+				query.setHint("javax.persistence.cache.retrieveMode", CacheRetrieveMode.USE);
 				objectListSmall = query.getResultList();
-				if (!cols.isEmpty()) {
+				if (objectListSmall!=null && !cols.isEmpty()) {
 					List<?> objectListSmallTmp = new ArrayList(objectListSmall);
 					objectListSmall.clear();
 					for (Object object : objectListSmallTmp) {
@@ -570,6 +626,8 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 						objectListSmall.add(objectSmall);
 					}
 				}
+				//objectListSmall =  getEntityManager().createQuery("select t from "+clazz.getSimpleName()+" t").setHint("javax.persistence.cache.retrieveMode", CacheRetrieveMode.USE).getResultList();
+				
 				// System.err.println("Time QuerySmall 1 "+className.getName()+": "+(new
 				// Date().getTime()-iniQuerySmall1.getTime()));
 				CriteriaBuilder criteriaBuilderSmall = getEntityManager().getCriteriaBuilder();
@@ -594,7 +652,7 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 				// userTransaction.setTransactionTimeout(60);
 				// objectListSmall = typedQuerySmall.getResultList();
 				// userTransaction.commit();
-				System.err.println("Time QuerySmall 2 " + className.getName() + ": " + (new Date().getTime() - iniQuerySmall.getTime()));
+				System.err.println("Time QuerySmall 2 " + className.getName() + ": " + (new Date().getTime() - iniQuerySmall1.getTime()));
 				// for (Iterator iterator = objectListSmall.iterator();
 				// iterator.hasNext();) {
 				// Object objRepl = (Object) iterator.next();
@@ -647,8 +705,8 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 		}
 	}
 
-	@Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)	
-	public Object entityObjectSyncImpl(boolean refresh, DevEntityObject obj) {
+	//@Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)	
+	public Object entityObjectSyncImpl(boolean refresh, DevEntityObject obj) throws Throwable {
 
 		Object objRepl = null;
 		boolean hasValue = false;
@@ -666,6 +724,16 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 							throw new IllegalArgumentException("Property name: '" + field.getName().toLowerCase() + "' not found in '" + obj.getEntityClass().getName() + "'.");
 						}
 						Object val = entPropVal.getVal();
+						if(entPropVal.isType(DevEntityPropertyValue.FILE)){
+							Object file = entPropVal.getPropertyFile();
+							if(file!=null){
+								if(field.getType().isAssignableFrom(String.class)){
+									val = new String((byte[])file);
+								}
+							}else{
+								val = file;
+							}
+						}
 						if (val instanceof List) {
 							hasValue = !((List) val).isEmpty();
 						} else {
@@ -687,6 +755,9 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 							} else {
 								try {
 									if (hasValue) {
+										if(field.getType().isAssignableFrom(BigDecimal.class)){											
+											val = BigDecimal.valueOf((Double)val);
+										}
 										field.set(objRepl, val);
 									}
 								} catch (IllegalArgumentException e) {
@@ -701,19 +772,17 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 
 				}
 				if (refresh && objRepl != null) {
-					getEntityManager().flush();
-					objRepl = getEntityManager().merge(objRepl);
-					getEntityManager().refresh(objRepl);
+					objRepl = refresh(objRepl);
 				}
 			}
 
 		} catch (Throwable e) {
-			e.printStackTrace();
+			throw e;
 		}
 		return objRepl;
 	}
 
-	public Object entityObjectSync(DevEntityObject obj) {
+	public Object entityObjectSync(DevEntityObject obj) throws Throwable {
 		return entityObjectSyncImpl(true, obj);
 	}
 
@@ -797,7 +866,15 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 						} else {
 							try {
 								if (val != null) {
-									entPropVal.setVal(val);
+									if(entPropVal.isType(DevEntityPropertyValue.FILE)){
+										if(field.getType().isAssignableFrom(String.class)){
+											val = String.valueOf(val).getBytes();
+										}
+										entPropVal.setVal(field.getName());
+										entPropVal.setPropertyFile((byte[])val);
+									}else{
+										entPropVal.setVal(val);
+									}
 								}
 							} catch (Throwable e) {
 								throw e;
@@ -917,6 +994,11 @@ public class SmallDao /*extends JdbcDaoSupport*/ implements Serializable  {
 			e.printStackTrace();
 			// return null;
 		}
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRED, rollbackFor=Exception.class)	
+	public void executeQuery(String str){
+		getEntityManager().createNativeQuery(str).executeUpdate();
 	}
 	
 	public void clearEntityManager(){

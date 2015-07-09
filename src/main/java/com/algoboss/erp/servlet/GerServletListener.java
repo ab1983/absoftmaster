@@ -10,6 +10,7 @@ import com.algoboss.erp.entity.DevComponentContainer;
 import com.algoboss.erp.entity.DevRequirement;
 import com.algoboss.erp.face.AdmAlgodevBean;
 import com.algoboss.erp.face.GerLoginBean;
+import com.algoboss.erp.face.SessionUtilBean;
 import com.algoboss.erp.util.AlgodevUtil;
 import com.algoboss.erp.util.ManualCDILookup;
 import com.algoboss.integration.small.dao.DataSourceContextHolder;
@@ -47,7 +48,8 @@ public class GerServletListener extends ManualCDILookup implements ServletContex
     private BaseDao baseDao;
     @Inject
     private GerLoginBean loginBean;
-
+       
+        
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         //baseDao = getFacadeWithJNDI(BaseDao.class);
@@ -93,11 +95,14 @@ public class GerServletListener extends ManualCDILookup implements ServletContex
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
-        System.out.println("SESSION CREATED!!!!!!!!!! " + new Date());
+    	String id = se.getSession().getId();
+        System.out.println("SESSION CREATED!!!!!!!!!! " + new Date() + " ID:"+id);
+        SessionUtilBean.set(id);
     }
 
     @Override
     public void sessionDestroyed(HttpSessionEvent se) {
+    	String id = se.getSession().getId();
         try {
             if (loginBean.isUserLogged()) {
                 loginBean.removeActiveSession();
@@ -106,8 +111,7 @@ public class GerServletListener extends ManualCDILookup implements ServletContex
             //e.printStackTrace();
         } finally {
         }
-
-        System.out.println("SESSION DESTROYED!!!!!!!!!! " + new Date());
+        System.out.println("SESSION DESTROYED!!!!!!!!!! " + new Date()+ " ID:"+id);
     }
 
     @Override
@@ -127,4 +131,5 @@ public class GerServletListener extends ManualCDILookup implements ServletContex
         //System.out.println("ATTRIBUTE REPLACED!!!");
         //throw new UnsupportedOperationException("Not supported yet.");
     }
+    
 }

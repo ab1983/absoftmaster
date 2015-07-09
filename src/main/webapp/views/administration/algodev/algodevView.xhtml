@@ -7,7 +7,10 @@
        xmlns:c="http://java.sun.com/jsp/jstl/core">
        <f:view>
        <h:body>
-			<script src="#{request.contextPath}/resources/js/algodevView.js" type="text/javascript" charset="utf-8"></script>        
+       		<script src="#{request.contextPath}/resources/js/algodevView.js" type="text/javascript" charset="utf-8"></script> 
+       		<!-- 
+       		<h:outputScript library="js" name="algodevView.js" target="head"></h:outputScript>
+       		 -->
     <h:form>  
     	<f:event type="preRenderComponent" listener="#{app.initBrowserCache()}"/>
     	<f:event type="preRenderComponent" listener="#{app.setIdxBrowserCached('')}"/>
@@ -19,10 +22,10 @@
     <h:form prependId="false" acceptcharset="ISO-8859-1" styleClass="ui-algo-container-form" >    
         <p:remoteCommand rendered="true" name="updateCurrentForm" immediate="true" update="@form"/>
         <p:remoteCommand rendered="false" name="updateBasePanel" update=":basePanel"/>  
-        <p:remoteCommand name="updateStartPage" actionListener="#{app.updateContainerPage()}" update="@form"/>  
+        <p:remoteCommand name="updateStartPage" update="@form"/>  
         <p:remoteCommand name="eventBeanRc" actionListener="#{app.eventBean()}" immediate="false" update="@form" oncomplete="oncomplete(xhr, status, args)"/>
-        <p:remoteCommand name="eventPageRc" actionListener="#{app.eventBean()}" immediate="true" update="@form"/>
-        <p:remoteCommand name="eventCallRc" actionListener="#{app.eventBean()}" immediate="true"/>
+        <p:remoteCommand name="eventPageRc" actionListener="#{app.eventBean()}" immediate="true" update="@form" oncomplete="oncomplete(xhr, status, args)"/>
+        <p:remoteCommand name="eventCallRc" actionListener="#{app.eventBean()}" immediate="true" oncomplete="oncomplete(xhr, status, args)"/>
         <script type="text/javascript">
             /* <![CDATA[ */
             var idxCached = '#{app.idxBrowserCached}';

@@ -188,8 +188,11 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
         if (id != null && id > 0) {
         	userAuth = new SecUserAuthorization();
             userAuth.setUserAuthorizationId(id);
-            List<SecUserAuthorization> userAuthorizationList = loginBean.getUserAuthorizationList();            
-            userAuth = userAuthorizationList.get(userAuthorizationList.indexOf(userAuth));            
+            List<SecUserAuthorization> userAuthorizationList = loginBean.getUserAuthorizationList();      
+            int useAuthIdx = userAuthorizationList.indexOf(userAuth);
+            if(useAuthIdx>-1){
+            	userAuth = userAuthorizationList.get(useAuthIdx);            
+            }
         }
         if (loginBean.getUser().isBoss() || loginBean.getUser().getRepresentative() != null) {
             notReadOnly = true;
@@ -521,13 +524,19 @@ public abstract class GenericBean<T> implements Serializable,Cloneable {
     }
 
     public Object doBeanRefresh(Object obj) {
+        FacesMessage msg = null;
         try {
-            obj = baseDao.findByObj(obj);
+        	obj = baseDao.findByObj(obj);
+        	return obj;
+        } catch (javax.persistence.RollbackException ex) {
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na atualização. Verifique se o registro está disponível e repita a operação.", "");
+        } catch (javax.transaction.RollbackException ex) {
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na atualização. Verifique se o registro está disponível e repita a operação.", "");
         } catch (Throwable ex) {
-            Logger.getLogger(GenericBean.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            return obj;
-        }
+            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Falha na atualização. Motivo: " + ex.getClass()+"-"+ex.getMessage(), "");
+        }    	
+        FacesContext.getCurrentInstance().addMessage(null, msg);        		
+        return null;
     }
 
     public void doBeanForm() {

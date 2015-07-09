@@ -255,6 +255,22 @@ public class SmallUtil {
 		}
 		return devEntityObjectReturn;
 	}
+	
+	public static final String CAMPO_VINCULO_PRODUTO = "livre4";
+	
+	public static DevEntityObject getProdutoByVinculo(Object vinculoProduto,AdmAlgoappBean app){
+		DevEntityObject devEntityObjectReturn = null;
+		if(vinculoProduto!=null){
+			List<DevEntityObject> produtos = app.doBeanList("1236_estoque");
+			for (DevEntityObject devEntityObject : produtos) {
+				if (Objects.toString(devEntityObject.getProp(CAMPO_VINCULO_PRODUTO)).contains(Objects.toString(vinculoProduto))) {
+					devEntityObjectReturn = devEntityObject;
+					break;
+				}
+			}	
+		}
+		return devEntityObjectReturn;
+	}	
 	public static DevEntityObject getCliente(Object codigo,AdmAlgoappBean app){
 		DevEntityObject devEntityObjectReturn = null;
 		if(codigo!=null){
@@ -268,6 +284,20 @@ public class SmallUtil {
 		}
 		return devEntityObjectReturn;
 	}
+	public static DevEntityObject getClienteByInscricao(Object CNPJ,AdmAlgoappBean app){
+		DevEntityObject devEntityObjectReturn = null;
+		if(CNPJ!=null){
+			List<DevEntityObject> clientes = app.doBeanList("1236_clifor");
+			for (DevEntityObject devEntityObject : clientes) {	
+				//System.out.println(Objects.toString(devEntityObject.getProp("cgc")).replaceAll("\\D", ""));
+				if (CNPJ.equals(Objects.toString(devEntityObject.getProp("cgc")).replaceAll("\\D", ""))) {
+					devEntityObjectReturn = devEntityObject;
+					break;
+				}
+			}
+		}
+		return devEntityObjectReturn;
+	}	
 	public static DevEntityObject getVeiculo(Object placa,AdmAlgoappBean app){
 		DevEntityObject devEntityObjectReturn = null;
 		if (!Objects.toString(placa, "").isEmpty()) {
@@ -294,5 +324,17 @@ public class SmallUtil {
 		}
 		return devEntityObjectReturn;
 	}
-	
+	public static DevEntityObject getOperacaoByCodigo(Object codOperacao, AdmAlgoappBean app) {
+		DevEntityObject devEntityObjectReturn = null;
+		if (!Objects.toString(codOperacao, "").isEmpty()) {
+			List<DevEntityObject> cfops = app.doBeanList("1236_icm");
+			for (DevEntityObject devEntityObject : cfops) {
+				if (codOperacao.equals(Objects.toString(devEntityObject.getProp("cfop")).trim())) {
+					devEntityObjectReturn = devEntityObject;
+					break;
+				}
+			}
+		}
+		return devEntityObjectReturn;
+	}	
 }

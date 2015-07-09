@@ -61,8 +61,9 @@
 		<property name="defaultTargetDataSource" ref="small-ds3" />
 		<property name="targetDataSources" ref="targetDataSources" />
 	</bean-->
-
 	<!-- Multiple DataSource EntityManagerFactory -->
+	<bean id="jpaDialect"  class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect" p:lazyDatabaseTransaction="true" >
+	</bean>	
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<!-- 
@@ -73,16 +74,16 @@
 			<bean id="jpaVendorAdapter"
 				class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"
 				p:databasePlatform="org.eclipse.persistence.platform.database.FirebirdPlatform"
-				p:showSql="true">
+				p:showSql="true" p:jpaDialect.lazyDatabaseTransaction="true">
 			</bean>
 			<!-- <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter" 
 				p:databasePlatform="org.eclipse.persistence.platform.database.MySQLPlatform" 
 				p:showSql="true" /> -->
-		</property>
-		
+		</property>	
 		<property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" />
 		<property name="persistenceUnitName" value="SMALLPU" />
 		<property name="jpaPropertyMap" ref="hibernateProperties" />
+		<property name="sharedCacheMode" value="ENABLE_SELECTIVE" />
 		<property name="packagesToScan">
 			<list>
 				<value>com.algoboss.integration.small.entity</value>
@@ -108,8 +109,12 @@
         <entry key="eclipselink.jdbc.batch-writing" value="JDBC" />
         <entry key="eclipselink.jdbc.batch-writing.size" value="1000" />	
         <!--  Optimization #9 - statement caching 
-        <property name="eclipselink.jdbc.cache-statements" value="true" />        		
         -->
+        <entry key="eclipselink.jdbc.cache-statements" value="true" />        		
+        <entry key="eclipselink.query-results-cache" value="true" />
+        <entry key="eclipselink.jdbc.exclusive-connection.mode" value="Always" />
+        	
+        
         		
 	</util:map>
 
@@ -129,6 +134,9 @@
 	
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="jpaDialect" ref="jpaDialect" />
+		<!-- 
+		 -->
 	</bean>
 	<!-- 
 
@@ -151,21 +159,23 @@
 	</bean>
  -->
 		<!--  
-		-->
 
+		-->
 	<tx:annotation-driven transaction-manager="transactionManager"  proxy-target-class="true" />
 	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
 
 
 
 	<!-- Aspecto para preenchimento do DS -->
+	<!-- 
+	 -->
 	<context:load-time-weaver aspectj-weaving="on" />
 	<context:spring-configured />
 
 
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	
-	<bean id="smallDao" class="com.algoboss.integration.small.dao.SmallDao" scope="globalSession">
+	<bean id="smallDao" class="com.algoboss.integration.small.dao.SmallDao"  scope="globalSession">
 		<!-- property name="dataSource" ref="small-ds1" /-->		
 	</bean>
 	<!-- bean id="baseDao" class="com.algoboss.erp.dao.BaseDao">
@@ -179,8 +189,10 @@
                <tx:method name="getEntityManagerSmall" propagation="REQUIRED" />
                <tx:method name="saveReplicate" propagation="REQUIRED" />
                <tx:method name="findByObjImplReplicate" propagation="REQUIRED" />
-               <tx:method name="removeReplicate" propagation="REQUIRED" />     
+               <tx:method name="removeReplicate" propagation="REQUIRED" />    
+               <!-- 
                <tx:method name="findEntityObjectByClassReplicate" propagation="REQUIRED" />                        
+                --> 
         </tx:attributes>
 </tx:advice>
 
@@ -226,17 +238,21 @@
  	<bean id="smallx-ds1" parent="dummyDataSource">
 		<property name="url" value="#{jdbc['database.url1']}" />
 	</bean>	
+	<!-- 
  	<bean id="smallx-ds2" parent="dummyDataSource">
 		<property name="url" value="#{jdbc['database.url2']}" />
 	</bean>	
  	<bean id="smallx-ds3" parent="dummyDataSource">
 		<property name="url" value="#{jdbc['database.url3']}" />
 	</bean>		
+	 -->
 
 	<util:map id="targetDataSources2">
 		<entry key="smallx-ds1" value-ref="smallx-ds1" />
+		<!-- 
 		<entry key="smallx-ds2" value-ref="smallx-ds2" />
 		<entry key="smallx-ds3" value-ref="smallx-ds3" />
+		 -->
 	</util:map>
 
 	<bean id="routerDataSource2" class="com.algoboss.integration.small.dao.RouterDataSource">

@@ -452,8 +452,12 @@ public class LayoutFieldsFormat {
 		writeOptArray(new String[] { property }, "String", value, new String[] { container }, requirement, clazz);
 	}
 
-	public void create(String container, String parentStyleClass, String templateStyleClass, String newStyleClass) {
+	public DevReportFieldOptions create(String container, String parentStyleClass, String templateStyleClass, String newStyleClass) {
 		writeOptArray(new String[] { "create" }, "String", parentStyleClass+";"+templateStyleClass, new String[] { container }, requirement, newStyleClass);
+		DevReportFieldContainer fieldContainer = getFieldContainer(requirement.getFieldContainerList(), container);	
+		DevEntityObject entObj = new DevEntityObject(requirement.getEntityClass());
+		DevReportFieldOptions fieldOptions = load(entObj, fieldContainer, newStyleClass);
+		return fieldOptions;
 	}	
 	
 	public void eventField(String container, String[] fieldNames, String function, String... events) {
@@ -529,7 +533,9 @@ public class LayoutFieldsFormat {
 	public static void clear(DevRequirement requirement) {
 		requirement.getFieldContainerList().clear();
 		DevEntityClass entitySelected = requirement.getEntityClass();
-		requirement.getFieldContainerList().addAll(generateFieldContainerHide(entitySelected,"form","list"));
+		if(entitySelected!=null){
+			requirement.getFieldContainerList().addAll(generateFieldContainerHide(entitySelected,"form","list"));
+		}
 		
 	}
 	
@@ -582,7 +588,7 @@ public class LayoutFieldsFormat {
 		}
 		if (fieldOptions == null) {
 			fieldOptions = new DevReportFieldOptions();
-			DevEntityPropertyValue propField = entObj.getPropObj(fieldName);
+			DevEntityPropertyValue propField = entObj!=null?entObj.getPropObj(fieldName):null;
 			if (propField != null) {
 				fieldOptions.setEntityPropertyDescriptor(propField.getEntityPropertyDescriptor());
 				fieldOptions.setName(fieldOptions.getEntityPropertyDescriptor().getPropertyName());
@@ -657,7 +663,9 @@ public class LayoutFieldsFormat {
 	public void showAll() {
 		requirement.getFieldContainerList().clear();
 		DevEntityClass entitySelected = requirement.getEntityClass();
-		requirement.getFieldContainerList().addAll(generateFieldContainerShow(entitySelected,"form","list"));
+		if(entitySelected!=null){
+			requirement.getFieldContainerList().addAll(generateFieldContainerShow(entitySelected,"form","list"));			
+		}
 
 	}	
 	
@@ -673,7 +681,7 @@ public class LayoutFieldsFormat {
 		writeOptArray(optionNames, optionType, optionValue, containers, requirement, null, fieldNames);
 	}
 	
-	public static void writeOptArray(String[] optionNames, String optionType, String optionValue, String[] containers, DevRequirement requirement, DevReportRequirement requirementReport, String... fieldNames) {
+	public static DevReportFieldContainer writeOptArray(String[] optionNames, String optionType, String optionValue, String[] containers, DevRequirement requirement, DevReportRequirement requirementReport, String... fieldNames) {
 		List<DevReportFieldContainer> fieldContainerList = null;
 		DevEntityClass entityClass = null;
 		if(requirement!=null){
@@ -683,9 +691,10 @@ public class LayoutFieldsFormat {
 			fieldContainerList = requirementReport.getFieldContainerList();
 			entityClass = requirementReport.getEntityClass();				
 		}
+		DevReportFieldContainer fieldContainer = null;
 		for (int i = 0; i < containers.length; i++) {
 			String container = containers[i];
-			DevReportFieldContainer fieldContainer = getFieldContainer(fieldContainerList, container);
+			fieldContainer = getFieldContainer(fieldContainerList, container);
 			DevEntityObject entObj = new DevEntityObject(entityClass);
 			for (int j = 0; j < fieldNames.length; j++) {
 				String fieldName = fieldNames[j];
@@ -695,6 +704,7 @@ public class LayoutFieldsFormat {
 				}
 			}
 		}
+		return fieldContainer;
 	}	
 
 	public static List<DevReportFieldOptions> getVisibleFields(DevRequirement requirement, String parent, DevEntityClass entitySelected) {

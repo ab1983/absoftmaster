@@ -28,7 +28,6 @@ public class LifeCycleListener extends ManualCDILookup implements PhaseListener 
 	private static final long serialVersionUID = 1L;
 	@Inject
 	private GerLoginBean loginBean;
-
 	@Override
 	public PhaseId getPhaseId() {
 		return PhaseId.ANY_PHASE;
@@ -36,8 +35,13 @@ public class LifeCycleListener extends ManualCDILookup implements PhaseListener 
 
 	@Override
 	public void beforePhase(PhaseEvent event) {
-		FacesContext context = event.getFacesContext();
-
+		//FacesContext context = event.getFacesContext();
+		if (event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES)) {
+			if (loginBean != null) {
+				loginBean.setReloadView(false);
+				loginBean.setInRequest(true);
+			}
+		}
 		// if (context.isPostback()) {
 		// UICommand component = findInvokedCommandComponent(context);
 
@@ -50,7 +54,7 @@ public class LifeCycleListener extends ManualCDILookup implements PhaseListener 
 	}
 
 	@Override
-	public void afterPhase(PhaseEvent event) {
+	public void afterPhase(PhaseEvent event) {		
 		// System.out.println("AFTER");
 		FacesContext context = event.getFacesContext();
 		updateSessionTimeout(context);
@@ -62,6 +66,7 @@ public class LifeCycleListener extends ManualCDILookup implements PhaseListener 
 		}
 		if (event.getPhaseId().equals(PhaseId.RENDER_RESPONSE)) {
 			if (loginBean != null) {
+				loginBean.setInRequest(false);
 				loginBean.setReloadView(false);
 			}
 		}

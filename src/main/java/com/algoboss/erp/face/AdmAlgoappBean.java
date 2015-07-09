@@ -3,6 +3,8 @@
  */
 package com.algoboss.erp.face;
 
+import groovy.json.StringEscapeUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -105,10 +107,13 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	protected List<DevEntityClass> entityClassList = new ArrayList<DevEntityClass>();
 	protected DevRequirement requirement;
 	protected String containerPage = "form";
+	protected String nextContainerPage = "";
 	protected Map<String, List<DevEntityObject>> beanListMap = new HashMap();
 	protected Map<String, BeanList<DevEntityObject>> beanListFilteredMap = new HashMap();
 	protected Object beanSel;
 	protected transient UIComponent dataTableSelected;
+	
+	protected List<DevEntityObject> beanListChild;
 	protected DevEntityObject childBean = new DevEntityObject();
 	protected DevEntityClass childEntity;
 	protected DevEntityPropertyValue childValue;
@@ -118,8 +123,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	protected Date endDate;
 	protected Set<String> beanMapBrowserCached = new TreeSet<String>(); 
 	protected String idxBrowserCached = "";
-	transient ScriptEngineManager manager = new ScriptEngineManager();
-	transient ScriptEngine jsEngine = manager.getEngineByExtension("js");
+	protected ScriptEngineManager manager = new ScriptEngineManager();
+	protected ScriptEngine jsEngine = manager.getEngineByExtension("js");
 	protected String PREFIX_BEAN = "app_";
 	protected String containerClass = "ui-algo-container-app";
 	protected PhaseListener phaseListener;
@@ -321,15 +326,22 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			endDate = c2.getTime();
 			long startTime1 = Calendar.getInstance().getTimeInMillis();
 			super.indexBeanNoList(nro);
-			initJsEngine();
 			long endTime1 = Calendar.getInstance().getTimeInMillis();
-			//getAppBean().setRequirement(requirement);
-			//getAppBean().setElementsContainerMap(requirement,new HashMap<String, List<UIComponent>>());			
-			if(requirement.getInterfaceType().startsWith("list")){
-				doList();			
+			if(requirement != null){
+				initJsEngine();
+				
+				//getAppBean().setRequirement(requirement);
+				//getAppBean().setElementsContainerMap(requirement,new HashMap<String, List<UIComponent>>());	
+				
+				if(requirement.getInterfaceType().startsWith("list")){
+					doList();			
+				}else{
+					doForm();
+				}
 			}else{
-				doForm();
+				Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, "#### REQUIREMENT IS NULL. nro: "+nro);
 			}
+			
 			long endTime2 = Calendar.getInstance().getTimeInMillis();
 			System.out.println("Time1 Bean " + this.subtitle + ": " + (endTime1 - startTime1));
 			System.out.println("Time2 Bean " + this.subtitle + ": " + (endTime2 - startTime1));
@@ -356,13 +368,15 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	private void initJsEngine(){
 		try {
 			//jsEngine.put("FacesMessage", javax.faces.application.FacesMessage);
+			jsEngine = manager.getEngineByExtension("js");
 			jsEngine.eval("importPackage(java.util);");
 			jsEngine.eval("importPackage(java.lang);");
 			jsEngine.eval("importPackage(java.math);");
 			jsEngine.eval("importPackage(javax.faces);");
 		 
-			if(requirement.getRequirementScript()!=null){
-				jsEngine.eval(requirement.getRequirementScript());								
+			if(requirement != null && requirement.getRequirementScript()!=null){
+				jsEngine.eval(requirement.getRequirementScript());		
+				jsEngine.put("app", this);
 			}		
 		} catch (ScriptException e) {
 			// TODO Auto-generated catch block
@@ -372,6 +386,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	
 	@PostConstruct	
 	public void onConstruct(){
+		try {
+			
 		Object actualBeanAux = getBaseBean().getActualBean(); 
 		AdmAlgoappBean actualBean = null;
 		if(actualBeanAux instanceof AdmAlgoappBean){
@@ -395,13 +411,20 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		//updateContainerPage();
 		jsEngine.put("app", this);
 		includePhaseListener();
+		} catch (Exception e) {
+			Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, e);
+		}
 	}
 	@PreDestroy
 	public void onDestroy(){
-		if(requirement!=null){
-			getAppBean().setAppBean(BaseBean.copyObject(this));			
+		try {
+			if(requirement!=null){
+				getAppBean().setAppBean(BaseBean.copyObject(this));			
+			}
+			removePhaseListener();			
+		} catch (Exception e) {
+			Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, e);
 		}
-		removePhaseListener();
 	}
 	
 	
@@ -484,6 +507,12 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			entity = requirement.getEntityClass();
 			//getAppBean().setEntity(entity);
 			List<DevComponentContainer> componentContainerList = requirement.getComponentContainerList();
+			if(componentContainerList.isEmpty()){
+				String msgStr = "Esta Aplicação precisa ser gerada novamente. Informe ao administrador do sistema.(generateElementsContainerMap)";
+				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, msgStr, "");
+				FacesContext.getCurrentInstance().addMessage(null, msg);
+				Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, msgStr);				
+			}
 			for (DevComponentContainer devComponentContainer : componentContainerList) {
 				if(devComponentContainer.getPrototypeComponentChildrenList()!=null && !devComponentContainer.getPrototypeComponentChildrenList().isEmpty()){
 					//Application app = FacesContext.getCurrentInstance().getApplication();
@@ -498,12 +527,18 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 					panel.setValueExpression("rendered",val);
 					panel.setTransient(true);
 					panel.getChildren().addAll(elements);
+					panel.setId(devComponentContainer.getName().trim()+Long.toHexString(System.nanoTime()));
 					elements = Collections.singletonList(panel);
 					
 					getAppBean().getElementsContainerMap(requirement).put(devComponentContainer.getName(), elements);	
 				}
 			}
-		}		
+		}else{
+			String msgStr = "Esta Aplicação precisa ser carregada novamente. Informe ao administrador do sistema.(generateElementsContainerMap)";
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, msgStr, "");
+			FacesContext.getCurrentInstance().addMessage(null, msg);
+			Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, msgStr);				
+		}
 	}
 	public void initBrowserCache(){
 		beanMapBrowserCached = new TreeSet<String>();
@@ -667,7 +702,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		fileDownload = null;
 		boolean start = false;
 		algoContainerView = getAlgoContainer();
-		if(algoContainerView!=null && requirement!=null && getAppBean().getElementsContainerMap(requirement)!=null){
+        SessionUtilBean.set(FacesContext.getCurrentInstance());//NEEDED TO APPBEAN
+		if(algoContainerView!=null && requirement!=null && getAppBean().getElementsContainerMap(requirement)!=null && !isInvalidUpdateContainer){
 			if(!algoContainerView.getId().equals(PREFIX_BEAN+requirement.getRequirementId())){
 				algoContainerView.getChildren().clear();
 			}
@@ -679,7 +715,11 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			}
 				
 			if(start){
-				for(Map.Entry<String, List<UIComponent>> object : getAppBean().getElementsContainerMap(requirement).entrySet()){
+				Map<String, List<UIComponent>> elementsContainerMap = getAppBean().getElementsContainerMap(requirement);
+				if(elementsContainerMap.isEmpty()){
+					
+				}
+				for(Map.Entry<String, List<UIComponent>> object : elementsContainerMap.entrySet()){
 					try {
 						algoContainerView.getChildren().addAll(object.getValue());													
 					} catch (javax.faces.FacesException e) {
@@ -687,6 +727,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 					}
 				}
 				System.out.println("### UpdateContainerPage!");
+				initJsEngine();				
 			}				
 		}
 	}
@@ -743,14 +784,21 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 
 	public void doList(String container, String node) {
-		containerPage = container;
-		getAppBean().setContainerPage(containerPage);	
 		//updateContainerPage();
+		nextContainerPage = container;
+		boolean listOk = false;
 		if (!container.equals("list")) {
 			doBeanListChild(node);
+			listOk = beanListChild != null;
 		} else {
 			doBeanList();
+			//int val = 3/0;
+			listOk = beanList!=null;
 		}
+		if(listOk){
+			containerPage = container;
+			getAppBean().setContainerPage(containerPage);	
+		}	
 	}
 
 	@Override
@@ -764,8 +812,6 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 
 	public void doForm(String container) {
-		containerPage = container;
-		getAppBean().setContainerPage(containerPage);	
 		//updateContainerPage();
 		if (!container.equals("form")) {
 			// String node =
@@ -774,11 +820,14 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		} else {
 			doBeanForm();
 		}
+		containerPage = container;
+		getAppBean().setContainerPage(containerPage);	
 	}
 
 	public void doRemove(DevEntityObject obj) {
 		bean = obj;
-		doBeanRemove();		
+		doBeanRemove();
+		System.out.println("### REMOVE "+entity.getName() +"!");
 	}
 
 	public void doRemoveChild(DevEntityObject obj) {
@@ -791,6 +840,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				}
 				childBean = new DevEntityObject();
 				childBean.setEntityClass(childEntity);
+				System.out.println("### REMOVE "+childEntity.getName() +"!");
 			} catch (Exception ex) {
 				Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, ex);
 			} finally {
@@ -801,13 +851,19 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 
 	public void doEdit(DevEntityObject obj) {
-		bean = (DevEntityObject)doBeanRefresh(obj);
-		getAppBean().setBean(bean);
-		doForm();
+		bean = doBeanRefresh(obj);
+		if(bean!=null){
+			getAppBean().setBean(bean);
+			doForm();
+		}
+	}
+	
+	public DevEntityObject doBeanRefresh(DevEntityObject obj){
+		return (DevEntityObject)super.doBeanRefresh(obj);
 	}
 
 	public void doSelect(DevEntityObject obj) {
-		bean = (DevEntityObject)doBeanRefresh(obj);
+		bean = doBeanRefresh(obj);
 	}	
 	
 	public void doCopy(DevEntityObject obj) {
@@ -863,6 +919,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				childBean.prePersist();
 				childBean = new DevEntityObject();
 				childBean.setEntityClass(childEntity);
+				System.out.println("### SAVE "+childEntity.getName() +"!");
 			} catch (Exception ex) {
 				Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, ex);
 			} finally {
@@ -885,6 +942,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				super.doBeanSaveAndList(true, true, false, bean);					
 				bean.setEntityClass(entity);
 				//beanMapBrowserCached.clear();
+				System.out.println("### SAVE "+entity.getName() +"!");
 			}
 			if (hasList) {
 				doList();
@@ -983,19 +1041,26 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				}
 				for(DevEntityObject obj:new DevEntityObject[]{bean,childBean}){
 					DevEntityClass ent = 	obj.getEntityClass();			
-					List<DevEntityPropertyDescriptor> propList = ent.getEntityPropertyDescriptorList();
-					for (DevEntityPropertyDescriptor devEntityPropertyDescriptor : propList) {
-						List<DevEntityPropertyDescriptorConfig> propConfigList = devEntityPropertyDescriptor.getEntityPropertyDescriptorConfigList();
-						for (DevEntityPropertyDescriptorConfig devEntityPropertyDescriptorConfig : propConfigList) {
-							if(devEntityPropertyDescriptorConfig.getConfigName().equalsIgnoreCase("objectList") && AlgodevUtil.formatDescription(devEntityPropertyDescriptorConfig.getConfigValue()).equals(configValue)){
-								String field1Value = Objects.toString($(ent.getName() + "." + devEntityPropertyDescriptor.getPropertyName(), obj).getVal(),"");
-								for(Map.Entry<Object,Object> object : listMapTmp){
-									if(object.getValue().equals(field1Value)){
-										return Collections.singletonMap(object.getKey(), field1Value);
+					if(ent!=null){
+						List<DevEntityPropertyDescriptor> propList = ent.getEntityPropertyDescriptorList();
+						for (DevEntityPropertyDescriptor devEntityPropertyDescriptor : propList) {
+							List<DevEntityPropertyDescriptorConfig> propConfigList = devEntityPropertyDescriptor.getEntityPropertyDescriptorConfigList();
+							for (DevEntityPropertyDescriptorConfig devEntityPropertyDescriptorConfig : propConfigList) {
+								if(devEntityPropertyDescriptorConfig.getConfigName().equalsIgnoreCase("objectList") && AlgodevUtil.formatDescription(devEntityPropertyDescriptorConfig.getConfigValue()).equals(configValue)){
+									String field1Value = Objects.toString($(ent.getName() + "." + devEntityPropertyDescriptor.getPropertyName(), obj).getVal(),"");
+									for(Map.Entry<Object,Object> object : listMapTmp){
+										if(object.getValue().equals(field1Value)){
+											return Collections.singletonMap(object.getKey(), field1Value);
+										}
 									}
 								}
 							}
 						}
+					}else{						
+						String msgStr = "FALHA AO CARREGAR LISTA DE "+className+" EM CACHE. FECHE O APLICATIVO E ABRA NOVAMENTE.";
+						FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msgStr, "");
+						FacesContext.getCurrentInstance().addMessage(null, msg);
+						Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, msgStr);
 					}
 				}
 				if(!listMapTmp.isEmpty()){
@@ -1030,8 +1095,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	public List<DevEntityObject> doBeanListChild(String node) {
 		List<DevEntityObject> childrenList = null;
 		if (node != null && !node.isEmpty() && node.contains(".")) {
-			childValue = $(node.toLowerCase());
-			if (childValue != null && childValue.getEntityPropertyDescriptor() != null) {
+			boolean newOk = newChildBean(node);
+			if (newOk) {
 				//baseDao.entityObjectSyncList(className, siteIdList, objectList, objectListSmallRest, Class.forName(childEntity.getCanonicalClassName()));
 				childrenList = childValue.getPropertyChildrenList();
 				if(childrenList == null){
@@ -1043,28 +1108,47 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 						childValue.setPropertyChildrenList(childrenList);
 					}
 				}
-				childEntity = childValue.getEntityPropertyDescriptor().getPropertyClass();
 				beanListMap.put(node.toLowerCase(), childrenList);
 				beanListFilteredMap.put(node.toLowerCase(), new BeanList(childrenList));
 				getAppBean().setBeanListMap(beanListMap);
 				getAppBean().setBeanListFilteredMap(beanListFilteredMap);				
-				childBean = new DevEntityObject();
-				childBean.setEntityClass(childEntity);
-				for (DevEntityPropertyDescriptor propDesc : childEntity.getEntityPropertyDescriptorList()) {
-					if (propDesc.getPropertyClass() != null && propDesc.getPropertyClass().equals(entity)) {
-						try {
-							$(childEntity.getName() + "." + propDesc.getPropertyName(), childBean).setVal(bean);
-						} catch (Exception ex) {
-							Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, ex);
-						}
-						break;
-					}
-				}
+
 			}
 		}
+		beanListChild = childrenList; 
 		return childrenList;
 	}
+	public boolean newChildBean(String node){
+		try {
+			if (node != null && !node.isEmpty() && node.contains(".")) {
+				childValue = $(node.toLowerCase());
+				if (childValue != null && childValue.getEntityPropertyDescriptor() != null) {
+					childEntity = childValue.getEntityPropertyDescriptor().getPropertyClass();
+					getAppBean().setBeanListMap(beanListMap);
+					getAppBean().setBeanListFilteredMap(beanListFilteredMap);				
+					childBean = new DevEntityObject();
+					childBean.setEntityClass(childEntity);
+					for (DevEntityPropertyDescriptor propDesc : childEntity.getEntityPropertyDescriptorList()) {
+						if (propDesc.getPropertyClass() != null && propDesc.getPropertyClass().equals(entity)) {
+							try {
+								$(childEntity.getName() + "." + propDesc.getPropertyName(), childBean).setVal(bean);
+							} catch (Exception ex) {
+								Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, ex);
+							}
+							break;
+						}
+					}	
+					return true;
+				}
+			}			
+		} catch (Exception e) {
+			Logger.getLogger(AdmAlgoappBean.class.getName()).log(Level.SEVERE, null, e);
+		}
+		return false;
 
+		
+	
+	}
 	public List<DevEntityObject> findListByClass(DevEntityClass className) {
 		List<DevEntityObject> entityObjectList = null;
 		if (className != null) {
@@ -1098,7 +1182,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 					} else {
 						List<String> cols = new ArrayList<String>();
 						if(entity.getName()!=null && entity.getName().equals(className.getName())){
-							cols = LayoutFieldsFormat.getVisibleFieldsNames(requirement, containerPage, entity);							
+							cols = LayoutFieldsFormat.getVisibleFieldsNames(requirement, nextContainerPage, entity);							
 						}
 						entityObjectList = baseDao.findEntityObjectByClass(className,cols, getSiteIdList(), null, null);													
 					}
@@ -1115,6 +1199,8 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			} catch (Throwable ex) {
 				msgStr = "Falha no processamento. Motivo: " + ex.getClass() +"-"+ex.getMessage();
 				ex.printStackTrace();
+				//FacesContext.getCurrentInstance().getExternalContext().responseReset();
+				//FacesContext.getCurrentInstance().responseComplete();
 			} finally {
 				if (!msgStr.isEmpty()) {
 					FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, msgStr, "");
@@ -1501,6 +1587,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}
 	public void eventBean(){
 		Map callMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();	
+		String message = null;
 		try {
 			firstRender = true;
 			String call = String.valueOf(callMap.get("call"));
@@ -1509,16 +1596,13 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 				Map<String,String> map = new HashMap<String,String>();
 				jsEngine.put("map", map);
 				jsEngine.eval(call);
-				String message = map.get("message");
+				message = map.get("message");
 				String callback = map.get("callback");				
-				if(message!=null){
-					FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message.toString(), "");
-					FacesContext.getCurrentInstance().addMessage(null, msg);
-				}
 				if(callback!=null){
+					//callback = StringEscapeUtils.escapeJavaScript(callback);
 					RequestContext reqCtx = RequestContext.getCurrentInstance();        
 					reqCtx.addCallbackParam("callback", callback);				
-				
+					System.out.println("### EVENT CALLBACK: "+callback);
 				}
 			}else{
 				AlgodevUtil.event(callMap, this);					
@@ -1526,7 +1610,23 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		} catch (ScriptException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			message = e.getMessage();
 		}	
+		if(message!=null){
+			String[] messageArray = message.split("\n");
+			for (int i = 0; i < messageArray.length; i++) {
+				message = messageArray[i];
+				if(!message.isEmpty()){
+					FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message.toString(), "");
+					FacesContext.getCurrentInstance().addMessage(null, msg);
+				}
+			}
+		}
+		boolean update = Boolean.parseBoolean(Objects.toString(callMap.get("update"),"false"));
+		if(update){
+		}
+		//setAlgoContainer();
+		ComponentFactory.resetComponent();
 		//String listField = String.valueOf(map.get("list_field"));
 		//String targetField = String.valueOf(map.get("target_field"));
 	}
@@ -1560,24 +1660,24 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			try {
 
 				if (event.getPhaseId().equals(PhaseId.PROCESS_VALIDATIONS)) {
-					isInvalidUpdateContainer = true;
+					bean.isInvalidUpdateContainer = true;
 				}
 				if (bean.containerClass.endsWith("-app") || bean.containerClass.endsWith("-rep")) {
 					if (event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES)) {
 						//firstRender = false;
 						UIComponent algoContainerX = bean.getAlgoContainer();
 						isAlgoapp = algoContainerX != null;
-						if (isAlgoapp && !firstRender) {
+						if (isAlgoapp && !bean.firstRender) {
 							Map map = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
 							String source = String.valueOf(map.get("javax.faces.source"));
 							String draggedId = source.split(":")[source.split(":").length - 1];
-							System.out.println(draggedId);
 							//algoContainerX.unsubscribeFromEvent(arg0, arg1);
 							//bean.generateElementsContainerMap(bean.requirement);
-							isAlgoapp = !draggedId.equals("updateActiveSession") && !draggedId.equals("tabView");
+							isAlgoapp = !draggedId.equals("updateActiveSession") && !draggedId.equals("tabView") ;
 							if(isAlgoapp){
-								bean.updateContainerPage();
-								ComponentFactory.resetComponent();
+								System.out.println(draggedId);
+								bean.setAlgoContainer();
+								ComponentFactory.resetComponent(algoContainerX);
 							}
 						}
 					}
@@ -1605,7 +1705,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 			try {
 				
 			if (event.getPhaseId().equals(PhaseId.APPLY_REQUEST_VALUES) || event.getPhaseId().equals(PhaseId.INVOKE_APPLICATION)) {
-				isInvalidUpdateContainer = false;
+				bean.isInvalidUpdateContainer = false;
 			}
 			if (PhaseId.RENDER_RESPONSE.equals(event.getPhaseId())) {
 				/*UIComponent algoContainerX = bean.getAlgoContainer();
@@ -1676,19 +1776,21 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 		FacesContext ctx = FacesContext.getCurrentInstance();
 		if(ctx!=null){
 			AppPhaseListener phaseListener = null;
-			List<PhaseListener> phaseListeners = ctx.getViewRoot().getPhaseListeners();
-			for (int i = 0; i < phaseListeners.size(); i++) {
-				PhaseListener element = phaseListeners.get(i);
-				if(element instanceof AppPhaseListener){
-					phaseListener = (AppPhaseListener)element;
-					break;
+			if(ctx.getViewRoot() != null){
+				List<PhaseListener> phaseListeners = ctx.getViewRoot().getPhaseListeners();
+				for (int i = 0; i < phaseListeners.size(); i++) {
+					PhaseListener element = phaseListeners.get(i);
+					if(element instanceof AppPhaseListener){
+						phaseListener = (AppPhaseListener)element;
+						break;
+					}
 				}
-			}
-			if(phaseListener==null){
-				//ctx.getViewRoot().removePhaseListener(phaseListener);	
-				ctx.getViewRoot().addPhaseListener(new AppPhaseListener(this));				
-			}else{
-				phaseListener.setBean(this);
+				if(phaseListener==null){
+					//ctx.getViewRoot().removePhaseListener(phaseListener);	
+					ctx.getViewRoot().addPhaseListener(new AppPhaseListener(this));				
+				}else{
+					phaseListener.setBean(this);
+				}
 			}
 		}	
 	}
@@ -1715,7 +1817,7 @@ public class AdmAlgoappBean extends GenericBean<DevEntityObject> implements Clon
 	}		
 	public void preRenderComponent(ComponentSystemEvent event){
 		if(firstRender && requirement !=null){
-			updateContainerPage();			
+			setAlgoContainer();			
 			firstRender = false;
 		}
 	}

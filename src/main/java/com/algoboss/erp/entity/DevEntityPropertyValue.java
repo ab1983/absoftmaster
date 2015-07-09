@@ -62,10 +62,21 @@ public class DevEntityPropertyValue implements Serializable, Cloneable {
     private DevEntityPropertyDescriptor entityPropertyDescriptor;
     @Transient
     private DevEntityObject entityObjectMapped; 
+    
+    public final static transient String FILE = "FILE";
 
     public DevEntityPropertyValue() {
     }
 
+    public boolean isType(String type){
+    	try {
+    		return this.getEntityPropertyDescriptor().getPropertyType().equalsIgnoreCase(type);
+		} catch (NullPointerException e) {
+			return false;
+		}
+    		
+    }
+    
     public DevEntityPropertyValue(DevEntityPropertyValue val) {
         //this.entityPropertyValueId = val.entityPropertyValueId;
         if (val != null) {

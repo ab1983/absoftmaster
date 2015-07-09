@@ -42,6 +42,7 @@ import javax.inject.Named;
 import javax.naming.InitialContext;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
@@ -1678,6 +1679,7 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
             ServletContext context = (ServletContext) fc.getExternalContext().getContext();
             HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
             File relatorioJasper = new File(context.getRealPath(bean.getReportFile()));
+            HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
             // parâmetros, se houver
             Map params = new HashMap();
             List<DevEntityPropertyValue> propValList = entityObject.getEntityPropertyValueList();
@@ -1734,13 +1736,18 @@ public class AdmAlgoreportBean extends GenericBean<DevReportRequirement> {
                     ouputStream.write(bytes, 0, bytes.length);
                     ouputStream.flush();
                     ouputStream.close();*/
-                    
+                	//response.sendRedirect(request.getContextPath()+"?file=teste.pdf");
                     response.reset();
+                    response.setHeader("Location", "http://www.google.com");
+                    response.setHeader("Refresh","5; URL=" + request.getContextPath()+"?file=teste.pdf");
+                    //response.encodeURL(request.getContextPath()+"?file=teste");
                     response.setContentType("application/pdf");
-                    response.setHeader("Content-Disposition", "inline;filename=\"" + AlgoUtil.escapeURL(bean.getReportRequirementName()) + ".pdf\";");
+                    response.setHeader("Content-Disposition", "inline;filename=\"file_" + AlgoUtil.escapeURL(bean.getReportRequirementName()) + ".pdf\";");
                     response.setCharacterEncoding("UTF-8");
                     response.setContentLength(bytes.length);
                     response.getOutputStream().write(bytes, 0, bytes.length);
+                    //request.getRequestDispatcher(request.getContextPath()+"?file=teste.pdf").forward(request, response);
+                    //response.sendRedirect(request.getContextPath()+"?file=teste.pdf");
                     FacesContext.getCurrentInstance().responseComplete();                    
                 } catch (IOException ex) {
                     Logger.getLogger(AdmAlgoreportBean.class.getName()).log(Level.SEVERE, null, ex);

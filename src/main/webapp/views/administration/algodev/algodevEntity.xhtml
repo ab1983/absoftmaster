@@ -125,7 +125,7 @@
         </p:tooltip>                               
 
     </p:outputPanel>         
-    <p:panel binding="#{entityDlg}" styleClass="entityDlg" visible="true" widgetVar="entityDlg" closable="false" style="height: 430px;">
+    <p:panel binding="#{entityDlg}" rendered="#{admAlgodevBean.entity!=null}" styleClass="entityDlg" visible="true" widgetVar="entityDlg" closable="false" style="height: 430px;">
         <f:facet name="header">
             <h:panelGroup > <h:outputText value="#{msg['entityClass']}"/><span class="ui-state-highlight" style="float:right;"><h:commandLink id="helpEnt" style="float:right;" styleClass="ui-icon ui-icon-help" ></h:commandLink></span></h:panelGroup>
         </f:facet>     

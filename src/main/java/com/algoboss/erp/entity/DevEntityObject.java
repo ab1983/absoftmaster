@@ -88,8 +88,8 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
         }
         return hasValue;
     }
-    public DevEntityPropertyValue getPropObj(String propName) {	
-    	DevEntityPropertyValue prop = $(this.getEntityClass().getName()+"."+propName);
+    public DevEntityPropertyValue getPropObj(String propName) {
+    	DevEntityPropertyValue prop = $((this.getEntityClass()!=null?this.getEntityClass().getName()+".":"")+propName);
     	return prop!=null && prop.getEntityPropertyDescriptor()!=null?prop:null;
     }
     public Object getProp(String propName) {
@@ -105,6 +105,16 @@ public class DevEntityObject extends GenericEntity implements Serializable, Clon
         	value = defaultValue;
         }
         return value;
+    }
+    
+    public void setProp(String prop,String value){
+		DevEntityPropertyValue propValue = new DevEntityPropertyValue();
+		DevEntityPropertyDescriptor propDesc = new DevEntityPropertyDescriptor();
+		propDesc.setPropertyType("TEMP");
+		propValue.setEntityPropertyDescriptor(propDesc);    			
+		propValue.setPropertyValue(value);
+		this.getEntityPropertyValueList().add(propValue);
+		this.entityPropertyValueMap.put(prop, propValue);    		    	
     }
 
     public String $date(String attr, String format) {

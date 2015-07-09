@@ -41,6 +41,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -58,6 +59,7 @@ import javax.faces.event.PhaseId;
 import javax.faces.event.PhaseListener;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.script.ScriptException;
 import javax.servlet.http.HttpSession;
 
 import org.primefaces.context.RequestContext;
@@ -137,12 +139,13 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
 		if(getAppBean() != null && getAppBean().getAppBean()!=null){
 			BaseBean.copyObject(getAppBean().getAppBean(), this);			
 		}
+		elementsContainerMap = getAppBean().getElementsContainerMap(requirement);
 		//updateContainerPage();
 	}
 	@PreDestroy
 	public void onDestroy(){
-		if(getAppBean()!=null){
-			getAppBean().setAppBean(BaseBean.copyObject(this));			
+		getAppBean().setAppBean(BaseBean.copyObject(this));			
+		if(requirement!=null){
 		}
 	}    
     	
@@ -784,7 +787,7 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
                     propEntList.addAll(getPropEntList(entProp.getPropertyClass(),type));
                 }
             }
-            if (!entClas.getName().equals(entity.getName())) {
+            if (entity!=null && entClas.getName()!=null && !entClas.getName().equals(entity.getName())) {
                 propEntList.add(entClas);
             }
         }
@@ -830,7 +833,7 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
                     bean.getService().setName(bean.getService().getName().concat(" [S").concat(Integer.toString(new Random().nextInt(100)).concat("]")));
                 }
                 List<Object> toSaveList = new ArrayList();
-                if(entity.getInstantiatesSite()==null){
+                if(entity !=null && entity.getInstantiatesSite()==null){
                 	entity.updateProperty();
                 }
                 toSaveList.add(loginBean.getInstantiatesSiteContract());
@@ -839,7 +842,9 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
                 if (!propEntList.isEmpty()) {
                     toSaveList.addAll(propEntList);
                 }
-                toSaveList.add(entity);
+                if(entity!=null){
+                	toSaveList.add(entity);
+                }
                 toSaveList.add(bean);
                 AdmContract contract = loginBean.getUser().getContract();
                 AdmService service = null;
@@ -857,12 +862,18 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
                     if (admServiceModuleContractAux != null) {
                         //.add(serviceContract);
                         List<AdmServiceContract> admServiceContractList = admServiceModuleContractAux.getServiceContractList();
-                        for (AdmServiceContract admServiceContract : admServiceContractList) {
+                        for (int i = 0; i < admServiceContractList.size(); i++) {
+                        	AdmServiceContract admServiceContract = admServiceContractList.get(i);
+                        	if(admServiceContract == null || admServiceContract.getService() == null){
+                        		admServiceContractList.set(i, null);
+                        		continue;
+                        	}
                             if (admServiceContract.getService().getServiceId().equals(bean.getService().getServiceId())) {
                                 admServiceContractAux = admServiceContract;
                                 break;
                             }
                         }
+                        admServiceContractList.remove(null);
                     } else {
                         admServiceModuleContractAux = new AdmServiceModuleContract();
                         admServiceModuleContractAux.setName(bean.getService().getModule());
@@ -1015,17 +1026,19 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
     				propertySelectedListCollection = new ArrayList<DevEntityPropertyDescriptor>();
     				propertySelectedFormCollection = new ArrayList<DevEntityPropertyDescriptor>();
     				Gson json = new Gson();
-    				Object[] je= json.fromJson("["+AlgodevUtil.formatDescription(bean.getService().getDescription()).replace(' ', Character.toChars(0)[0])+"]",Object[].class);
+    				Object[] je= json.fromJson("["+AlgodevUtil.formatDescription(bean.getService().getDescription()).replace(' ', Character.toChars(0)[0]).replaceAll(Pattern.quote("/"), "_").replaceAll("\\:|\\=|\\#", "?")+"]",Object[].class);
     				//String[] strArray = stringToArray(je.getAsJsonArray().get(0).getAsString());
-    				entity = AlgodevUtil.arrayToEntity(je,entity);
-    				entity.setLabel(bean.getRequirementName());
-    				if(!entityClassNodeList.contains(entity)){
-    					entityClassNodeList.add(entity);    					
+    				if(entity!=null){
+    					entity = AlgodevUtil.arrayToEntity(je,entity);
+	    				entity.setLabel(bean.getRequirementName());
+	    				if(!entityClassNodeList.contains(entity)){
+	    					entityClassNodeList.add(entity);    					
+	    				}
+	    				//entity = entitySelected;
+	    				
+	    				propertySelectedListCollection.addAll(entity.getEntityPropertyDescriptorList());
+	    				propertySelectedFormCollection.addAll(entity.getEntityPropertyDescriptorList());
     				}
-    				//entity = entitySelected;
-    				
-    				propertySelectedListCollection.addAll(entity.getEntityPropertyDescriptorList());
-    				propertySelectedFormCollection.addAll(entity.getEntityPropertyDescriptorList());
     			
     			}
     		}
@@ -1042,7 +1055,7 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
         //Map map = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         Map<String, Object> map = new HashMap<String, Object>();
         if (bean != null && bean.getInterfaceType() == null) {
-            bean.setInterfaceType("listForm");
+            //bean.setInterfaceType("listForm");
         }
         if (bean.getInterfaceType().equals("listForm") || bean.getInterfaceType().equals("listEditForm") || bean.getInterfaceType().equals("formList") || bean.getInterfaceType().equals("formlistEdit")) {
         	map.put("dataform", "true");
@@ -1052,6 +1065,16 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
             map.put("datagrid", "true");
         }
         prepareCreateByConstructor();
+        if (bean.getInterfaceType().equals("empty")) {
+        	map.put("empty", "true");
+        	bean.setEntityClass(null);
+        	entity = null;
+        	createByConstructor(map, null, algoContainer);
+        	doBeanSave();
+        	doBeanForm();
+        	return;
+        }
+        
         if ((propertySelectedListCollection != null && !propertySelectedListCollection.isEmpty()) || (propertySelectedFormCollection != null && !propertySelectedFormCollection.isEmpty())) {
             bean.getService().setDescription(AlgodevUtil.entityToString(entity));
             algoContainer.getChildren().clear();
@@ -1113,6 +1136,23 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
         UIComponent elementPanel = BaseBean.getAlgoPalette();
         try {
         	LayoutFieldsFormat.onConstruction(bean);
+            if (map.containsKey("empty") && !String.valueOf(map.get("empty")).isEmpty()) {
+                compTarget.getChildren().clear();
+                if (cloned == null) {
+                    cloned = ComponentFactory.findComponentByStyleClass("data-panel", elementPanel);
+                    cloned = ComponentFactory.componentClone(cloned, false);
+                    AlgodevUtil.updateChildren(compTarget.getChildren(), cloned);
+                    setContainerPage("form");
+                }
+                elementsContainerMap.put("form", Arrays.asList(cloned));
+                ComponentFactory.updateComponentContainerUI(bean, "", entity, cloned, elementPanel);
+                //cloned = new ComponentFactory(cloned, elementPanel, "", "", elementsContainerMap, entity, bean, AppType.get(bean.getInterfaceType())).getComponentCreated();
+                //elements.clear();
+                //elements.addAll(compTarget.getChildren());
+                AlgodevUtil.generateElementsContainerMap(elementsContainerMap, bean);
+                updateContainerPage();
+                cloned = null;
+            }           	
             if (map.containsKey("dataform") && !String.valueOf(map.get("dataform")).isEmpty()) {
                 compTarget.getChildren().clear();
                 if (cloned == null) {
@@ -1161,7 +1201,12 @@ public class AdmAlgodevBean extends AdmAlgoBean<DevRequirement> {
                 cloned = null;
                 //compTarget.getChildren().clear();
             }
-        } catch (Throwable ex) {
+        } catch(ScriptException ex){
+            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    ex.getClass()+"-"+ex.getMessage(), "");
+            FacesContext.getCurrentInstance().addMessage(null, msg);
+        	Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
+        }catch (Throwable ex) {
             Logger.getLogger(AdmAlgodevBean.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
