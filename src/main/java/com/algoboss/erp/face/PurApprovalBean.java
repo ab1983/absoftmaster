@@ -4,18 +4,21 @@
  */
 package com.algoboss.erp.face;
 
-import com.algoboss.erp.dao.BaseDao;
-import com.algoboss.erp.entity.PurOrder;
-import com.algoboss.erp.entity.PurOrderItem;
-import com.algoboss.erp.entity.PurSolicitation;
-import com.algoboss.erp.entity.PurSolicitationItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import com.algoboss.core.dao.BaseDao;
+import com.algoboss.core.face.GenericBean;
+import com.algoboss.erp.entity.PurOrder;
+import com.algoboss.erp.entity.PurOrderItem;
+import com.algoboss.erp.entity.PurSolicitation;
+import com.algoboss.erp.entity.PurSolicitationItem;
 
 /**
  *

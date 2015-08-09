@@ -5,17 +5,11 @@
 package com.algoboss.integration.face;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.algoboss.erp.face.GerLoginBean;
+import com.algoboss.core.face.GerLoginBean;
 import com.algoboss.erp.util.ManualCDILookup;
 
 /**

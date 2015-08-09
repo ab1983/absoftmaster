@@ -16,7 +16,7 @@
                 <supported-locale>es</supported-locale>
      	   </locale-config>
 	   <resource-bundle>
-		<base-name>com.algoboss.erp.messages</base-name>
+		<base-name>com.algoboss.core.messages</base-name>
 		<var>msg</var>
 	   </resource-bundle>
 	   <!-- 
@@ -26,11 +26,11 @@
 	    -->
      </application>
     <lifecycle>
-        <phase-listener>com.algoboss.erp.face.LifeCycleListener</phase-listener>
+        <phase-listener>com.algoboss.core.face.LifeCycleListener</phase-listener>
     </lifecycle>   
     <factory>
       <exception-handler-factory>
-        com.algoboss.erp.exceptions.CustomExceptionHandlerFactory
+        com.algoboss.core.exceptions.CustomExceptionHandlerFactory
       </exception-handler-factory>
     </factory>    
 </faces-config>

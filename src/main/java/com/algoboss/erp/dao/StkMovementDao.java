@@ -4,15 +4,17 @@
  */
 package com.algoboss.erp.dao;
 
-import com.algoboss.erp.entity.JpaUtil;
-import com.algoboss.erp.entity.StkMovement;
-import com.algoboss.erp.entity.StkMovementItem;
-import com.algoboss.erp.entity.StkSupplyItem;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+
+import com.algoboss.core.entity.JpaUtil;
+import com.algoboss.erp.entity.StkMovement;
+import com.algoboss.erp.entity.StkMovementItem;
+import com.algoboss.erp.entity.StkSupplyItem;
 
 /**
  *

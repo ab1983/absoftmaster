@@ -11,7 +11,7 @@
     </p:notificationBar-->     
     <h:form prependId="false">
 	    <p:panel rendered="#{baseBean.getAlgoPalette()==null}" binding="#{algoRepPaletteBind2}" style="display: none;" id="repElementPanel2" styleClass="elementPanel" toggleable="true" header="#{msg['elementPallete']}" collapsed="true">
-	        <ui:include src="views/administration/algodev/algodevElementPanel.xhtml"/>
+	        <ui:include src="views/app/administration/algodev/algodevElementPanel.xhtml"/>
 	    </p:panel>  
 	    <f:event type="preRenderComponent" rendered="true" listener="#{(baseBean.setAlgoPalette(algoRepPaletteBind2))}"/>    
     </h:form> 

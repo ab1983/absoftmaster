@@ -4,10 +4,12 @@
     <param-name>javax.faces.PROJECT_STAGE</param-name>
     <param-value>Development</param-value>
   </context-param>
+  <!-- 
   <listener>
     <description>ServletContextListener, HttpSessionListener, HttpSessionAttributeListener</description>
-    <listener-class>com.algoboss.erp.servlet.GerServletListener</listener-class>
+    <listener-class>com.algoboss.core.servlet.GerServletListener</listener-class>
   </listener>
+   -->
   <!-- Add Support for Spring -->
   <!-- 
    -->

@@ -4,9 +4,11 @@
  */
 package com.algoboss.erp.face;
 
-import com.algoboss.erp.entity.Funcionario;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+
+import com.algoboss.core.face.GenericBean;
+import com.algoboss.erp.entity.Funcionario;
 
 /**
  *

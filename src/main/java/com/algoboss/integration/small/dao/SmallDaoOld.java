@@ -4,28 +4,29 @@
  */
 package com.algoboss.integration.small.dao;
 
-import com.algoboss.erp.dao.*;
-import com.algoboss.erp.entity.AdmContract;
-import com.algoboss.erp.entity.DevEntityClass;
-import com.algoboss.erp.entity.DevEntityObject;
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Resource;
-import javax.ejb.*;
-import javax.persistence.*;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.transaction.*;
+import javax.transaction.Status;
+import javax.transaction.UserTransaction;
+
+import com.algoboss.app.entity.DevEntityClass;
+import com.algoboss.app.entity.DevEntityObject;
+import com.algoboss.core.entity.AdmContract;
 
 /**
  *

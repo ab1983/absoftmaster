@@ -4,24 +4,28 @@
  */
 package com.algoboss.erp.face;
 
-import com.algoboss.erp.dao.BaseDao;
-import com.algoboss.erp.dao.GrtProjetoDao;
-import com.algoboss.erp.entity.CpgDocumento;
-import com.algoboss.erp.entity.CpgItemDocumento;
-import com.algoboss.erp.entity.GerFornecedor;
-import com.algoboss.erp.entity.GrtProjeto;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import org.primefaces.context.RequestContext;
+
+import com.algoboss.core.dao.BaseDao;
+import com.algoboss.core.face.GenericBean;
+import com.algoboss.erp.dao.GrtProjetoDao;
+import com.algoboss.erp.entity.CpgDocumento;
+import com.algoboss.erp.entity.CpgItemDocumento;
+import com.algoboss.erp.entity.GerFornecedor;
+import com.algoboss.erp.entity.GrtProjeto;
 
 /**
  *

@@ -4,8 +4,7 @@
  */
 package com.algoboss.integration.small.face;
 
-import com.algoboss.erp.dao.BaseDao;
-import com.algoboss.erp.face.GenericBean;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -16,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -23,7 +23,11 @@ import javax.inject.Named;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+
 import net.sf.jasperreports.engine.JasperRunManager;
+
+import com.algoboss.core.dao.BaseDao;
+import com.algoboss.core.face.GenericBean;
 
 /**
  *

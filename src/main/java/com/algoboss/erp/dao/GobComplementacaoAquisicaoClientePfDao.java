@@ -4,13 +4,15 @@
  */
 package com.algoboss.erp.dao;
 
-import com.algoboss.erp.entity.GobComplementacaoAquisicaoClientePf;
-import com.algoboss.erp.entity.JpaUtil;
-import com.algoboss.erp.entity.GobObra;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
+
+import com.algoboss.core.entity.JpaUtil;
+import com.algoboss.erp.entity.GobComplementacaoAquisicaoClientePf;
+import com.algoboss.erp.entity.GobObra;
 
 /**
  *

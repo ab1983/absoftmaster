@@ -1,17 +1,11 @@
-import static org.junit.Assert.*;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.StringTokenizer;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.junit.Test;
-
-import com.algoboss.erp.face.GenericBean;
 
 
 public class JavaScriptEmail {

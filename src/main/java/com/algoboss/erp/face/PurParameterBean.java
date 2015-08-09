@@ -4,11 +4,14 @@
  */
 package com.algoboss.erp.face;
 
-import com.algoboss.erp.entity.PurParameter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
+
+import com.algoboss.core.face.GenericBean;
+import com.algoboss.erp.entity.PurParameter;
 
 
 /**

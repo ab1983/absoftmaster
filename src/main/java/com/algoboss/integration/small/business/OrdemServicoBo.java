@@ -6,8 +6,9 @@ import java.util.Objects;
 
 import javax.persistence.NoResultException;
 
-import com.algoboss.erp.entity.DevEntityObject;
-import com.algoboss.erp.face.AdmAlgoappBean;
+import com.algoboss.app.entity.DevEntityObject;
+import com.algoboss.app.face.AdmAlgoappBean;
+
 
 public class OrdemServicoBo {
 	public static void preRender(AdmAlgoappBean app) {

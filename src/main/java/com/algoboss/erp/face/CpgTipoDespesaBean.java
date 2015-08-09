@@ -4,9 +4,11 @@
  */
 package com.algoboss.erp.face;
 
-import com.algoboss.erp.entity.CpgTipoDespesa;
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Named;
+
+import com.algoboss.core.face.GenericBean;
+import com.algoboss.erp.entity.CpgTipoDespesa;
 
 
 /**

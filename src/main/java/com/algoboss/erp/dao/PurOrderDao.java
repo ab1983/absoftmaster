@@ -4,12 +4,13 @@
  */
 package com.algoboss.erp.dao;
 
-import com.algoboss.erp.entity.GrtProjeto;
-import com.algoboss.erp.entity.JpaUtil;
-import com.algoboss.erp.entity.PurOrder;
 import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+
+import com.algoboss.core.entity.JpaUtil;
+import com.algoboss.erp.entity.PurOrder;
 
 /**
  *

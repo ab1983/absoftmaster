@@ -4,15 +4,18 @@
  */
 package com.algoboss.erp.face;
 
+import javax.enterprise.context.SessionScoped;
+import javax.faces.convert.Converter;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import com.algoboss.core.face.BaseBean;
+import com.algoboss.core.face.GenericBean;
 import com.algoboss.erp.entity.CpgTipoDespesa;
 import com.algoboss.erp.entity.StkBrand;
 import com.algoboss.erp.entity.StkSupplyCategory;
 import com.algoboss.erp.entity.StkSupplyItem;
 import com.algoboss.erp.entity.StkUnitOfMeasure;
-import javax.enterprise.context.SessionScoped;
-import javax.faces.convert.Converter;
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  *

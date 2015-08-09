@@ -4,7 +4,19 @@
  */
 package com.algoboss.erp.face;
 
-import com.algoboss.erp.dao.BaseDao;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import javax.inject.Inject;
+
+import org.primefaces.event.FlowEvent;
+
+import com.algoboss.core.dao.BaseDao;
+import com.algoboss.core.face.GenericBean;
 import com.algoboss.erp.dao.GobComplementacaoAquisicaoClientePfDao;
 import com.algoboss.erp.entity.GerCliente;
 import com.algoboss.erp.entity.GobAquisicaoImovel;
@@ -13,14 +25,6 @@ import com.algoboss.erp.entity.GobComplementacaoAquisicaoClientePf;
 import com.algoboss.erp.entity.GobItemPadraoChecklistDocumentacaoAquisicao;
 import com.algoboss.erp.entity.GobObra;
 import com.algoboss.erp.entity.GobStatusAquisicao;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
-import javax.inject.Inject;
-import org.primefaces.event.FlowEvent;
 
 /**
  *

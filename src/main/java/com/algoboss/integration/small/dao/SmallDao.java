@@ -56,12 +56,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
-import com.algoboss.erp.entity.AdmInstantiatesSite;
-import com.algoboss.erp.entity.DevEntityClass;
-import com.algoboss.erp.entity.DevEntityObject;
-import com.algoboss.erp.entity.DevEntityPropertyValue;
-import com.algoboss.erp.face.GenericBean;
-import com.algoboss.erp.face.GerLoginBean;
+import com.algoboss.core.entity.AdmInstantiatesSite;
+import com.algoboss.app.entity.DevEntityClass;
+import com.algoboss.app.entity.DevEntityObject;
+import com.algoboss.app.entity.DevEntityPropertyValue;
+import com.algoboss.core.face.GenericBean;
+import com.algoboss.core.face.GerLoginBean;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**

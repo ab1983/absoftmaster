@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">  
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="icon" type="image/png" href="#{request.contextPath}/resources/images/favicon.png" />            
+        <link href="#{request.contextPath}/resources/css/default.css" rel="stylesheet" type="text/css" />
+        <link href="#{request.contextPath}/resources/css/cssLayout.css" rel="stylesheet" type="text/css" />
+        <!--script type="text/javascript" src="#{request.contextPath}/resources/js/jquery/jquery.maskedinput-1.3.js"></script-->
+        <!--script type="text/javascript" src="#{request.contextPath}/resources/js/jquery/jquery.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/jquery/jquery-plugins.js"></script>
+        <script type="text/javascript" src="#{request.contextPath}/resources/js/primefaces.js"></script>
+        <h:outputScript library="primefaces" name="jquery/jquery.js" target="head" /-->
+        <title><h:outputText value="#{baseBean.title}"/></title>
+    </h:head>
+
+    <h:body>
+        <script type = "text/javascript" > /* <![CDATA[ */
+            (function(i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r;
+                i[r] = i[r] || function() {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+                a = s.createElement(o),
+                        m = s.getElementsByTagName(o)[0];
+                a.async = 1;
+                a.src = g;
+                m.parentNode.insertBefore(a, m)
+            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+            ga('create', 'UA-44207042-1', 'algoboss.com');
+            ga('send', 'pageview');
+
+            /* ]]> */</script>         
+        <!--h:outputScript library="js/jquery/" name="ui/jquery-ui-1.8.16.custom.js" target="head"></h:outputScript-->     
+        <h:form id="formUpdate" prependId="false" style="position: relative; top:30%;">    
+            <p:focus/>
+            <h:panelGroup>
+                <p:panel style="width: 450px;height: 150px;margin: auto; ">
+                    <f:facet name="header">
+                        <div style="text-align: center;margin:0px;padding: 0px;display: inline-block;"> Atualização - #{baseBean.title}</div>
+                    </f:facet>
+                    <h:panelGrid columns="2">
+                    	<p:commandButton style="width: 200px;" id="updateBtn" value="Atualizar agora" ajax="false" update="@form" action="#{gerLoginBean.doUpdateAccount()}" oncomplete="window.clearTimeout(idSessionExpired);"></p:commandButton>
+ 						<p:commandButton style="width: 200px;" id="noupdateBtn" value="Atualizar mais tarde" ajax="false" update="@form" action="#{gerLoginBean.doLogin()}" oncomplete="window.clearTimeout(idSessionExpired);"></p:commandButton>               
+                    </h:panelGrid>
+                </p:panel>
+            </h:panelGroup>
+            <p:dialog header="Conexão Expirada" modal="true" closable="false" widgetVar="sessionExpiredWv" resizable="false">
+                <a href="#{request.contextPath}/f/login.xhtml">
+                    <p:button rendered="true" style="width: 100px;" value="Reconectar"/>
+                </a>
+            </p:dialog>
+            <script>
+                var idSessionExpired = window.setTimeout('sessionExpiredWv.show()',#{gerLoginBean.sessionTimeout*1000});
+            </script>
+            <div>
+                <ui:include src="bottom.xhtml"></ui:include>
+            </div>
+            <p:ajaxStatus style="width:64px;height:64px;position:fixed;right:5px;bottom:20px" onerror="alert('Falha no Processamento do Login!')">  
+                <f:facet name="start">  
+                    <p:graphicImage url="resources/images/loading.gif" style="margin: auto;"/>  
+                </f:facet>  
+
+                <f:facet name="complete">  
+                    <h:outputText value="" />  
+                </f:facet>  
+            </p:ajaxStatus>               
+            <!--h:messages style="color:red;"/-->             
+        </h:form>
+    </h:body>
+</html>

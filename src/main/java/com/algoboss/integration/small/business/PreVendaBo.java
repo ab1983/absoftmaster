@@ -3,7 +3,6 @@ package com.algoboss.integration.small.business;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -13,16 +12,9 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.persistence.NoResultException;
 
-import com.algoboss.erp.entity.DevEntityClass;
-import com.algoboss.erp.entity.DevEntityObject;
-import com.algoboss.erp.entity.DevEntityPropertyDescriptor;
-import com.algoboss.erp.entity.DevEntityPropertyDescriptorConfig;
-import com.algoboss.erp.entity.DevReportFieldContainer;
-import com.algoboss.erp.entity.DevReportFieldOptions;
-import com.algoboss.erp.entity.DevReportFieldOptionsMap;
-import com.algoboss.erp.entity.DevRequirement;
-import com.algoboss.erp.face.AdmAlgoappBean;
-import com.algoboss.erp.util.AlgoUtil;
+import com.algoboss.app.entity.DevEntityObject;
+import com.algoboss.app.face.AdmAlgoappBean;
+import com.algoboss.core.util.AlgoUtil;
 
 public class PreVendaBo {
 	public static void preRender(AdmAlgoappBean app) {
